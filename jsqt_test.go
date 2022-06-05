@@ -47,6 +47,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":[]}`, when: `.a`, then: `[]`},
 		{give: `{"a":{}}`, when: `.a`, then: `{}`},
 		{give: `{"a":2}`, when: `.a`, then: `2`},
+		{give: `{"a":"a\"b"}`, when: `.a`, then: `"a\"b"`},
 		{give: `2`, when: `.`, then: `2`},
 		{give: `-2`, when: `.`, then: `-2`},
 		{give: `false`, when: `.`, then: `false`},

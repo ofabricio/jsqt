@@ -177,49 +177,54 @@ func (j *Json) IterateArray(f func(string, Json) bool) {
 }
 
 func (j *Json) GetValue() string {
-	if j.Equal("{") {
-		return j.TokenFor(j.MatchObject)
+	if v := j.TokenFor(j.MatchObject); v != "" {
+		return v
 	}
-	if j.Equal("[") {
-		return j.TokenFor(j.MatchArray)
+	if v := j.TokenFor(j.MatchArray); v != "" {
+		return v
 	}
-	if j.Equal(`"`) {
-		return j.TokenFor(j.MatchString)
+	if v := j.TokenFor(j.MatchString); v != "" {
+		return v
 	}
 	return j.TokenFor(j.MatchRest)
 }
 
 func (j *Json) MatchRest() bool {
-	for !j.Equal(",") && !j.Equal("}") && !j.Equal("]") {
-		j.Next()
+	// Note: I'm not sure why I had to quit the scanner
+	//       interface to get a WAY better performance.
+	s := j.Scanner
+	for i := 0; i < len(s) && s[i] != ',' && s[i] != '}' && s[i] != ']'; i++ {
+		j.Advance(1)
 	}
 	return true
 }
 
 func (j *Json) MatchObject() bool {
-	return j.MatchScope("{", "}")
+	return j.MatchScope('{', '}')
 }
 
 func (j *Json) MatchArray() bool {
-	return j.MatchScope("[", "]")
+	return j.MatchScope('[', ']')
 }
 
-func (j *Json) MatchScope(open, clos string) bool {
-	if j.Match(open) {
-		c := 1
-		for j.More() && c > 0 {
-			if j.Match(open) {
+func (j *Json) MatchScope(open, clos byte) bool {
+	// Note: I'm not sure why I had to quit the scanner
+	//       interface to get a WAY better performance.
+	s := j.Scanner
+	if len(s) > 0 && s[0] == open {
+		c := 0
+		for i := 0; i < len(s); i++ {
+			j.Advance(1)
+			if s[i] == open {
 				c++
 				continue
 			}
-			if j.Match(clos) {
+			if s[i] == clos {
 				c--
-				continue
+				if c == 0 {
+					break
+				}
 			}
-			if j.MatchString() {
-				continue
-			}
-			j.Next()
 		}
 		return c == 0
 	}
@@ -227,7 +232,24 @@ func (j *Json) MatchScope(open, clos string) bool {
 }
 
 func (j *Json) MatchString() bool {
-	return j.Match(`"`) && j.MatchUntilEscape(`"`, `\`) && j.Match(`"`)
+	// Note: I'm not sure why I had to quit the scanner
+	//       interface to get a WAY better performance.
+	s := j.Scanner
+	if len(s) > 0 && s[0] == '"' {
+		j.Advance(1)
+		for i := 1; i < len(s); i++ {
+			j.Advance(1)
+			prev := s[i-1]
+			curr := s[i]
+			if prev == '\\' && curr == '"' {
+				continue
+			}
+			if curr == '"' {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // #endregion Json
