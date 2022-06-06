@@ -14,6 +14,13 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Flatten.
+		{give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`, when: `a.b.c.*.{d:d,e:e.f.(flatten).g.h.i.j.*.k.l}`, then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`},
+		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.(flatten).c.(flatten).d`, then: `3`},
+		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.(flatten).c.*.d`, then: `[3]`},
+		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.*.c.*.d`, then: `[[3]]`},
+		{give: `{"a":[{"b":[{"c":3}]}]}`, when: `a.(flatten).b.*.c`, then: `[3]`},
+		// General.
 		{give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`, when: `a.b.c.*.{d:d,e:e.f.*.g.h.i.j.*.k.l}`, then: `[{"d":"one","e":[["hi"]]},{"d":"two","e":[[]]}]`},
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `*`, then: `[{"b":3},{"c":4},{"b":5}]`},
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.*`, then: `[{"b":3},{"c":4},{"b":5}]`},

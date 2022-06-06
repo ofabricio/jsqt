@@ -33,10 +33,32 @@ func (q *query) Parse(j Json) string {
 	if q.MatchByte('{') {
 		return q.ParseObject(j)
 	}
+	if q.MatchByte('(') {
+		return q.ParseFunc(j)
+	}
 	if seg := q.TokenFor(q.MatchObjectKey); seg != "" {
 		return q.Parse(j.Get(seg))
 	}
 	return j.String()
+}
+
+func (q *query) ParseFunc(j Json) string {
+	name, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(' ')
+	args, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(')')
+
+	// TODO: add global function map.
+
+	if name == "flatten" {
+		return flatten(q, j, args)
+	}
+	return j.String()
+}
+
+func flatten(q *query, j Json, arg string) string {
+	v := q.ParseStar(j)
+	v = strings.TrimPrefix(v, "[")
+	v = strings.TrimSuffix(v, "]")
+	return v
 }
 
 func (q *query) ParseObject(j Json) string {
@@ -105,6 +127,14 @@ func (q *query) MatchObjectKey() bool {
 }
 
 func (q *query) IsObjectKey(r byte) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
+}
+
+func (q *query) MatchFuncName() bool {
+	return q.MatchWhileByByte(q.IsFuncName)
+}
+
+func (q *query) IsFuncName(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
 }
 
