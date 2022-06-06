@@ -24,7 +24,7 @@ type query struct {
 }
 
 func (q *query) Parse(j Json) string {
-	q.MatchByte('.')
+	q.ByteMatch('.')
 	if path := q.ByteTokenBy(q.IsObjectKey); path != "" {
 		return q.Parse(j.Get(path))
 	}
@@ -38,9 +38,9 @@ func (q *query) Parse(j Json) string {
 }
 
 func (q *query) MatchFunc() (string, string) {
-	if q.MatchByte('(') {
-		name, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(' ')
-		args, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(')')
+	if q.ByteMatch('(') {
+		name, _ := q.ByteTokenBy(q.IsFuncName), q.ByteMatch(' ')
+		args, _ := q.ByteTokenBy(q.IsFuncName), q.ByteMatch(')')
 		return name, args
 	}
 	return "", ""
@@ -70,10 +70,10 @@ func (q *query) CallFunc(name, args string, j Json) string {
 }
 
 func (q *query) ParseObject(j Json) string {
-	if q.MatchByte('{') {
+	if q.ByteMatch('{') {
 		var obj strings.Builder
 		obj.WriteString("{")
-		for q.MatchByte(',') || !q.MatchByte('}') {
+		for q.ByteMatch(',') || !q.ByteMatch('}') {
 			key := q.ParseObjectKey()
 			if key == "" {
 				key = q.GetLastPathSegment()
@@ -96,7 +96,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.ByteTokenBy(q.IsObjectKey); q.MatchByte(':') {
+	if key := q.ByteTokenBy(q.IsObjectKey); q.ByteMatch(':') {
 		return key
 	}
 	q.Back(m)
@@ -106,7 +106,7 @@ func (q *query) ParseObjectKey() string {
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
 	key := q.ByteTokenBy(q.IsObjectKey)
-	for q.MatchByte('.') {
+	for q.ByteMatch('.') {
 		if k := q.ByteTokenBy(q.IsObjectKey); k != "" {
 			key = k
 		}
@@ -187,10 +187,10 @@ func (j *Json) Get(keyOrIndex string) (r Json) {
 }
 
 func (j *Json) IterateObject(f func(string, Json) bool) {
-	if j.MatchByte('{') {
-		for !j.MatchByte('}') {
-			k, _ := j.TokenFor(j.MatchString), j.MatchByte(':')
-			v, _ := j.GetValue(), j.MatchByte(',')
+	if j.ByteMatch('{') {
+		for !j.ByteMatch('}') {
+			k, _ := j.TokenFor(j.MatchString), j.ByteMatch(':')
+			v, _ := j.GetValue(), j.ByteMatch(',')
 			if f(strings.Trim(k, `"`), New(v)) {
 				return
 			}
@@ -199,10 +199,10 @@ func (j *Json) IterateObject(f func(string, Json) bool) {
 }
 
 func (j *Json) IterateArray(f func(string, Json) bool) {
-	if j.MatchByte('[') {
-		for i := 0; !j.MatchByte(']'); i++ {
+	if j.ByteMatch('[') {
+		for i := 0; !j.ByteMatch(']'); i++ {
 			k := strconv.Itoa(i)
-			v, _ := j.GetValue(), j.MatchByte(',')
+			v, _ := j.GetValue(), j.ByteMatch(',')
 			if f(k, New(v)) {
 				return
 			}
@@ -224,7 +224,7 @@ func (j *Json) GetValue() string {
 }
 
 func (j *Json) MatchRest() bool {
-	return j.MatchUntilByte(',', '}', ']')
+	return j.ByteMatchUntil(',', '}', ']')
 }
 
 func (j *Json) MatchObject() bool {
@@ -236,7 +236,7 @@ func (j *Json) MatchArray() bool {
 }
 
 func (j *Json) MatchString() bool {
-	return j.MatchStringByte('"')
+	return j.ByteMatchString('"')
 }
 
 // #endregion Json
