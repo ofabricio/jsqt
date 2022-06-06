@@ -27,9 +27,6 @@ func (q *query) Parse(j Json) string {
 	if q.MatchByte('.') {
 		return q.Parse(j)
 	}
-	if q.MatchByte('*') {
-		return q.ParseArray(j)
-	}
 	if q.MatchByte('{') {
 		return q.ParseObject(j)
 	}
@@ -59,6 +56,9 @@ func (q *query) ParseFunc(j Json) string {
 	}
 	if name == "default" {
 		return defaultValue(q, j, args)
+	}
+	if name == "collect" {
+		return collect(q, j, args)
 	}
 	return j.String()
 }
@@ -274,6 +274,10 @@ func omitempty(q *query, j Json, arg string) string {
 		return ""
 	}
 	return j.String()
+}
+
+func collect(q *query, j Json, arg string) string {
+	return q.ParseArray(j)
 }
 
 // #endregion Functions
