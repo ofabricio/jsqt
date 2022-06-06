@@ -25,7 +25,7 @@ type query struct {
 
 func (q *query) Parse(j Json) string {
 	q.MatchByte('.')
-	if path := q.TokenFor(q.MatchObjectKey); path != "" {
+	if path := q.ByteTokenBy(q.IsObjectKey); path != "" {
 		return q.Parse(j.Get(path))
 	}
 	if name, args := q.MatchFunc(); name != "" {
@@ -96,7 +96,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.TokenFor(q.MatchObjectKey); q.MatchByte(':') {
+	if key := q.ByteTokenBy(q.IsObjectKey); q.MatchByte(':') {
 		return key
 	}
 	q.Back(m)
@@ -105,9 +105,9 @@ func (q *query) ParseObjectKey() string {
 
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
-	s := q.TokenFor(q.MatchObjectKey)
+	s := q.ByteTokenBy(q.IsObjectKey)
 	for q.MatchByte('.') {
-		s = q.TokenFor(q.MatchObjectKey)
+		s = q.ByteTokenBy(q.IsObjectKey)
 	}
 	q.Back(m)
 	return s
@@ -133,16 +133,8 @@ func (q *query) ParseArray(j Json) string {
 	return arr.String()
 }
 
-func (q *query) MatchObjectKey() bool {
-	return q.MatchWhileByByte(q.IsObjectKey)
-}
-
 func (q *query) IsObjectKey(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
-}
-
-func (q *query) MatchFuncName() bool {
-	return q.MatchWhileByByte(q.IsFuncName)
 }
 
 func (q *query) IsFuncName(r byte) bool {
