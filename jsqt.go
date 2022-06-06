@@ -28,7 +28,7 @@ func (q *query) Parse(j Json) string {
 		return q.Parse(j)
 	}
 	if q.MatchByte('*') {
-		return q.ParseStar(j)
+		return q.ParseArray(j)
 	}
 	if q.MatchByte('{') {
 		return q.ParseObject(j)
@@ -72,7 +72,7 @@ func defaultValue(q *query, j Json, arg string) string {
 }
 
 func flatten(q *query, j Json, arg string) string {
-	v := q.ParseStar(j)
+	v := q.ParseArray(j)
 	v = strings.TrimPrefix(v, "[")
 	v = strings.TrimSuffix(v, "]")
 	return v
@@ -80,7 +80,7 @@ func flatten(q *query, j Json, arg string) string {
 
 func size(q *query, j Json, arg string) string {
 	c := 0
-	j = New(q.ParseStar(j))
+	j = New(q.ParseArray(j))
 	j.IterateArray(func(i string, v Json) bool {
 		c++
 		return false
@@ -140,7 +140,7 @@ func (q *query) GetLastPathSegment() string {
 	return s
 }
 
-func (q *query) ParseStar(j Json) string {
+func (q *query) ParseArray(j Json) string {
 	var arr strings.Builder
 	arr.WriteString("[")
 	end := *q
