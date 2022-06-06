@@ -63,42 +63,6 @@ func (q *query) ParseFunc(j Json) string {
 	return j.String()
 }
 
-func defaultValue(q *query, j Json, arg string) string {
-	v := q.Parse(j)
-	if v == "" {
-		return arg
-	}
-	return v
-}
-
-func flatten(q *query, j Json, arg string) string {
-	v := q.ParseArray(j)
-	v = strings.TrimPrefix(v, "[")
-	v = strings.TrimSuffix(v, "]")
-	return v
-}
-
-func size(q *query, j Json, arg string) string {
-	c := 0
-	j = New(q.ParseArray(j))
-	j.IterateArray(func(i string, v Json) bool {
-		c++
-		return false
-	})
-	return strconv.Itoa(c)
-}
-
-func omitempty(q *query, j Json, arg string) string {
-	v := q.Parse(j)
-	if v == "{}" {
-		return ""
-	}
-	if v == "[]" {
-		return ""
-	}
-	return j.String()
-}
-
 func (q *query) ParseObject(j Json) string {
 	var obj strings.Builder
 	obj.WriteString("{")
@@ -273,3 +237,43 @@ func (j *Json) MatchString() bool {
 }
 
 // #endregion Json
+
+// #region Functions
+
+func defaultValue(q *query, j Json, arg string) string {
+	v := q.Parse(j)
+	if v == "" {
+		return arg
+	}
+	return v
+}
+
+func flatten(q *query, j Json, arg string) string {
+	v := q.ParseArray(j)
+	v = strings.TrimPrefix(v, "[")
+	v = strings.TrimSuffix(v, "]")
+	return v
+}
+
+func size(q *query, j Json, arg string) string {
+	c := 0
+	j = New(q.ParseArray(j))
+	j.IterateArray(func(i string, v Json) bool {
+		c++
+		return false
+	})
+	return strconv.Itoa(c)
+}
+
+func omitempty(q *query, j Json, arg string) string {
+	v := q.Parse(j)
+	if v == "{}" {
+		return ""
+	}
+	if v == "[]" {
+		return ""
+	}
+	return j.String()
+}
+
+// #endregion Functions
