@@ -55,7 +55,6 @@ func TestGet(t *testing.T) {
 		{give: `{}`, when: `.`, then: `{}`},
 		{give: `[]`, when: `.`, then: `[]`},
 		{give: `[1,2]`, when: `.`, then: `[1,2]`},
-		{give: `bla`, when: `.`, then: `bla`}, // Invalid Json though.
 		{give: `"a"`, when: `.`, then: `"a"`},
 	}
 

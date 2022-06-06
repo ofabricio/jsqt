@@ -3,7 +3,6 @@ package jsqt
 import (
 	"strconv"
 	"strings"
-	"unicode"
 
 	. "github.com/ofabricio/scanner"
 )
@@ -25,13 +24,13 @@ type query struct {
 }
 
 func (q *query) Parse(j Json) string {
-	if q.Match(".") {
+	if q.MatchByte('.') {
 		return q.Parse(j)
 	}
-	if q.Match("*") {
+	if q.MatchByte('*') {
 		return q.ParseStar(j)
 	}
-	if q.Match("{") {
+	if q.MatchByte('{') {
 		return q.ParseObject(j)
 	}
 	if seg := q.TokenFor(q.MatchObjectKey); seg != "" {
@@ -43,7 +42,7 @@ func (q *query) Parse(j Json) string {
 func (q *query) ParseObject(j Json) string {
 	var obj strings.Builder
 	obj.WriteString("{")
-	for q.Match(",") || !q.Match("}") {
+	for q.MatchByte(',') || !q.MatchByte('}') {
 		key := q.ParseObjectKey()
 		if key == "" {
 			key = q.GetLastPathSegment()
@@ -64,7 +63,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.TokenFor(q.MatchObjectKey); q.Match(":") {
+	if key := q.TokenFor(q.MatchObjectKey); q.MatchByte(':') {
 		return key
 	}
 	q.Back(m)
@@ -74,7 +73,7 @@ func (q *query) ParseObjectKey() string {
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
 	s := q.TokenFor(q.MatchObjectKey)
-	for q.Match(".") {
+	for q.MatchByte('.') {
 		s = q.TokenFor(q.MatchObjectKey)
 	}
 	q.Back(m)
@@ -102,11 +101,11 @@ func (q *query) ParseStar(j Json) string {
 }
 
 func (q *query) MatchObjectKey() bool {
-	return q.MatchWhileBy(q.IsObjectKey)
+	return q.MatchWhileByByte(q.IsObjectKey)
 }
 
-func (q *query) IsObjectKey(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_'
+func (q *query) IsObjectKey(r byte) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
 }
 
 // #endregion Query
@@ -153,10 +152,10 @@ func (j *Json) Get(keyOrIndex string) (r Json) {
 }
 
 func (j *Json) IterateObject(f func(string, Json) bool) {
-	if j.Match("{") {
-		for !j.Match("}") {
-			k, _ := j.TokenFor(j.MatchString), j.Match(":")
-			v, _ := j.GetValue(), j.Match(",")
+	if j.MatchByte('{') {
+		for !j.MatchByte('}') {
+			k, _ := j.TokenFor(j.MatchString), j.MatchByte(':')
+			v, _ := j.GetValue(), j.MatchByte(',')
 			if f(strings.Trim(k, `"`), New(v)) {
 				return
 			}
@@ -165,10 +164,10 @@ func (j *Json) IterateObject(f func(string, Json) bool) {
 }
 
 func (j *Json) IterateArray(f func(string, Json) bool) {
-	if j.Match("[") {
-		for i := 0; !j.Match("]"); i++ {
+	if j.MatchByte('[') {
+		for i := 0; !j.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
-			v, _ := j.GetValue(), j.Match(",")
+			v, _ := j.GetValue(), j.MatchByte(',')
 			if f(k, New(v)) {
 				return
 			}
