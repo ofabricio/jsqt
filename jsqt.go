@@ -51,7 +51,24 @@ func (q *query) ParseFunc(j Json) string {
 	if name == "flatten" {
 		return flatten(q, j, args)
 	}
+	if name == "size" {
+		return size(q, j, args)
+	}
+	if name == "omitempty" {
+		return omitempty(q, j, args)
+	}
+	if name == "default" {
+		return defaultValue(q, j, args)
+	}
 	return j.String()
+}
+
+func defaultValue(q *query, j Json, arg string) string {
+	v := q.Parse(j)
+	if v == "" {
+		return arg
+	}
+	return v
 }
 
 func flatten(q *query, j Json, arg string) string {
@@ -59,6 +76,27 @@ func flatten(q *query, j Json, arg string) string {
 	v = strings.TrimPrefix(v, "[")
 	v = strings.TrimSuffix(v, "]")
 	return v
+}
+
+func size(q *query, j Json, arg string) string {
+	c := 0
+	j = New(q.ParseStar(j))
+	j.IterateArray(func(i string, v Json) bool {
+		c++
+		return false
+	})
+	return strconv.Itoa(c)
+}
+
+func omitempty(q *query, j Json, arg string) string {
+	v := q.Parse(j)
+	if v == "{}" {
+		return ""
+	}
+	if v == "[]" {
+		return ""
+	}
+	return j.String()
 }
 
 func (q *query) ParseObject(j Json) string {

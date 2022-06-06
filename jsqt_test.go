@@ -14,7 +14,20 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
-		// Flatten.
+		// Default function.
+		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.*.(default 0).b`, then: `[3,0,5]`},
+		// OmitEmpty Function.
+		{give: `{"a":[[3],[]]}`, when: `a.(size).(omitempty)`, then: `1`},
+		{give: `{"a":[[3],[]]}`, when: `a.*.(omitempty)`, then: `[[3]]`},
+		{give: `{"a":[{"d":3},{"e":4}]}`, when: `a.(size).(omitempty).{d}`, then: `1`},
+		{give: `{"a":[{"d":3},{"e":4}]}`, when: `a.*.(omitempty).{d}`, then: `[{"d":3}]`},
+		// Size function.
+		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.*.c.(size).d`, then: `[1]`},
+		{give: `{"a":[{"d":3},{"e":4}]}`, when: `a.(size).d`, then: `1`},
+		{give: `{"a":[3,4]}`, when: `a.(size)`, then: `2`},
+		{give: `{"a":[3]}`, when: `a.(size)`, then: `1`},
+		{give: `{"a":[]}`, when: `a.(size)`, then: `0`},
+		// Flatten function.
 		{give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`, when: `a.b.c.*.{d:d,e:e.f.(flatten).g.h.i.j.*.k.l}`, then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`},
 		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.(flatten).c.(flatten).d`, then: `3`},
 		{give: `{"a":[{"b":[{"c":[{"d":3}]}]}]}`, when: `a.(flatten).b.(flatten).c.*.d`, then: `[3]`},
