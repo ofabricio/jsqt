@@ -60,6 +60,9 @@ func (q *query) ParseFunc(j Json) string {
 	if name == "collect" {
 		return collect(q, j, args)
 	}
+	if name == "merge" {
+		return merge(q, j, args)
+	}
 	return j.String()
 }
 
@@ -278,6 +281,31 @@ func omitempty(q *query, j Json, arg string) string {
 
 func collect(q *query, j Json, arg string) string {
 	return q.ParseArray(j)
+}
+
+func merge(q *query, j Json, arg string) string {
+	var b strings.Builder
+	b.WriteString("{")
+	done := make(map[string]bool)
+	j = New(q.ParseArray(j))
+	j.IterateArray(func(i string, v Json) bool {
+		v.IterateObject(func(k string, v Json) bool {
+			if !done[k] {
+				if b.Len() > 1 {
+					b.WriteString(",")
+				}
+				b.WriteString(`"`)
+				b.WriteString(k)
+				b.WriteString(`":`)
+				b.WriteString(v.String())
+			}
+			done[k] = true
+			return false
+		})
+		return false
+	})
+	b.WriteString("}")
+	return b.String()
 }
 
 // #endregion Functions

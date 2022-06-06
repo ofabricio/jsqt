@@ -14,6 +14,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Merge function.
+		{give: `[{"a":3},{"b":4},{"c":5}]`, when: `(merge)`, then: `{"a":3,"b":4,"c":5}`},
 		// Default function.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.(collect).(default 0).b`, then: `[3,0,5]`},
 		// OmitEmpty Function.
