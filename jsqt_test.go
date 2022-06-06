@@ -44,6 +44,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `{.a}`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `.{a}`, then: `{"a":3}`},
 		// General.
+		{give: `{"a":{"a b c":3}}`, when: `{a."a b c","x y z":a."a b c"}`, then: `{"a b c":3,"x y z":3}`},
 		{give: `{"a":{"b":{"c":3}}}`, when: `a.{b.{c}}`, then: `{"b":{"c":3}}`},
 		{give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`, when: `a.b.c.(collect).{d:d,e:e.f.(collect).g.h.i.j.(collect).k.l}`, then: `[{"d":"one","e":[["hi"]]},{"d":"two","e":[[]]}]`},
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.(collect)`, then: `[{"b":3},{"c":4},{"b":5}]`},

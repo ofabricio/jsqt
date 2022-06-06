@@ -25,7 +25,7 @@ type query struct {
 
 func (q *query) Parse(j Json) string {
 	q.ByteMatch('.')
-	if path := q.ByteTokenBy(q.IsObjectKey); path != "" {
+	if path := q.MatchPath(); path != "" {
 		return q.Parse(j.Get(path))
 	}
 	if name, args := q.MatchFunc(); name != "" {
@@ -35,6 +35,17 @@ func (q *query) Parse(j Json) string {
 		return obj
 	}
 	return j.String()
+}
+
+func (q *query) MatchPath() string {
+	if path := q.ByteTokenBy(q.IsObjectKey); path != "" {
+		return path
+	}
+	if m := q.Mark(); q.ByteMatchString('"') {
+		str := q.Token(m)
+		return str[1 : len(str)-1] // Remove "".
+	}
+	return ""
 }
 
 func (q *query) MatchFunc() (string, string) {
@@ -96,7 +107,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.ByteTokenBy(q.IsObjectKey); q.ByteMatch(':') {
+	if key := q.MatchPath(); q.ByteMatch(':') {
 		return key
 	}
 	q.Back(m)
@@ -105,9 +116,9 @@ func (q *query) ParseObjectKey() string {
 
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
-	key := q.ByteTokenBy(q.IsObjectKey)
+	key := q.MatchPath()
 	for q.ByteMatch('.') {
-		if k := q.ByteTokenBy(q.IsObjectKey); k != "" {
+		if k := q.MatchPath(); k != "" {
 			key = k
 		}
 	}
