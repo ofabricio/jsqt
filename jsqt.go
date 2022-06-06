@@ -24,27 +24,30 @@ type query struct {
 }
 
 func (q *query) Parse(j Json) string {
-	if q.MatchByte('.') {
-		return q.Parse(j)
+	q.MatchByte('.')
+	if path := q.TokenFor(q.MatchObjectKey); path != "" {
+		return q.Parse(j.Get(path))
 	}
-	if q.MatchByte('{') {
-		return q.ParseObject(j)
+	if name, args := q.MatchFunc(); name != "" {
+		return q.CallFunc(name, args, j)
 	}
-	if q.MatchByte('(') {
-		return q.ParseFunc(j)
-	}
-	if seg := q.TokenFor(q.MatchObjectKey); seg != "" {
-		return q.Parse(j.Get(seg))
+	if obj := q.ParseObject(j); obj != "" {
+		return obj
 	}
 	return j.String()
 }
 
-func (q *query) ParseFunc(j Json) string {
-	name, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(' ')
-	args, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(')')
+func (q *query) MatchFunc() (string, string) {
+	if q.MatchByte('(') {
+		name, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(' ')
+		args, _ := q.ByteTokenBy(q.IsFuncName), q.MatchByte(')')
+		return name, args
+	}
+	return "", ""
+}
 
+func (q *query) CallFunc(name, args string, j Json) string {
 	// TODO: add global function map.
-
 	if name == "flatten" {
 		return flatten(q, j, args)
 	}
@@ -67,25 +70,28 @@ func (q *query) ParseFunc(j Json) string {
 }
 
 func (q *query) ParseObject(j Json) string {
-	var obj strings.Builder
-	obj.WriteString("{")
-	for q.MatchByte(',') || !q.MatchByte('}') {
-		key := q.ParseObjectKey()
-		if key == "" {
-			key = q.GetLastPathSegment()
-		}
-		if v := q.Parse(j); v != "" {
-			if obj.Len() > 1 {
-				obj.WriteString(",")
+	if q.MatchByte('{') {
+		var obj strings.Builder
+		obj.WriteString("{")
+		for q.MatchByte(',') || !q.MatchByte('}') {
+			key := q.ParseObjectKey()
+			if key == "" {
+				key = q.GetLastPathSegment()
 			}
-			obj.WriteString(`"`)
-			obj.WriteString(key)
-			obj.WriteString(`":`)
-			obj.WriteString(v)
+			if v := q.Parse(j); v != "" {
+				if obj.Len() > 1 {
+					obj.WriteString(",")
+				}
+				obj.WriteString(`"`)
+				obj.WriteString(key)
+				obj.WriteString(`":`)
+				obj.WriteString(v)
+			}
 		}
+		obj.WriteString("}")
+		return obj.String()
 	}
-	obj.WriteString("}")
-	return obj.String()
+	return ""
 }
 
 func (q *query) ParseObjectKey() string {
