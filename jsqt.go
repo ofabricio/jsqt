@@ -190,66 +190,19 @@ func (j *Json) GetValue() string {
 }
 
 func (j *Json) MatchRest() bool {
-	// Note: I'm not sure why I had to quit the scanner
-	//       interface to get a WAY better performance.
-	s := j.Scanner
-	for i := 0; i < len(s) && s[i] != ',' && s[i] != '}' && s[i] != ']'; i++ {
-		j.Advance(1)
-	}
-	return true
+	return j.MatchUntilByte(',', '}', ']')
 }
 
 func (j *Json) MatchObject() bool {
-	return j.MatchScope('{', '}')
+	return j.MatchCounting('{', '}')
 }
 
 func (j *Json) MatchArray() bool {
-	return j.MatchScope('[', ']')
-}
-
-func (j *Json) MatchScope(open, clos byte) bool {
-	// Note: I'm not sure why I had to quit the scanner
-	//       interface to get a WAY better performance.
-	s := j.Scanner
-	if len(s) > 0 && s[0] == open {
-		c := 0
-		for i := 0; i < len(s); i++ {
-			j.Advance(1)
-			if s[i] == open {
-				c++
-				continue
-			}
-			if s[i] == clos {
-				c--
-				if c == 0 {
-					break
-				}
-			}
-		}
-		return c == 0
-	}
-	return false
+	return j.MatchCounting('[', ']')
 }
 
 func (j *Json) MatchString() bool {
-	// Note: I'm not sure why I had to quit the scanner
-	//       interface to get a WAY better performance.
-	s := j.Scanner
-	if len(s) > 0 && s[0] == '"' {
-		j.Advance(1)
-		for i := 1; i < len(s); i++ {
-			j.Advance(1)
-			prev := s[i-1]
-			curr := s[i]
-			if prev == '\\' && curr == '"' {
-				continue
-			}
-			if curr == '"' {
-				return true
-			}
-		}
-	}
-	return false
+	return j.MatchStringByte('"')
 }
 
 // #endregion Json
