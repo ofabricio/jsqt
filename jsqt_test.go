@@ -44,11 +44,12 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `{.a}`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `.{a}`, then: `{"a":3}`},
 		// General.
+		{give: `{"a":{"b":{"c":3}}}`, when: `a.{b.{c}}`, then: `{"b":{"c":3}}`},
 		{give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`, when: `a.b.c.(collect).{d:d,e:e.f.(collect).g.h.i.j.(collect).k.l}`, then: `[{"d":"one","e":[["hi"]]},{"d":"two","e":[[]]}]`},
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.(collect)`, then: `[{"b":3},{"c":4},{"b":5}]`},
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `.(collect).b`, then: `[3,5]`},
 		{give: `{"a":{"b":{"c":[{"d":1,"e":{"f":[{"g":{"h":{"i":{"j":[{"k":3}]}}}}]}}]}}}`, when: `a.b.c.(collect).{d,data:e.f.(collect).g.h.i.j.(collect).k}`, then: `[{"d":1,"data":[[3]]}]`},
-		{give: `{"a":{"b":[3,4]}}`, when: `{.a.b.(collect)}`, then: `{"":[3,4]}`},
+		{give: `{"a":{"b":[3,4]}}`, when: `{.a.b.(collect)}`, then: `{"b":[3,4]}`},
 		{give: `{"a":[{"b":3}]}`, when: `a`, then: `[{"b":3}]`},
 		{give: `{"a":[{"b":3}]}`, when: `a.(collect)`, then: `[{"b":3}]`},
 		{give: `{"a":[{"b":3}]}`, when: `a.(collect).b`, then: `[3]`},

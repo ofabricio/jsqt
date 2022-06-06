@@ -105,12 +105,14 @@ func (q *query) ParseObjectKey() string {
 
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
-	s := q.ByteTokenBy(q.IsObjectKey)
+	key := q.ByteTokenBy(q.IsObjectKey)
 	for q.MatchByte('.') {
-		s = q.ByteTokenBy(q.IsObjectKey)
+		if k := q.ByteTokenBy(q.IsObjectKey); k != "" {
+			key = k
+		}
 	}
 	q.Back(m)
-	return s
+	return key
 }
 
 func (q *query) ParseArray(j Json) string {
