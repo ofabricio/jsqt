@@ -154,24 +154,36 @@ func (q *query) ParseArray(j Json) string {
 	return ""
 }
 
-func (q *query) IterateArray(j Json) string {
-	var arr strings.Builder
-	arr.WriteString("[")
+func (q *query) ParseJsonArrayItems(j Json, f func(string) string) {
 	end := *q
 	j.IterateArray(func(i string, v Json) bool {
 		sub := *q
-		if s := sub.Parse(v); s != "" {
+		if s := f(sub.Parse(v)); s != "" {
 			end = sub
-			if arr.Len() > 1 {
-				arr.WriteString(",")
-			}
-			arr.WriteString(s)
 		}
 		return false
 	})
 	*q = end
+}
+
+func (q *query) FilterJsonArray(j Json, f func(string) string) string {
+	var arr strings.Builder
+	arr.WriteString("[")
+	q.ParseJsonArrayItems(j, func(v string) string {
+		if v = f(v); v != "" {
+			if arr.Len() > 1 {
+				arr.WriteString(",")
+			}
+			arr.WriteString(v)
+		}
+		return v
+	})
 	arr.WriteString("]")
 	return arr.String()
+}
+
+func identity(v string) string {
+	return v
 }
 
 func (q *query) IsObjectKey(r byte) bool {
@@ -286,8 +298,12 @@ func defaultValue(q *query, j Json, arg string) string {
 	return v
 }
 
+func collect(q *query, j Json, arg string) string {
+	return q.FilterJsonArray(j, identity)
+}
+
 func flatten(q *query, j Json, arg string) string {
-	v := q.IterateArray(j)
+	v := q.FilterJsonArray(j, identity)
 	v = strings.TrimPrefix(v, "[")
 	v = strings.TrimSuffix(v, "]")
 	return v
@@ -295,10 +311,11 @@ func flatten(q *query, j Json, arg string) string {
 
 func size(q *query, j Json, arg string) string {
 	c := 0
-	j = New(q.IterateArray(j))
-	j.IterateArray(func(i string, v Json) bool {
-		c++
-		return false
+	q.ParseJsonArrayItems(j, func(v string) string {
+		if v != "" {
+			c++
+		}
+		return v
 	})
 	return strconv.Itoa(c)
 }
@@ -314,17 +331,13 @@ func omitempty(q *query, j Json, arg string) string {
 	return j.String()
 }
 
-func collect(q *query, j Json, arg string) string {
-	return q.IterateArray(j)
-}
-
 func merge(q *query, j Json, arg string) string {
+	done := make(map[string]bool)
 	var b strings.Builder
 	b.WriteString("{")
-	done := make(map[string]bool)
-	j = New(q.IterateArray(j))
-	j.IterateArray(func(i string, v Json) bool {
-		v.IterateObject(func(k string, v Json) bool {
+	q.ParseJsonArrayItems(j, func(v string) string {
+		j = New(v)
+		j.IterateObject(func(k string, v Json) bool {
 			if !done[k] {
 				if b.Len() > 1 {
 					b.WriteString(",")
@@ -337,7 +350,7 @@ func merge(q *query, j Json, arg string) string {
 			done[k] = true
 			return false
 		})
-		return false
+		return v
 	})
 	b.WriteString("}")
 	return b.String()
