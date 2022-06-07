@@ -9,7 +9,7 @@ import (
 
 func Get(jsn, qry string) Json {
 	src := New(jsn)
-	q := query{Scanner(qry)}
+	q := query{Scanner: Scanner(qry), Root: src}
 	return New(q.Parse(src))
 }
 
@@ -21,10 +21,14 @@ func New(jsn string) Json {
 
 type query struct {
 	Scanner
+	Root Json
 }
 
 func (q *query) Parse(j Json) string {
 	q.ByteMatch('.')
+	if q.ByteMatch('@') && q.Match("root") {
+		return q.Parse(q.Root)
+	}
 	if path := q.MatchPath(); path != "" {
 		return q.Parse(j.Get(path))
 	}

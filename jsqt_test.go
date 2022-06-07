@@ -43,6 +43,8 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `.{.a}`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `{.a}`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `.{a}`, then: `{"a":3}`},
+		// Root node access.
+		{give: `{"a":{"b":{"c":{"d":3}}},"e":4}`, when: `{a.b.{c.d,x:@root.e}}`, then: `{"b":{"d":3,"x":4}}`},
 		// General.
 		{give: `{"a":{"a b c":3}}`, when: `{a."a b c","x y z":a."a b c"}`, then: `{"a b c":3,"x y z":3}`},
 		{give: `{"a":{"b":{"c":3}}}`, when: `a.{b.{c}}`, then: `{"b":{"c":3}}`},
