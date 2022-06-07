@@ -57,8 +57,11 @@ func (q *query) MatchPath() string {
 
 func (q *query) MatchFunc() (string, string) {
 	if q.ByteMatch('(') {
-		name, _ := q.ByteTokenBy(q.IsFuncName), q.ByteMatch(' ')
-		args, _ := q.ByteTokenBy(q.IsFuncName), q.ByteMatch(')')
+		f := func() bool {
+			return q.ByteMatchUntil(' ', ')')
+		}
+		name, _ := q.TokenFor(f), q.ByteMatch(' ')
+		args, _ := q.TokenFor(f), q.ByteMatch(')')
 		return name, args
 	}
 	return "", ""
@@ -172,10 +175,6 @@ func (q *query) IterateArray(j Json) string {
 }
 
 func (q *query) IsObjectKey(r byte) bool {
-	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
-}
-
-func (q *query) IsFuncName(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
 }
 
