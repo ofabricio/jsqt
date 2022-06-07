@@ -38,6 +38,9 @@ func (q *query) Parse(j Json) string {
 	if obj := q.ParseObject(j); obj != "" {
 		return obj
 	}
+	if arr := q.ParseArray(j); arr != "" {
+		return arr
+	}
 	return j.String()
 }
 
@@ -131,6 +134,24 @@ func (q *query) GetLastPathSegment() string {
 }
 
 func (q *query) ParseArray(j Json) string {
+	if q.ByteMatch('[') {
+		var obj strings.Builder
+		obj.WriteString("[")
+		for q.ByteMatch(',') || !q.ByteMatch(']') {
+			if v := q.Parse(j); v != "" {
+				if obj.Len() > 1 {
+					obj.WriteString(",")
+				}
+				obj.WriteString(v)
+			}
+		}
+		obj.WriteString("]")
+		return obj.String()
+	}
+	return ""
+}
+
+func (q *query) IterateArray(j Json) string {
 	var arr strings.Builder
 	arr.WriteString("[")
 	end := *q
@@ -267,7 +288,7 @@ func defaultValue(q *query, j Json, arg string) string {
 }
 
 func flatten(q *query, j Json, arg string) string {
-	v := q.ParseArray(j)
+	v := q.IterateArray(j)
 	v = strings.TrimPrefix(v, "[")
 	v = strings.TrimSuffix(v, "]")
 	return v
@@ -275,7 +296,7 @@ func flatten(q *query, j Json, arg string) string {
 
 func size(q *query, j Json, arg string) string {
 	c := 0
-	j = New(q.ParseArray(j))
+	j = New(q.IterateArray(j))
 	j.IterateArray(func(i string, v Json) bool {
 		c++
 		return false
@@ -295,14 +316,14 @@ func omitempty(q *query, j Json, arg string) string {
 }
 
 func collect(q *query, j Json, arg string) string {
-	return q.ParseArray(j)
+	return q.IterateArray(j)
 }
 
 func merge(q *query, j Json, arg string) string {
 	var b strings.Builder
 	b.WriteString("{")
 	done := make(map[string]bool)
-	j = New(q.ParseArray(j))
+	j = New(q.IterateArray(j))
 	j.IterateArray(func(i string, v Json) bool {
 		v.IterateObject(func(k string, v Json) bool {
 			if !done[k] {
