@@ -3,7 +3,7 @@ module github.com/ofabricio/jsqt
 go 1.18
 
 require (
-	github.com/ofabricio/scanner v0.0.0-20220606223127-176667679bb8
+	github.com/ofabricio/scanner v0.0.0-20220608222839-d9e7a18fc621
 	github.com/stretchr/testify v1.7.1
 )
 

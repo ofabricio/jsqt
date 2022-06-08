@@ -25,8 +25,8 @@ type query struct {
 }
 
 func (q *query) Parse(j Json) string {
-	q.ByteMatch('.')
-	if q.ByteMatch('@') && q.Match("root") {
+	q.MatchByte('.')
+	if q.MatchByte('@') && q.Match("root") {
 		return q.Parse(q.Root)
 	}
 	if path := q.MatchPath(); path != "" {
@@ -45,10 +45,10 @@ func (q *query) Parse(j Json) string {
 }
 
 func (q *query) MatchPath() string {
-	if path := q.ByteTokenBy(q.IsObjectKey); path != "" {
+	if path := q.TokenByteBy(q.IsObjectKey); path != "" {
 		return path
 	}
-	if m := q.Mark(); q.ByteMatchString('"') {
+	if m := q.Mark(); q.UtilMatchString('"') {
 		str := q.Token(m)
 		return str[1 : len(str)-1] // Remove "".
 	}
@@ -56,12 +56,12 @@ func (q *query) MatchPath() string {
 }
 
 func (q *query) MatchFunc() (string, string) {
-	if q.ByteMatch('(') {
+	if q.MatchByte('(') {
 		f := func() bool {
-			return q.ByteMatchUntil(' ', ')')
+			return q.MatchUntilAnyByte(' ', ')')
 		}
-		name, _ := q.TokenFor(f), q.ByteMatch(' ')
-		args, _ := q.TokenFor(f), q.ByteMatch(')')
+		name, _ := q.TokenFor(f), q.MatchByte(' ')
+		args, _ := q.TokenFor(f), q.MatchByte(')')
 		return name, args
 	}
 	return "", ""
@@ -91,10 +91,10 @@ func (q *query) CallFunc(name, args string, j Json) string {
 }
 
 func (q *query) ParseObject(j Json) string {
-	if q.ByteMatch('{') {
+	if q.MatchByte('{') {
 		var obj strings.Builder
 		obj.WriteString("{")
-		for q.ByteMatch(',') || !q.ByteMatch('}') {
+		for q.MatchByte(',') || !q.MatchByte('}') {
 			key := q.ParseObjectKey()
 			if key == "" {
 				key = q.GetLastPathSegment()
@@ -117,7 +117,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.MatchPath(); q.ByteMatch(':') {
+	if key := q.MatchPath(); q.MatchByte(':') {
 		return key
 	}
 	q.Back(m)
@@ -127,7 +127,7 @@ func (q *query) ParseObjectKey() string {
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
 	key := q.MatchPath()
-	for q.ByteMatch('.') {
+	for q.MatchByte('.') {
 		if k := q.MatchPath(); k != "" {
 			key = k
 		}
@@ -137,10 +137,10 @@ func (q *query) GetLastPathSegment() string {
 }
 
 func (q *query) ParseArray(j Json) string {
-	if q.ByteMatch('[') {
+	if q.MatchByte('[') {
 		var obj strings.Builder
 		obj.WriteString("[")
-		for q.ByteMatch(',') || !q.ByteMatch(']') {
+		for q.MatchByte(',') || !q.MatchByte(']') {
 			if v := q.Parse(j); v != "" {
 				if obj.Len() > 1 {
 					obj.WriteString(",")
@@ -234,10 +234,10 @@ func (j *Json) Get(keyOrIndex string) (r Json) {
 }
 
 func (j *Json) IterateObject(f func(string, Json) bool) {
-	if j.ByteMatch('{') {
-		for !j.ByteMatch('}') {
-			k, _ := j.TokenFor(j.MatchString), j.ByteMatch(':')
-			v, _ := j.GetValue(), j.ByteMatch(',')
+	if j.MatchByte('{') {
+		for !j.MatchByte('}') {
+			k, _ := j.TokenFor(j.MatchString), j.MatchByte(':')
+			v, _ := j.GetValue(), j.MatchByte(',')
 			if f(strings.Trim(k, `"`), New(v)) {
 				return
 			}
@@ -246,10 +246,10 @@ func (j *Json) IterateObject(f func(string, Json) bool) {
 }
 
 func (j *Json) IterateArray(f func(string, Json) bool) {
-	if j.ByteMatch('[') {
-		for i := 0; !j.ByteMatch(']'); i++ {
+	if j.MatchByte('[') {
+		for i := 0; !j.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
-			v, _ := j.GetValue(), j.ByteMatch(',')
+			v, _ := j.GetValue(), j.MatchByte(',')
 			if f(k, New(v)) {
 				return
 			}
@@ -271,19 +271,19 @@ func (j *Json) GetValue() string {
 }
 
 func (j *Json) MatchRest() bool {
-	return j.ByteMatchUntil(',', '}', ']')
+	return j.MatchUntilAnyByte3(',', '}', ']')
 }
 
 func (j *Json) MatchObject() bool {
-	return j.MatchCounting('{', '}')
+	return j.UtilMatchOpenCloseCount('{', '}')
 }
 
 func (j *Json) MatchArray() bool {
-	return j.MatchCounting('[', ']')
+	return j.UtilMatchOpenCloseCount('[', ']')
 }
 
 func (j *Json) MatchString() bool {
-	return j.ByteMatchString('"')
+	return j.UtilMatchString('"')
 }
 
 // #endregion Json
