@@ -25,7 +25,11 @@ type query struct {
 }
 
 func (q *query) Parse(j Json) string {
-	q.MatchByte('.')
+	if q.MatchByte('.') {
+		if q.EqualByte('|') {
+			return q.MatchFilter(j)
+		}
+	}
 	if key := q.MatchObjectKey(); key != "" {
 		return q.Parse(j.Get(key))
 	}
@@ -44,7 +48,7 @@ func (q *query) Parse(j Json) string {
 	if v := q.MatchRawValue(); v != "" {
 		return v
 	}
-	return q.MatchFilter(j)
+	return j.String()
 }
 
 func (q *query) MatchFilter(j Json) string {
@@ -53,18 +57,15 @@ func (q *query) MatchFilter(j Json) string {
 		q.MatchByte(' ')
 		lh := q.Parse(j)
 		q.MatchByte('>')
-		rh := q.MatchValue()
-		// rh := q.Parse(j)
-		// fmt.Println(rh)
+		rh := q.Parse(j)
 		q.MatchByte('|')
 		a, _ := strconv.Atoi(lh)
 		b, _ := strconv.Atoi(rh)
 		if a > b {
-			return v
+			return q.Parse(New(v))
 		}
-		return ""
 	}
-	return j.String()
+	return ""
 }
 
 func (q *query) MatchRawValue() string {

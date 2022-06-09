@@ -16,6 +16,16 @@ func TestGet(t *testing.T) {
 	}{
 		// Filter.
 		{
+			give: `[{"a":[1,5],"b":3},{"a":[3,6],"b":7}]`,
+			when: `.(collect).|a b>!4|.(collect).|. .>!4|`,
+			then: `[[6]]`,
+		},
+		{
+			give: `[3,4,5,6]`,
+			when: `.(collect).|. .>@root.1|`,
+			then: `[5,6]`,
+		},
+		{
 			give: `[3,4,5,6]`,
 			when: `.(collect).|. .>!4|`,
 			then: `[5,6]`,
