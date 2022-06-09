@@ -41,10 +41,33 @@ func (q *query) Parse(j Json) string {
 	if arr := q.ParseArray(j); arr != "" {
 		return arr
 	}
+	return q.ParseFilter(j)
+}
+
+func (q *query) ParseFilter(j Json) string {
+	if q.MatchByte('|') {
+		v := q.Parse(j)
+		q.MatchByte(' ')
+		lh := q.Parse(j)
+		q.MatchByte('>')
+		rh := q.MatchPath()
+		q.MatchByte('|')
+		a, _ := strconv.Atoi(lh)
+		b, _ := strconv.Atoi(rh)
+		if a > b {
+			return v
+		}
+		return ""
+	}
 	return j.String()
 }
 
 func (q *query) MatchPath() string {
+	if q.MatchByte('!') {
+		if v := q.TokenByteBy(q.IsValue); v != "" {
+			return v
+		}
+	}
 	if path := q.TokenByteBy(q.IsObjectKey); path != "" {
 		return path
 	}
@@ -190,6 +213,11 @@ func (q *query) IsObjectKey(r byte) bool {
 	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_'
 }
 
+func (q *query) IsValue(r byte) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' ||
+		r == '-' || r == '+' || r == '.'
+}
+
 // #endregion Query
 
 // #region Json
@@ -328,7 +356,7 @@ func omitempty(q *query, j Json, arg string) string {
 	if v == "[]" {
 		return ""
 	}
-	return j.String()
+	return v
 }
 
 func merge(q *query, j Json, arg string) string {

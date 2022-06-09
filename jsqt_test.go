@@ -14,6 +14,32 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Filter.
+		{
+			give: `[3,4,5,6]`,
+			when: `.(collect).|. .>!4|`,
+			then: `[5,6]`,
+		},
+		{
+			give: `{"a":[{"b":[{"c":[{"d":3},{"d":4}]},{"c":[{"d":5},{"d":6}]}]}]}`,
+			when: `a.(collect).b.(collect).c.(omitempty).(collect).|d d>!4|`,
+			then: `[[[5,6]]]`,
+		},
+		{
+			give: `{"a":[{"b":[{"c":[{"d":3},{"d":4}]},{"c":[{"d":5},{"d":6}]}]}]}`,
+			when: `a.(collect).b.(collect).c.(collect).|d d>!4|`,
+			then: `[[[],[5,6]]]`,
+		},
+		{
+			give: `{"a":[{"b":3,"c":4},{"b":5,"c":6}]}`,
+			when: `a.(collect).|b c>!4|`,
+			then: `[5]`,
+		},
+		{
+			give: `{"a":[{"b":3,"c":4},{"b":5,"c":6}]}`,
+			when: `a.(collect).|{b} c>!4|`,
+			then: `[{"b":5}]`,
+		},
 		// Merge function.
 		{give: `[{"a":3},{"b":4},{"c":5}]`, when: `.(merge)`, then: `{"a":3,"b":4,"c":5}`},
 		// Default function.
