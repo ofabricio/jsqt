@@ -26,31 +26,36 @@ type query struct {
 
 func (q *query) Parse(j Json) string {
 	q.MatchByte('.')
-	if q.MatchByte('@') && q.Match("root") {
-		return q.Parse(q.Root)
+	if key := q.MatchObjectKey(); key != "" {
+		return q.Parse(j.Get(key))
 	}
-	if path := q.MatchPath(); path != "" {
-		return q.Parse(j.Get(path))
+	if obj := q.MatchObject(j); obj != "" {
+		return obj
+	}
+	if arr := q.MatchArray(j); arr != "" {
+		return arr
 	}
 	if name, args := q.MatchFunc(); name != "" {
 		return q.CallFunc(name, args, j)
 	}
-	if obj := q.ParseObject(j); obj != "" {
-		return obj
+	if q.MatchByte('@') && q.Match("root") {
+		return q.Parse(q.Root)
 	}
-	if arr := q.ParseArray(j); arr != "" {
-		return arr
+	if v := q.MatchRawValue(); v != "" {
+		return v
 	}
-	return q.ParseFilter(j)
+	return q.MatchFilter(j)
 }
 
-func (q *query) ParseFilter(j Json) string {
+func (q *query) MatchFilter(j Json) string {
 	if q.MatchByte('|') {
 		v := q.Parse(j)
 		q.MatchByte(' ')
 		lh := q.Parse(j)
 		q.MatchByte('>')
-		rh := q.MatchPath()
+		rh := q.MatchValue()
+		// rh := q.Parse(j)
+		// fmt.Println(rh)
 		q.MatchByte('|')
 		a, _ := strconv.Atoi(lh)
 		b, _ := strconv.Atoi(rh)
@@ -62,20 +67,27 @@ func (q *query) ParseFilter(j Json) string {
 	return j.String()
 }
 
-func (q *query) MatchPath() string {
-	if q.MatchByte('!') {
-		if v := q.TokenByteBy(q.IsValue); v != "" {
-			return v
-		}
+func (q *query) MatchRawValue() string {
+	if !q.MatchByte('!') {
+		return ""
 	}
-	if path := q.TokenByteBy(q.IsObjectKey); path != "" {
-		return path
+	// TODO: string.
+	return q.TokenByteBy(q.IsValue)
+}
+
+func (q *query) MatchValue() string {
+	if v := q.MatchRawValue(); v != "" {
+		return v
 	}
+	return q.MatchObjectKey()
+}
+
+func (q *query) MatchObjectKey() string {
 	if m := q.Mark(); q.UtilMatchString('"') {
 		str := q.Token(m)
 		return str[1 : len(str)-1] // Remove "".
 	}
-	return ""
+	return q.TokenByteBy(q.IsObjectKey)
 }
 
 func (q *query) MatchFunc() (string, string) {
@@ -113,7 +125,7 @@ func (q *query) CallFunc(name, args string, j Json) string {
 	return j.String()
 }
 
-func (q *query) ParseObject(j Json) string {
+func (q *query) MatchObject(j Json) string {
 	if q.MatchByte('{') {
 		var obj strings.Builder
 		obj.WriteString("{")
@@ -140,7 +152,7 @@ func (q *query) ParseObject(j Json) string {
 
 func (q *query) ParseObjectKey() string {
 	m := q.Mark()
-	if key := q.MatchPath(); q.MatchByte(':') {
+	if key := q.MatchObjectKey(); q.MatchByte(':') {
 		return key
 	}
 	q.Back(m)
@@ -149,9 +161,9 @@ func (q *query) ParseObjectKey() string {
 
 func (q *query) GetLastPathSegment() string {
 	m := q.Mark()
-	key := q.MatchPath()
+	key := q.MatchObjectKey()
 	for q.MatchByte('.') {
-		if k := q.MatchPath(); k != "" {
+		if k := q.MatchObjectKey(); k != "" {
 			key = k
 		}
 	}
@@ -159,7 +171,7 @@ func (q *query) GetLastPathSegment() string {
 	return key
 }
 
-func (q *query) ParseArray(j Json) string {
+func (q *query) MatchArray(j Json) string {
 	if q.MatchByte('[') {
 		var obj strings.Builder
 		obj.WriteString("[")
