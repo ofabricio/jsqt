@@ -3,6 +3,7 @@ package jsqt
 import (
 	"strconv"
 	"strings"
+	"unicode"
 
 	. "github.com/ofabricio/scanner"
 )
@@ -11,6 +12,18 @@ func Get(jsn, qry string) Json {
 	src := New(jsn)
 	q := query{Scanner: Scanner(qry), Root: src}
 	return New(q.Parse(src))
+}
+
+func Get2(jsn, qry string) Json {
+	src := New(jsn)
+	q := query{Scanner: Scanner(qry), Root: src}
+	return New(q.ParseRoot(src))
+}
+
+func GetClosure(jsn, qry string) Json {
+	src := New(jsn)
+	q := query{Scanner: Scanner(qry), Root: src}
+	return New(q.ParseClosure(src))
 }
 
 func New(jsn string) Json {
@@ -22,6 +35,239 @@ func New(jsn string) Json {
 type query struct {
 	Scanner
 	Root Json
+}
+
+// #region Closure
+
+func (q *query) ParseClosure(j Json) string {
+	if v := q.ParseFunc(j); v != "" {
+		return v
+	}
+	return ""
+}
+
+func (q *query) ParseFuncArg(j Json) string {
+	if q.MatchByte(' ') {
+		if v := q.ParseFunc(j); v != "" {
+			return v
+		}
+		if v := q.TokenFor(func() bool {
+			return q.UtilMatchString('"')
+		}); v != "" {
+			return v
+		}
+		return q.TokenAnything()
+	}
+	return ""
+}
+
+func (q *query) ParseFunc(j Json) string {
+	if q.MatchByte('(') {
+		if q.MatchByte(')') {
+			return j.String()
+		}
+		if fname := q.TokenAnything(); fname != "" {
+			if v := q.CallFuncClosure(fname, j); v != "" {
+				if q.MatchByte(')') {
+					return v
+				}
+				return ""
+			}
+		}
+	}
+	return ""
+}
+
+func (q *query) TokenAnything() string {
+	return q.TokenFor(func() bool {
+		return q.MatchUntilAnyByte(' ', ')')
+	})
+}
+
+func (q *query) CallFuncClosure(fname string, j Json) string {
+	if fname == "raw" {
+		return q.ParseFuncArg(j)
+	}
+	if fname == "root" {
+		return q.Root.String()
+	}
+	if fname == "." {
+		return j.String()
+	}
+	// if fname == "pipe" {
+	// for {
+	// 	v := q.ParseFuncArg(j)
+	// 	if v == "" {
+	// 		return j.String()
+	// 	}
+	// 	j = New(v)
+	// }
+	// }
+	if fname == "get" {
+		for {
+			key := q.ParseFuncArg(j)
+			if key == "" {
+				return j.String()
+			}
+			if key[0] == '"' {
+				key = key[1 : len(key)-1]
+			}
+			j = j.Collect(key)
+		}
+	}
+	// if fname == "path" {
+	// 	for {
+	// 		key := q.ParseFuncArg(j)
+	// 		if key == "" {
+	// 			return j.String()
+	// 		}
+	// 		if key[0] == '"' {
+	// 			key = key[1 : len(key)-1]
+	// 		}
+	// 		j = j.Collect(key)
+	// 	}
+	// }
+	if fname == "obj" {
+		var out strings.Builder
+		out.WriteString("{")
+		for !q.EqualByte(')') {
+			if out.Len() > 1 {
+				out.WriteString(",")
+			}
+			k := q.ParseFuncArg(j)
+			v := q.ParseFuncArg(j)
+			out.WriteString(`"`)
+			out.WriteString(k)
+			out.WriteString(`":`)
+			out.WriteString(v)
+		}
+		out.WriteString("}")
+		return out.String()
+	}
+	if fname == "arr" {
+		var out strings.Builder
+		out.WriteString("[")
+		for !q.EqualByte(')') {
+			if out.Len() > 1 {
+				out.WriteString(",")
+			}
+			v := q.ParseFuncArg(j)
+			out.WriteString(v)
+		}
+		out.WriteString("]")
+		return out.String()
+	}
+	if fname == "flatten" {
+		v := q.ParseFuncArg(j)
+		return v[1 : len(v)-1]
+	}
+	if fname == "collect" {
+		j = New(q.ParseFuncArg(j)) // Feed.
+		return q.Collect(j, func(sub *query, item Json) string {
+			for !sub.EqualByte(')') {
+				item = New(sub.ParseFuncArg(item))
+			}
+			return item.String()
+		})
+	}
+	if fname == "join" {
+		var out strings.Builder
+		out.WriteString("{")
+		j = New(q.ParseFuncArg(j)) // Feed.
+		q.ForEach(j, func(sub *query, item Json) {
+			if f := sub.ParseFuncArg(item); f == "" { // Filter.
+				return
+			}
+			for !sub.EqualByte(')') {
+				if out.Len() > 1 {
+					out.WriteString(",")
+				}
+				k := sub.ParseFuncArg(item) // Key.
+				v := sub.ParseFuncArg(item) // Value.
+				out.WriteString(k)
+				out.WriteString(":")
+				out.WriteString(v)
+			}
+		})
+		out.WriteString("}")
+		return out.String()
+	}
+	return ""
+}
+
+func (q *query) Collect(j Json, f func(sub *query, item Json) string) string {
+	var arr strings.Builder
+	arr.WriteString("[")
+	ini := *q
+	j.IterateArray(func(i string, item Json) bool {
+		end := ini
+		if v := f(&end, item); v != "" {
+			if arr.Len() > 1 {
+				arr.WriteString(",")
+			}
+			arr.WriteString(v)
+		}
+		*q = end
+		return false
+	})
+	arr.WriteString("]")
+	return arr.String()
+}
+
+func (q *query) ForEach(j Json, f func(sub *query, item Json)) {
+	ini := *q
+	j.IterateArray(func(i string, item Json) bool {
+		end := ini
+		f(&end, item)
+		*q = end
+		return false
+	})
+}
+
+// #endregion Closure
+
+func (q *query) ParseRoot(j Json) string {
+	return q.ParseValue(j)
+}
+
+func (q *query) ParseValue(j Json) string {
+	if v := q.ParsePath(j); v != "" {
+		return v
+	}
+	if v := q.ParseRaw(); v != "" {
+		return v
+	}
+	return ""
+}
+
+func (q *query) ParsePath(j Json) string {
+	if !q.MatchByte('.') {
+		return j.String()
+	}
+	if v := q.ParseKey(); v != "" {
+		return q.ParsePath(j.Get(v))
+	}
+	return j.String()
+}
+
+func (q *query) ParseKey() string {
+	m := q.Mark()
+	if q.UtilMatchString('"') {
+		key := q.Token(m)
+		return key[1 : len(key)-1]
+	}
+	if q.MatchWhileRuneBy(q.IsName) {
+		return q.Token(m)
+	}
+	return ""
+}
+
+func (q *query) IsName(r rune) bool {
+	return unicode.IsLetter(r) || r == '_' || unicode.IsDigit(r)
+}
+
+func (q *query) ParseRaw() string {
+	return q.TokenRuneBy(unicode.IsPrint)
 }
 
 func (q *query) Parse(j Json) string {
@@ -272,6 +518,32 @@ func (j *Json) Get(keyOrIndex string) (r Json) {
 	j.IterateObject(f)
 	j.IterateArray(f)
 	return r
+}
+
+func (j *Json) Collect(keyOrIndex string) (r Json) {
+	if j.IsArray() && !(keyOrIndex[0] >= '0' && keyOrIndex[0] <= '9') {
+		var out strings.Builder
+		out.WriteString("[")
+		j.IterateArray(func(k string, v Json) bool {
+			if out.Len() > 1 {
+				out.WriteString(",")
+			}
+			out.WriteString(v.Collect(keyOrIndex).String())
+			return false
+		})
+		out.WriteString("]")
+		return New(out.String())
+	} else {
+		return j.Get(keyOrIndex)
+	}
+}
+
+func (j *Json) IsObject() bool {
+	return j.EqualByte('{')
+}
+
+func (j *Json) IsArray() bool {
+	return j.EqualByte('[')
 }
 
 func (j *Json) IterateObject(f func(string, Json) bool) {
