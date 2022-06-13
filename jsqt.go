@@ -144,7 +144,7 @@ func (q *query) CallFunc(fname string, j Json) string {
 	if fname == "join" {
 		var out strings.Builder
 		out.WriteString("{")
-		j = New(q.ParseFuncArg(j)) // Feed.
+		j = New(q.ParseFuncArg(j)) // Input.
 		q.ForEach(j, func(sub *query, item Json) {
 			if f := sub.ParseFuncArg(item); f == "" { // Filter.
 				return
@@ -165,7 +165,7 @@ func (q *query) CallFunc(fname string, j Json) string {
 	}
 	if fname == "size" {
 		c := 0
-		j = New(q.ParseFuncArg(j)) // Feed.
+		j = New(q.ParseFuncArg(j)) // Input.
 		j.ForEach(func(i string, v Json) bool {
 			c++
 			return false
@@ -176,7 +176,7 @@ func (q *query) CallFunc(fname string, j Json) string {
 		done := make(map[string]bool)
 		var b strings.Builder
 		b.WriteString("{")
-		j = New(q.ParseFuncArg(j)) // Feed.
+		j = New(q.ParseFuncArg(j)) // Input.
 		j.ForEach(func(i string, v Json) bool {
 			v.ForEachKeyVal(func(k string, v Json) bool {
 				if !done[k] {
