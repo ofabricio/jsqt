@@ -124,13 +124,22 @@ func (q *query) CallFunc(fname string, j Json) string {
 		return v[1 : len(v)-1]
 	}
 	if fname == "collect" {
-		j = New(q.ParseFuncArg(j)) // Feed.
-		return q.Collect(j, func(sub *query, item Json) string {
+		var out strings.Builder
+		out.WriteString("[")
+		j = New(q.ParseFuncArg(j)) // Input.
+		q.ForEach(j, func(sub *query, item Json) {
 			for !sub.EqualByte(')') {
 				item = New(sub.ParseFuncArg(item))
 			}
-			return item.String()
+			if item.String() != "" {
+				if out.Len() > 1 {
+					out.WriteString(",")
+				}
+				out.WriteString(item.String())
+			}
 		})
+		out.WriteString("]")
+		return out.String()
 	}
 	if fname == "join" {
 		var out strings.Builder
@@ -203,25 +212,6 @@ func (q *query) CallFunc(fname string, j Json) string {
 		return v
 	}
 	return ""
-}
-
-func (q *query) Collect(j Json, f func(sub *query, item Json) string) string {
-	var arr strings.Builder
-	arr.WriteString("[")
-	ini := *q
-	j.ForEach(func(i string, item Json) bool {
-		end := ini
-		if v := f(&end, item); v != "" {
-			if arr.Len() > 1 {
-				arr.WriteString(",")
-			}
-			arr.WriteString(v)
-		}
-		*q = end
-		return false
-	})
-	arr.WriteString("]")
-	return arr.String()
 }
 
 func (q *query) ForEach(j Json, f func(sub *query, item Json)) {
