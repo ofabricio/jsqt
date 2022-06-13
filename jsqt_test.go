@@ -45,6 +45,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
 		// Get.
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a b)`, then: `[3]`},
 		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(get a b)`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4}]`, when: `(get a)`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4}]`, when: `(get 0 a)`, then: `3`},

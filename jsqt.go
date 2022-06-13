@@ -277,10 +277,12 @@ func (j *Json) Collect(keyOrIndex string) (r Json) {
 		var out strings.Builder
 		out.WriteString("[")
 		j.ForEach(func(i string, v Json) bool {
-			if out.Len() > 1 {
-				out.WriteString(",")
+			if s := v.Collect(keyOrIndex).String(); s != "" {
+				if out.Len() > 1 {
+					out.WriteString(",")
+				}
+				out.WriteString(s)
 			}
-			out.WriteString(v.Collect(keyOrIndex).String())
 			return false
 		})
 		out.WriteString("]")
