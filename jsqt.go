@@ -156,6 +156,15 @@ func (q *query) CallFunc(fname string, j Json) string {
 		out.WriteString("}")
 		return out.String()
 	}
+	if fname == "size" {
+		c := 0
+		j = New(q.ParseFuncArg(j)) // Feed.
+		j.ForEach(func(i string, v Json) bool {
+			c++
+			return false
+		})
+		return strconv.Itoa(c)
+	}
 	return ""
 }
 

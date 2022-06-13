@@ -14,6 +14,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Size.
+		{give: `[3,4]`, when: `(size (.))`, then: `2`},
 		// Join.
 		{
 			give: `{"a":{"b":[{"c":"one","d":"one-val"},{"c":"two","d":"two-val"}]}}`,
