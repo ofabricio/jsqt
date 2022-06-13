@@ -16,6 +16,8 @@ func TestGet(t *testing.T) {
 	}{
 		// Size.
 		{give: `[3,4]`, when: `(size (.))`, then: `2`},
+		// Merge.
+		{give: `[{"a":3},{"b":4}]`, when: `(merge (.))`, then: `{"a":3,"b":4}`},
 		// Join.
 		{
 			give: `{"a":{"b":[{"c":"one","d":"one-val"},{"c":"two","d":"two-val"}]}}`,

@@ -165,6 +165,30 @@ func (q *query) CallFunc(fname string, j Json) string {
 		})
 		return strconv.Itoa(c)
 	}
+	if fname == "merge" {
+		done := make(map[string]bool)
+		var b strings.Builder
+		b.WriteString("{")
+		j = New(q.ParseFuncArg(j)) // Feed.
+		j.ForEach(func(i string, v Json) bool {
+			v.ForEachKeyVal(func(k string, v Json) bool {
+				if !done[k] {
+					if b.Len() > 1 {
+						b.WriteString(",")
+					}
+					b.WriteString(`"`)
+					b.WriteString(k)
+					b.WriteString(`":`)
+					b.WriteString(v.String())
+				}
+				done[k] = true
+				return false
+			})
+			return false
+		})
+		b.WriteString("}")
+		return b.String()
+	}
 	return ""
 }
 
@@ -321,30 +345,5 @@ func (j *Json) MatchString() bool {
 // #endregion Json
 
 // #region Functions
-
-// func merge(q *query, j Json, arg string) string {
-// 	done := make(map[string]bool)
-// 	var b strings.Builder
-// 	b.WriteString("{")
-// 	q.ParseJsonArrayItems(j, func(v string) string {
-// 		j = New(v)
-// 		j.ForEachKeyVal(func(k string, v Json) bool {
-// 			if !done[k] {
-// 				if b.Len() > 1 {
-// 					b.WriteString(",")
-// 				}
-// 				b.WriteString(`"`)
-// 				b.WriteString(k)
-// 				b.WriteString(`":`)
-// 				b.WriteString(v.String())
-// 			}
-// 			done[k] = true
-// 			return false
-// 		})
-// 		return v
-// 	})
-// 	b.WriteString("}")
-// 	return b.String()
-// }
 
 // #endregion Functions
