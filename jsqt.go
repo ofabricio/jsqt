@@ -322,28 +322,20 @@ func (j *Json) ForEach(f func(string, Json) bool) {
 }
 
 func (j *Json) GetValue() string {
-	if v := j.TokenFor(j.MatchObject); v != "" {
-		return v
+	m := j.Mark()
+	if j.UtilMatchOpenCloseCount('{', '}', '"') { // Match Object.
+		return j.Token(m)
 	}
-	if v := j.TokenFor(j.MatchArray); v != "" {
-		return v
+	if j.UtilMatchOpenCloseCount('[', ']', '"') { // Match Array.
+		return j.Token(m)
 	}
-	if v := j.TokenFor(j.MatchString); v != "" {
-		return v
+	if j.MatchString() {
+		return j.Token(m)
 	}
-	return j.TokenFor(j.MatchRest)
-}
-
-func (j *Json) MatchRest() bool {
-	return j.MatchUntilAnyByte3(',', '}', ']')
-}
-
-func (j *Json) MatchObject() bool {
-	return j.UtilMatchOpenCloseCount('{', '}', '"')
-}
-
-func (j *Json) MatchArray() bool {
-	return j.UtilMatchOpenCloseCount('[', ']', '"')
+	if j.MatchUntilAnyByte3(',', '}', ']') { // Match Anything.
+		return j.Token(m)
+	}
+	return ""
 }
 
 func (j *Json) MatchString() bool {
