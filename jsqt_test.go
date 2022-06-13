@@ -14,6 +14,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Default function.
+		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect (.) () (default (get b) 0))`, then: `[3,0,5]`},
 		// Size.
 		{give: `[3,4]`, when: `(size (.))`, then: `2`},
 		// Merge.

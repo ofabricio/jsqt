@@ -52,12 +52,8 @@ func (q *query) ParseFunc(j Json) string {
 			return j.String()
 		}
 		if fname := q.TokenAnything(); fname != "" {
-			if v := q.CallFunc(fname, j); v != "" {
-				if q.MatchByte(')') {
-					return v
-				}
-				return ""
-			}
+			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
+			return v
 		}
 	}
 	return ""
@@ -188,6 +184,14 @@ func (q *query) CallFunc(fname string, j Json) string {
 		})
 		b.WriteString("}")
 		return b.String()
+	}
+	if fname == "default" {
+		v := q.ParseFuncArg(j) // Input.
+		d := q.ParseFuncArg(j) // Value.
+		if v == "" {
+			return d
+		}
+		return v
 	}
 	return ""
 }
