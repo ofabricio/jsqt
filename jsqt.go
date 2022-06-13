@@ -195,6 +195,13 @@ func (q *query) CallFunc(fname string, j Json) string {
 		}
 		return v
 	}
+	if fname == "omitempty" {
+		v := q.ParseFuncArg(j)
+		if v == "{}" || v == "[]" {
+			return ""
+		}
+		return v
+	}
 	return ""
 }
 

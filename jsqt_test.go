@@ -14,6 +14,10 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// OmitEmpty Function.
+		{give: `{"a":[[3],[]]}`, when: `(collect (get a) () (omitempty (.)))`, then: `[[3]]`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(collect (get a) () (obj x (get b)) (omitempty (.)))`, then: `[{"x":3}]`},
+		{give: `{"a":{}}`, when: `(omitempty (get a))`, then: ``},
 		// Default function.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect (.) () (default (get b) 0))`, then: `[3,0,5]`},
 		// Size.
