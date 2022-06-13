@@ -96,10 +96,12 @@ func (q *query) CallFunc(fname string, j Json) string {
 			}
 			k := q.ParseFuncArg(j)
 			v := q.ParseFuncArg(j)
-			out.WriteString(`"`)
-			out.WriteString(k)
-			out.WriteString(`":`)
-			out.WriteString(v)
+			if v != "" {
+				out.WriteString(`"`)
+				out.WriteString(k)
+				out.WriteString(`":`)
+				out.WriteString(v)
+			}
 		}
 		out.WriteString("}")
 		return out.String()
