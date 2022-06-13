@@ -97,9 +97,14 @@ func (q *query) CallFunc(fname string, j Json) string {
 			k := q.ParseFuncArg(j)
 			v := q.ParseFuncArg(j)
 			if v != "" {
-				out.WriteString(`"`)
-				out.WriteString(k)
-				out.WriteString(`":`)
+				if k[0] == '"' {
+					out.WriteString(k)
+				} else {
+					out.WriteString(`"`)
+					out.WriteString(k)
+					out.WriteString(`"`)
+				}
+				out.WriteString(`:`)
 				out.WriteString(v)
 			}
 		}
