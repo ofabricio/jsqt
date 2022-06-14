@@ -90,6 +90,32 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestJsonWS(t *testing.T) {
+
+	tt := []struct {
+		give string
+		when string
+		then string
+	}{
+		{give: `{  "a"  :	3,  "b"  :  [  {  "c"  :  4  }  ]  }`, when: `(get b c)`, then: `[4]`},
+		{give: `[3,4 ]`, when: `(get 1)`, then: `4`},
+		{give: `[3, 4]`, when: `(get 1)`, then: `4`},
+		{give: `[3 ,4]`, when: `(get 1)`, then: `4`},
+		{give: `[ 3,4]`, when: `(get 1)`, then: `4`},
+		{give: `[ ]`, when: `(get (.))`, then: `[ ]`},
+		{give: `{"a":3, "b":4}`, when: `(get b)`, then: `4`},
+		{give: `{"a":3 ,"b":4}`, when: `(get a)`, then: `3`},
+		{give: `{"a": 3}`, when: `(get a)`, then: `3`},
+		{give: `{"a" :3}`, when: `(get a)`, then: `3`},
+		{give: `{ "a":3}`, when: `(get a)`, then: `3`},
+		{give: `{ }`, when: `(get (.))`, then: `{ }`},
+	}
+	for _, tc := range tt {
+		r := Get(tc.give, tc.when)
+		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+	}
+}
+
 func TestJsonGet(t *testing.T) {
 
 	tt := []struct {

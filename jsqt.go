@@ -216,9 +216,9 @@ func (j *Json) Collect(keyOrIndex string) Json {
 
 func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
 	if j.MatchByte('{') {
-		for !j.MatchByte('}') {
-			k, _ := j.TokenFor(j.MatchString), j.MatchByte(':')
-			v, _ := j.GetValue(), j.MatchByte(',')
+		for j.WS() && !j.MatchByte('}') {
+			k, _, _, _ := j.TokenFor(j.MatchString), j.WS(), j.MatchByte(':'), j.WS()
+			v, _, _ := j.GetValue(), j.WS(), j.MatchByte(',')
 			if f(strings.Trim(k, `"`), New(v)) {
 				return
 			}
@@ -228,9 +228,9 @@ func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
 
 func (j *Json) ForEach(f func(string, Json) bool) {
 	if j.MatchByte('[') {
-		for i := 0; !j.MatchByte(']'); i++ {
+		for i := 0; j.WS() && !j.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
-			v, _ := j.GetValue(), j.MatchByte(',')
+			v, _, _ := j.GetValue(), j.WS(), j.MatchByte(',')
 			if f(k, New(v)) {
 				return
 			}
@@ -249,7 +249,7 @@ func (j *Json) GetValue() string {
 	if j.MatchString() {
 		return j.Token(m)
 	}
-	if j.MatchUntilAnyByte3(',', '}', ']') { // Match Anything.
+	if j.MatchUntilAnyByte4(',', '}', ']', ' ') { // Match Anything.
 		return j.Token(m)
 	}
 	return ""
@@ -257,6 +257,11 @@ func (j *Json) GetValue() string {
 
 func (j *Json) MatchString() bool {
 	return j.UtilMatchString('"')
+}
+
+func (j *Json) WS() bool {
+	j.MatchWhileAnyByte4(' ', '\t', '\n', '\r')
+	return true
 }
 
 // #endregion Json

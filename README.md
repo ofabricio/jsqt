@@ -2,6 +2,8 @@
 
 JSON Query and Transformation.
 
+This lib uses a closure-like language to query and transform JSON.
+
 ### Roadmap
 
 [ ] Parse whitespace
