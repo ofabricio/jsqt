@@ -2,6 +2,7 @@ package jsqt
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,11 +15,16 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
-		// OmitEmpty Function.
+		// Iterate.
+		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,7]}`, when: `(iterate (.) num2str)`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6","7"]}`},
+		{give: `{"a":3,"b":4}`, when: `(iterate (.) num2str)`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate (.) num2str)`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate (.) num2str)`, then: `"3"`},
+		// OmitEmpty.
 		{give: `{"a":[[3],[]]}`, when: `(collect (get a) () (omitempty (.)))`, then: `[[3]]`},
-		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(collect (get a) () (obj x (get b)) (omitempty (.)))`, then: `[{"x":3}]`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a (omitempty (obj x (get b))))`, then: `[{"x":3}]`},
 		{give: `{"a":{}}`, when: `(omitempty (get a))`, then: ``},
-		// Default function.
+		// Default.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect (.) () (default (get b) 0))`, then: `[3,0,5]`},
 		// Size.
 		{give: `[3,4]`, when: `(size (.))`, then: `2`},
@@ -45,6 +51,11 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
 		// Get.
+		{
+			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
+			when: `(get a b c (obj d (get d) e (flatten (get e f g h i j k l))))`,
+			then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`,
+		},
 		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a b)`, then: `[3]`},
 		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(get a b)`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4}]`, when: `(get a)`, then: `[3,4]`},
@@ -131,31 +142,18 @@ func TestJsonCollect(t *testing.T) {
 
 func ExampleJson_Iterate() {
 
-	j := New(`{"a":"x","b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}},"d":1}`)
-	j.Iterate(func(k string, v Json) bool {
-		fmt.Println(k, v.String())
-		return false
+	j := New(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}},"d":1}`)
+	v := j.Iterate(func(k string, v Json) (string, string) {
+		if v.IsNumber() {
+			return strings.ToUpper(k), `"` + v.String() + `"`
+		}
+		return strings.ToUpper(k), v.String()
 	})
 
+	fmt.Println(v)
+
 	// Output:
-	// . {"a":"x","b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}},"d":1}
-	// .a "x"
-	// .b 2
-	// .c {"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}}
-	// .c.a 3
-	// .c.b {"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}
-	// .c.b.a 4
-	// .c.b.b [{"a":5},{"a":6,"b":7,"c":[8,9,0]}]
-	// .c.b.b.0 {"a":5}
-	// .c.b.b.0.a 5
-	// .c.b.b.1 {"a":6,"b":7,"c":[8,9,0]}
-	// .c.b.b.1.a 6
-	// .c.b.b.1.b 7
-	// .c.b.b.1.c [8,9,0]
-	// .c.b.b.1.c.0 8
-	// .c.b.b.1.c.1 9
-	// .c.b.b.1.c.2 0
-	// .d 1
+	// {"A":"1","B":"2","C":{"A":"3","B":{"A":"4","B":[{"A":"5"},{"A":"6","B":"7","C":["8","9","0"]}]}},"D":"1"}
 }
 
 func TestJsonForEachKeyVal(t *testing.T) {
