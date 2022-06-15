@@ -219,7 +219,7 @@ func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
 		for j.WS() && !j.MatchByte('}') {
 			k, _, _, _ := j.TokenFor(j.MatchString), j.WS(), j.MatchByte(':'), j.WS()
 			v, _, _ := j.GetValue(), j.WS(), j.MatchByte(',')
-			if f(strings.Trim(k, `"`), New(v)) {
+			if f(k[1:len(k)-1], New(v)) {
 				return
 			}
 		}
