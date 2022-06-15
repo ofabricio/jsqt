@@ -22,7 +22,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(iterate (.) num2str)`, then: `"3"`},
 		// OmitEmpty.
 		{give: `{"a":[[3],[]]}`, when: `(collect (get a) () (omitempty (.)))`, then: `[[3]]`},
-		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a (omitempty (obj x (get b))))`, then: `[{"x":3}]`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(collect (get a) () (omitempty (obj x (get b))))`, then: `[{"x":3}]`},
 		{give: `{"a":{}}`, when: `(omitempty (get a))`, then: ``},
 		// Default.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect (.) () (default (get b) 0))`, then: `[3,0,5]`},
@@ -37,9 +37,14 @@ func TestGet(t *testing.T) {
 			then: `{"one":"one-val","two":"two-val"}`,
 		},
 		// Collect.
+		// {
+		// 	give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
+		// 	when: `(get a b c (obj d (get d) e (flatten (get e f g h i j k l))))`,
+		// 	then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`,
+		// },
 		{
 			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
-			when: `(collect (get a b c) () (obj d (get d) e (flatten (get e f g h i j k l))))`,
+			when: `(collect (get a b c) () (obj d (get d) e (collect (get e f) () (flatten (collect (get g h i j) () (get k l))))))`,
 			then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`,
 		},
 		{give: `{"a":[{"b":{"c":3}},{"b":{}}]}`, when: `(collect (get a) () (get b c))`, then: `[3]`},
@@ -51,14 +56,8 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
 		// Get.
-		{
-			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
-			when: `(get a b c (obj d (get d) e (flatten (get e f g h i j k l))))`,
-			then: `[{"d":"one","e":["hi"]},{"d":"two","e":[]}]`,
-		},
-		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a b)`, then: `[3]`},
-		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(get a b)`, then: `[3,4]`},
-		{give: `[{"a":3},{"a":4}]`, when: `(get a)`, then: `[3,4]`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 1 c)`, then: `4`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 0 b)`, then: `3`},
 		{give: `[{"a":3},{"a":4}]`, when: `(get 0 a)`, then: `3`},
 		{give: `[2,3,4]`, when: `(get 3)`, then: ``},
 		{give: `[2,3,4]`, when: `(get 2)`, then: `4`},
@@ -97,18 +96,16 @@ func TestJsonWS(t *testing.T) {
 		when string
 		then string
 	}{
-		{give: `{  "a"  :	3,  "b"  :  [  {  "c"  :  4  }  ]  }`, when: `(get b c)`, then: `[4]`},
+		{give: `{  "a"  :	3,  "b"  :  [  {  "c"  :  4  }  ]  }`, when: `(get b 0 c)`, then: `4`},
 		{give: `[3,4 ]`, when: `(get 1)`, then: `4`},
 		{give: `[3, 4]`, when: `(get 1)`, then: `4`},
 		{give: `[3 ,4]`, when: `(get 1)`, then: `4`},
 		{give: `[ 3,4]`, when: `(get 1)`, then: `4`},
-		{give: `[ ]`, when: `(get (.))`, then: `[ ]`},
 		{give: `{"a":3, "b":4}`, when: `(get b)`, then: `4`},
 		{give: `{"a":3 ,"b":4}`, when: `(get a)`, then: `3`},
 		{give: `{"a": 3}`, when: `(get a)`, then: `3`},
 		{give: `{"a" :3}`, when: `(get a)`, then: `3`},
 		{give: `{ "a":3}`, when: `(get a)`, then: `3`},
-		{give: `{ }`, when: `(get (.))`, then: `{ }`},
 	}
 	for _, tc := range tt {
 		r := Get(tc.give, tc.when)

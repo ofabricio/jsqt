@@ -40,7 +40,7 @@ func (q *Query) ParseFuncArg(j Json) string {
 		if q.UtilMatchString('"') {
 			return q.Token(m)
 		}
-		if q.MatchUntilAnyByte(' ', ')') {
+		if q.MatchUntilAnyByte(' ', ')') { // Anything.
 			return q.Token(m)
 		}
 	}
@@ -49,12 +49,12 @@ func (q *Query) ParseFuncArg(j Json) string {
 
 func (q *Query) ParseFunc(j Json) string {
 	if q.MatchByte('(') {
-		if q.MatchByte(')') {
-			return j.String()
-		}
 		if fname := q.TokenAnything(); fname != "" {
 			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
 			return v
+		}
+		if q.MatchByte(')') {
+			return j.String()
 		}
 	}
 	return ""
@@ -282,33 +282,14 @@ func FuncCurrent(q *Query, j Json) string {
 
 func FuncGet(q *Query, j Json) string {
 	for !q.EqualByte(')') {
-		if q.Equal(" (") {
-			j = New(q.ParseFuncArg(j))
-		} else {
-			key := q.ParseFuncArg(j)
-			if key == "" {
-				return j.String()
-			}
-			if key[0] == '"' {
-				key = key[1 : len(key)-1]
-			}
-			j = j.Collect(key)
-			if j.IsArray() {
-				var o strings.Builder
-				o.WriteString("[")
-				q.ForEach(j, func(sub *Query, item Json) {
-					v := FuncGet(sub, item)
-					if v != "" {
-						if o.Len() > 1 {
-							o.WriteString(",")
-						}
-						o.WriteString(v)
-					}
-				})
-				o.WriteString("]")
-				j = New(o.String())
-			}
+		key := q.ParseFuncArg(j)
+		if key == "" {
+			return j.String()
 		}
+		if key[0] == '"' {
+			key = key[1 : len(key)-1]
+		}
+		j = j.Get(key)
 	}
 	return j.String()
 }
@@ -360,14 +341,13 @@ func FuncCollect(q *Query, j Json) string {
 	o.WriteString("[")
 	j = New(q.ParseFuncArg(j)) // Input.
 	q.ForEach(j, func(sub *Query, item Json) {
-		for !sub.EqualByte(')') {
-			item = New(sub.ParseFuncArg(item))
-		}
-		if item.String() != "" {
-			if o.Len() > 1 {
-				o.WriteString(",")
+		if v := sub.ParseFuncArg(item); v != "" { // Filter.
+			if v = sub.ParseFuncArg(item); v != "" { // Mapper.
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v)
 			}
-			o.WriteString(item.String())
 		}
 	})
 	o.WriteString("]")
