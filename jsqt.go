@@ -332,8 +332,10 @@ func FuncArr(q *Query, j Json) string {
 }
 
 func FuncFlatten(q *Query, j Json) string {
-	v := q.ParseFuncArg(j)
-	return v[1 : len(v)-1]
+	if v := q.ParseFuncArg(j); len(v) > 1 {
+		return v[1 : len(v)-1]
+	}
+	return j.String()
 }
 
 func FuncCollect(q *Query, j Json) string {
