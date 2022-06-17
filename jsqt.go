@@ -13,6 +13,12 @@ func Get(jsn, qry string) Json {
 	return New(q.Parse(src))
 }
 
+func Get2(jsn, qry string) Json {
+	src := New(jsn)
+	q := Query{Scanner: Scanner(qry), Root: src}
+	return q.Parse2(src)
+}
+
 func New(jsn string) Json {
 	return Json{Scanner(jsn)}
 }
@@ -22,6 +28,246 @@ func New(jsn string) Json {
 type Query struct {
 	Scanner
 	Root Json
+}
+
+func (q *Query) Parse2(j Json) Json {
+	return q.ParseFunc2(j)
+}
+
+func (q *Query) ParseFunc2(j Json) Json {
+	if q.MatchByte('(') {
+		if fname := q.TokenAnything(); fname != "" {
+			v, _ := q.CallFunc2(fname, j), q.MatchByte(')')
+			return v
+		}
+		if q.MatchByte(')') {
+			return j
+		}
+	}
+	return New("")
+}
+
+func (q *Query) CallFunc2(fname string, j Json) Json {
+	switch fname {
+	case "get":
+		return FuncGet2(q, j)
+	case "obj":
+		return FuncObj2(q, j)
+	case "collect":
+		return FuncCollect2(q, j)
+	case "arr":
+		return FuncArr2(q, j)
+	case "raw":
+		return FuncRaw2(q, j)
+	case "root":
+		return q.Root
+	case "size":
+		return FuncSize2(q, j)
+	case "default":
+		return FuncDefault2(q, j)
+	case "omitempty":
+		return FuncOmitempty2(q, j)
+	case "merge":
+		return FuncMerge2(q, j)
+	case "join":
+		return FuncJoin2(q, j)
+	case "iterate":
+		return FuncIterate2(q, j)
+	case "flatten":
+		v := j.String()
+		return New(v[1 : len(v)-1])
+	default:
+		return New("")
+	}
+}
+
+func (q *Query) ParseFuncArg2(j Json) Json {
+	if q.MatchByte(' ') {
+		if v := q.ParseFunc2(j); v.String() != "" {
+			return v
+		}
+		return q.ParseFuncArgKey(j)
+	}
+	return New("")
+}
+
+func (q *Query) ParseFuncArgFunc(j Json) Json {
+	q.MatchByte(' ')
+	return q.ParseFunc2(j)
+}
+
+func (q *Query) ParseFuncArgKey(j Json) Json {
+	q.MatchByte(' ')
+	key := ""
+	m := q.Mark()
+	if q.UtilMatchString('"') {
+		key = q.Token(m)
+		key = key[1 : len(key)-1]
+	} else if q.MatchUntilAnyByte(' ', ')') { // Anything.
+		key = q.Token(m)
+	}
+	return j.Get(key)
+}
+
+func (q *Query) ParseFuncArgRaw(j Json) Json {
+	q.MatchByte(' ')
+	v := ""
+	m := q.Mark()
+	if q.UtilMatchString('"') {
+		v = q.Token(m)
+	} else if q.MatchUntilAnyByte(' ', ')') { // Anything.
+		v = q.Token(m)
+	}
+	return New(v)
+}
+
+func FuncRaw2(q *Query, j Json) Json {
+	return q.ParseFuncArgRaw(j)
+}
+
+func FuncGet2(q *Query, j Json) Json {
+	for !q.EqualByte(')') {
+		j = q.ParseFuncArg2(j)
+	}
+	return j
+}
+
+func FuncArr2(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("[")
+	for !q.EqualByte(')') {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		v := q.ParseFuncArg2(j)
+		o.WriteString(v.String())
+	}
+	o.WriteString("]")
+	return New(o.String())
+}
+
+func FuncObj2(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("{")
+	for !q.EqualByte(')') {
+		if k, v := q.ParseFuncArgRaw(j), q.ParseFuncArg2(j); v.String() != "" {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			if k.String()[0] == '"' {
+				o.WriteString(k.String())
+			} else {
+				o.WriteString(`"`)
+				o.WriteString(k.String())
+				o.WriteString(`"`)
+			}
+			o.WriteString(`:`)
+			o.WriteString(v.String())
+		}
+	}
+	o.WriteString("}")
+	return New(o.String())
+}
+
+func FuncCollect2(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("[")
+	for !q.EqualByte(')') {
+		if j.IsArray() {
+			q.ForEach(j, func(sub *Query, item Json) {
+				for !sub.EqualByte(')') {
+					item = sub.ParseFuncArg2(item)
+				}
+				if item.String() != "" {
+					if o.Len() > 1 {
+						o.WriteString(",")
+					}
+					o.WriteString(item.String())
+				}
+			})
+		} else {
+			j = q.ParseFuncArgKey(j)
+		}
+	}
+	o.WriteString("]")
+	return New(o.String())
+}
+
+func FuncDefault2(q *Query, j Json) Json {
+	d := q.ParseFuncArgRaw(j) // Default value.
+	if j.String() == "" {
+		return d
+	}
+	return j
+}
+
+func FuncOmitempty2(q *Query, j Json) Json {
+	// v := q.ParseFuncArg2(j)
+	if j.String() == "{}" || j.String() == "[]" {
+		return New("")
+	}
+	return j
+}
+
+func FuncSize2(q *Query, j Json) Json {
+	c := 0
+	j.ForEach(func(i string, v Json) bool {
+		c++
+		return false
+	})
+	return New(strconv.Itoa(c))
+}
+
+func FuncMerge2(q *Query, j Json) Json {
+	done := make(map[string]bool)
+	var b strings.Builder
+	b.WriteString("{")
+	// j = New(q.ParseFuncArg(j)) // Input.
+	j.ForEach(func(i string, v Json) bool {
+		v.ForEachKeyVal(func(k string, v Json) bool {
+			if !done[k] {
+				if b.Len() > 1 {
+					b.WriteString(",")
+				}
+				b.WriteString(`"`)
+				b.WriteString(k)
+				b.WriteString(`":`)
+				b.WriteString(v.String())
+			}
+			done[k] = true
+			return false
+		})
+		return false
+	})
+	b.WriteString("}")
+	return New(b.String())
+}
+
+func FuncJoin2(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("{")
+	// j = New(q.ParseFuncArg(j)) // Input.
+	q.ForEach(j, func(sub *Query, item Json) {
+		for !sub.EqualByte(')') {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			k := sub.ParseFuncArg2(item) // Key.
+			v := sub.ParseFuncArg2(item) // Value.
+			o.WriteString(k.String())
+			o.WriteString(":")
+			o.WriteString(v.String())
+		}
+	})
+	o.WriteString("}")
+	return New(o.String())
+}
+
+func FuncIterate2(q *Query, j Json) Json {
+	m := q.TokenAnything() // Map function.
+	_ = m
+	// TODO: create functions map.
+	return New(j.Iterate(num2str))
 }
 
 func (q *Query) Parse(j Json) string {

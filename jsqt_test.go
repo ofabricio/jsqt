@@ -8,6 +8,85 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGet2(t *testing.T) {
+
+	tt := []struct {
+		give string
+		when string
+		then string
+	}{
+		// Iterate.
+		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,7]}`, when: `(iterate num2str)`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6","7"]}`},
+		{give: `{"a":3,"b":4}`, when: `(iterate num2str)`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate num2str)`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate num2str)`, then: `"3"`},
+		// OmitEmpty.
+		{give: `{"a":[[3],[]]}`, when: `(collect a (omitempty))`, then: `[[3]]`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(collect a (obj x b) (omitempty))`, then: `[{"x":3}]`},
+		{give: `{"a":{}}`, when: `(get a (omitempty))`, then: ``},
+		// Default.
+		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
+		// Size.
+		{give: `[3,4]`, when: `(size)`, then: `2`},
+		// Merge.
+		{give: `[{"a":3},{"b":4}]`, when: `(merge)`, then: `{"a":3,"b":4}`},
+		// Join.
+		{
+			give: `[{"c":"one","d":"one-val"},{"c":"two","d":"two-val"}]`,
+			when: `(join c d)`,
+			then: `{"one":"one-val","two":"two-val"}`,
+		},
+		// Collect.
+		{
+			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
+			when: `(collect a b c (obj x d e (collect e f g h i j (flatten) k l)))`,
+			then: `[{"x":"one","e":["hi"]},{"x":"two","e":[]}]`,
+		},
+		{give: `{"a":[{"b":{"c":3}},{"b":{}}]}`, when: `(collect a b c)`, then: `[3]`},
+		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(collect a b)`, then: `[3,4]`},
+		{give: `[{"a":3},{"b":4},{"a":5}]`, when: `(collect a)`, then: `[3,5]`},
+		// Array.
+		{give: `{"a":3,"b":4}`, when: `(arr a b a (raw "hi"))`, then: `[3,4,3,"hi"]`},
+		{give: `{"a":3,"b":4}`, when: `(arr a b a)`, then: `[3,4,3]`},
+		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
+		// Object.
+		{give: `{"a":3,"b":4}`, when: `(obj "a b" a y b)`, then: `{"a b":3,"y":4}`},
+		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
+		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
+		// Get.
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 1 c)`, then: `4`},
+		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 0 b)`, then: `3`},
+		{give: `[{"a":3},{"a":4}]`, when: `(get 0 a)`, then: `3`},
+		{give: `[2,3,4]`, when: `(get 3)`, then: ``},
+		{give: `[2,3,4]`, when: `(get 2)`, then: `4`},
+		{give: `[2,3,4]`, when: `(get 1)`, then: `3`},
+		{give: `[2,3,4]`, when: `(get 0)`, then: `2`},
+		{give: `{"aa":{"bb":{"cc":3}}}`, when: `(get aa bb cc)`, then: `3`},
+		{give: `{"a b":{"c d":3}}`, when: `(get "a b" "c d")`, then: `3`},
+		{give: `{"a b":3}`, when: `(get "a b")`, then: `3`},
+		{give: `{"a":{"b":3}}`, when: `(get a b)`, then: `3`},
+		{give: `{"a":3}`, when: `(get a)`, then: `3`},
+		// Root.
+		{give: `3`, when: `(root)`, then: `3`},
+		{give: ``, when: `(root)`, then: ``},
+		// Raw.
+		{give: ``, when: `(raw {})`, then: `{}`},
+		{give: ``, when: `(raw [])`, then: `[]`},
+		{give: ``, when: `(raw null)`, then: `null`},
+		{give: ``, when: `(raw true)`, then: `true`},
+		{give: ``, when: `(raw false)`, then: `false`},
+		{give: ``, when: `(raw 3e2)`, then: `3e2`},
+		{give: ``, when: `(raw 3)`, then: `3`},
+		{give: ``, when: `(raw "a")`, then: `"a"`},
+		{give: ``, when: `(raw -3)`, then: `-3`},
+		{give: ``, when: `(raw 1.2)`, then: `1.2`},
+	}
+	for _, tc := range tt {
+		r := Get2(tc.give, tc.when)
+		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+	}
+}
+
 func TestGet(t *testing.T) {
 
 	tt := []struct {
