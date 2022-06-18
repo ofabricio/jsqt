@@ -295,8 +295,8 @@ func FuncIterate(q *Query, j Json) Json {
 }
 
 func FuncEq(q *Query, j Json) Json {
-	f := q.ParseArgKey(j) // Field.
-	v := q.ParseArgRaw(j) // Value.
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() == v.String() {
 		return j
 	}
