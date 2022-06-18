@@ -9,15 +9,9 @@ import (
 
 func Get(jsn, qry string) Json {
 	src := New(jsn)
-	q := Query{Scanner: Scanner(qry), Root: src}
-	return New(q.Parse(src))
-}
-
-func Get2(jsn, qry string) Json {
-	src := New(jsn)
 	src.WS()
 	q := Query{Scanner: Scanner(qry), Root: src}
-	return q.Parse2(src)
+	return q.Parse(src)
 }
 
 func New(jsn string) Json {
@@ -31,14 +25,14 @@ type Query struct {
 	Root Json
 }
 
-func (q *Query) Parse2(j Json) Json {
-	return q.ParseFunc2(j)
+func (q *Query) Parse(j Json) Json {
+	return q.ParseFunc(j)
 }
 
-func (q *Query) ParseFunc2(j Json) Json {
+func (q *Query) ParseFunc(j Json) Json {
 	if q.MatchByte('(') {
 		if fname := q.TokenAnything(); fname != "" {
-			v, _ := q.CallFunc2(fname, j), q.MatchByte(')')
+			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
 			return v
 		}
 		if q.MatchByte(')') {
@@ -48,46 +42,10 @@ func (q *Query) ParseFunc2(j Json) Json {
 	return New("")
 }
 
-func (q *Query) CallFunc2(fname string, j Json) Json {
-	switch fname {
-	case "get":
-		return FuncGet2(q, j)
-	case "obj":
-		return FuncObj2(q, j)
-	case "collect":
-		return FuncCollect2(q, j)
-	case "arr":
-		return FuncArr2(q, j)
-	case "raw":
-		return FuncRaw2(q, j)
-	case "root":
-		return q.Root
-	case "size":
-		return FuncSize2(q, j)
-	case "default":
-		return FuncDefault2(q, j)
-	case "omitempty":
-		return FuncOmitempty2(q, j)
-	case "merge":
-		return FuncMerge2(q, j)
-	case "join":
-		return FuncJoin2(q, j)
-	case "iterate":
-		return FuncIterate2(q, j)
-	case "==":
-		return FuncEq2(q, j)
-	case "flatten":
-		v := j.String()
-		return New(v[1 : len(v)-1])
-	default:
-		return New("")
-	}
-}
-
-func (q *Query) ParseFuncArg2(j Json) Json {
+func (q *Query) ParseFuncArg(j Json) Json {
 	if q.MatchByte(' ') {
 		if q.EqualByte('(') {
-			if v := q.ParseFunc2(j); v.String() != "" {
+			if v := q.ParseFunc(j); v.String() != "" {
 				return v
 			}
 			return New("")
@@ -95,11 +53,6 @@ func (q *Query) ParseFuncArg2(j Json) Json {
 		return q.ParseFuncArgKey(j)
 	}
 	return New("")
-}
-
-func (q *Query) ParseFuncArgFunc(j Json) Json {
-	q.MatchByte(' ')
-	return q.ParseFunc2(j)
 }
 
 func (q *Query) ParseFuncArgKey(j Json) Json {
@@ -127,36 +80,87 @@ func (q *Query) ParseFuncArgRaw(j Json) Json {
 	return New(v)
 }
 
-func FuncRaw2(q *Query, j Json) Json {
+func (q *Query) CallFunc(fname string, j Json) Json {
+	switch fname {
+	case "get":
+		return FuncGet(q, j)
+	case "obj":
+		return FuncObj(q, j)
+	case "arr":
+		return FuncArr(q, j)
+	case "raw":
+		return FuncRaw(q, j)
+	case "collect":
+		return FuncCollect(q, j)
+	case "flatten":
+		return FuncFlatten(q, j)
+	case "size":
+		return FuncSize(q, j)
+	case "default":
+		return FuncDefault(q, j)
+	case "omitempty":
+		return FuncOmitempty(q, j)
+	case "merge":
+		return FuncMerge(q, j)
+	case "join":
+		return FuncJoin(q, j)
+	case "iterate":
+		return FuncIterate(q, j)
+	case "==":
+		return FuncEq(q, j)
+	case "root":
+		return q.Root
+	default:
+		return New("")
+	}
+}
+
+func (q *Query) TokenAnything() string {
+	return q.TokenFor(func() bool {
+		return q.MatchUntilAnyByte(' ', ')')
+	})
+}
+
+func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
+	ini := *q
+	j.ForEach(func(i string, item Json) bool {
+		end := ini
+		f(&end, item)
+		*q = end
+		return false
+	})
+}
+
+func FuncRaw(q *Query, j Json) Json {
 	return q.ParseFuncArgRaw(j)
 }
 
-func FuncGet2(q *Query, j Json) Json {
+func FuncGet(q *Query, j Json) Json {
 	for !q.EqualByte(')') {
-		j = q.ParseFuncArg2(j)
+		j = q.ParseFuncArg(j)
 	}
 	return j
 }
 
-func FuncArr2(q *Query, j Json) Json {
+func FuncArr(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
 	for !q.EqualByte(')') {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
-		v := q.ParseFuncArg2(j)
+		v := q.ParseFuncArg(j)
 		o.WriteString(v.String())
 	}
 	o.WriteString("]")
 	return New(o.String())
 }
 
-func FuncObj2(q *Query, j Json) Json {
+func FuncObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for !q.EqualByte(')') {
-		if k, v := q.ParseFuncArgRaw(j), q.ParseFuncArg2(j); v.String() != "" {
+		if k, v := q.ParseFuncArgRaw(j), q.ParseFuncArg(j); v.String() != "" {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -175,14 +179,14 @@ func FuncObj2(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncCollect2(q *Query, j Json) Json {
+func FuncCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
 	for !q.EqualByte(')') {
 		if j.IsArray() {
 			q.ForEach(j, func(sub *Query, item Json) {
 				for !sub.EqualByte(')') {
-					item = sub.ParseFuncArg2(item)
+					item = sub.ParseFuncArg(item)
 				}
 				if item.String() != "" {
 					if o.Len() > 1 {
@@ -199,7 +203,7 @@ func FuncCollect2(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncDefault2(q *Query, j Json) Json {
+func FuncDefault(q *Query, j Json) Json {
 	d := q.ParseFuncArgRaw(j) // Default value.
 	if j.String() == "" {
 		return d
@@ -207,15 +211,15 @@ func FuncDefault2(q *Query, j Json) Json {
 	return j
 }
 
-func FuncOmitempty2(q *Query, j Json) Json {
-	// v := q.ParseFuncArg2(j)
+func FuncOmitempty(q *Query, j Json) Json {
+	// v := q.ParseFuncArg(j)
 	if j.String() == "{}" || j.String() == "[]" {
 		return New("")
 	}
 	return j
 }
 
-func FuncSize2(q *Query, j Json) Json {
+func FuncSize(q *Query, j Json) Json {
 	c := 0
 	j.ForEach(func(i string, v Json) bool {
 		c++
@@ -224,11 +228,10 @@ func FuncSize2(q *Query, j Json) Json {
 	return New(strconv.Itoa(c))
 }
 
-func FuncMerge2(q *Query, j Json) Json {
+func FuncMerge(q *Query, j Json) Json {
 	done := make(map[string]bool)
 	var b strings.Builder
 	b.WriteString("{")
-	// j = New(q.ParseFuncArg(j)) // Input.
 	j.ForEach(func(i string, v Json) bool {
 		v.ForEachKeyVal(func(k string, v Json) bool {
 			if !done[k] {
@@ -249,17 +252,16 @@ func FuncMerge2(q *Query, j Json) Json {
 	return New(b.String())
 }
 
-func FuncJoin2(q *Query, j Json) Json {
+func FuncJoin(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
-	// j = New(q.ParseFuncArg(j)) // Input.
 	q.ForEach(j, func(sub *Query, item Json) {
 		for !sub.EqualByte(')') {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			k := sub.ParseFuncArg2(item) // Key.
-			v := sub.ParseFuncArg2(item) // Value.
+			k := sub.ParseFuncArg(item) // Key.
+			v := sub.ParseFuncArg(item) // Value.
 			o.WriteString(k.String())
 			o.WriteString(":")
 			o.WriteString(v.String())
@@ -269,14 +271,14 @@ func FuncJoin2(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncIterate2(q *Query, j Json) Json {
+func FuncIterate(q *Query, j Json) Json {
 	m := q.TokenAnything() // Map function.
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
 }
 
-func FuncEq2(q *Query, j Json) Json {
+func FuncEq(q *Query, j Json) Json {
 	f := q.ParseFuncArgKey(j) // Field.
 	v := q.ParseFuncArgRaw(j) // Value.
 	if f.String() == v.String() {
@@ -285,91 +287,9 @@ func FuncEq2(q *Query, j Json) Json {
 	return New("")
 }
 
-func (q *Query) Parse(j Json) string {
-	if v := q.ParseFunc(j); v != "" {
-		return v
-	}
-	return ""
-}
-
-func (q *Query) ParseFuncArg(j Json) string {
-	if q.MatchByte(' ') {
-		if v := q.ParseFunc(j); v != "" {
-			return v
-		}
-		m := q.Mark()
-		if q.UtilMatchString('"') {
-			return q.Token(m)
-		}
-		if q.MatchUntilAnyByte(' ', ')') { // Anything.
-			return q.Token(m)
-		}
-	}
-	return ""
-}
-
-func (q *Query) ParseFunc(j Json) string {
-	if q.MatchByte('(') {
-		if fname := q.TokenAnything(); fname != "" {
-			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
-			return v
-		}
-		if q.MatchByte(')') {
-			return j.String()
-		}
-	}
-	return ""
-}
-
-func (q *Query) TokenAnything() string {
-	return q.TokenFor(func() bool {
-		return q.MatchUntilAnyByte(' ', ')')
-	})
-}
-
-func (q *Query) CallFunc(fname string, j Json) string {
-	switch fname {
-	case "get":
-		return FuncGet(q, j)
-	case "obj":
-		return FuncObj(q, j)
-	case "arr":
-		return FuncArr(q, j)
-	case "collect":
-		return FuncCollect(q, j)
-	case "flatten":
-		return FuncFlatten(q, j)
-	case "raw":
-		return FuncRaw(q, j)
-	case ".":
-		return FuncCurrent(q, j)
-	case "join":
-		return FuncJoin(q, j)
-	case "size":
-		return FuncSize(q, j)
-	case "merge":
-		return FuncMerge(q, j)
-	case "default":
-		return FuncDefault(q, j)
-	case "omitempty":
-		return FuncOmitEmpty(q, j)
-	case "root":
-		return FuncRoot(q, j)
-	case "iterate":
-		return FuncIterate(q, j)
-	default:
-		return ""
-	}
-}
-
-func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
-	ini := *q
-	j.ForEach(func(i string, item Json) bool {
-		end := ini
-		f(&end, item)
-		*q = end
-		return false
-	})
+func FuncFlatten(q *Query, j Json) Json {
+	v := j.String()
+	return New(v[1 : len(v)-1])
 }
 
 // #endregion Query
@@ -528,177 +448,6 @@ func (j *Json) WS() bool {
 // #endregion Json
 
 // #region Functions
-
-func FuncRaw(q *Query, j Json) string {
-	return q.ParseFuncArg(j)
-}
-
-func FuncRoot(q *Query, j Json) string {
-	return q.Root.String()
-}
-
-func FuncCurrent(q *Query, j Json) string {
-	return j.String()
-}
-
-func FuncGet(q *Query, j Json) string {
-	for !q.EqualByte(')') {
-		key := q.ParseFuncArg(j)
-		if key == "" {
-			return j.String()
-		}
-		if key[0] == '"' {
-			key = key[1 : len(key)-1]
-		}
-		j = j.Get(key)
-	}
-	return j.String()
-}
-
-func FuncObj(q *Query, j Json) string {
-	var o strings.Builder
-	o.WriteString("{")
-	for !q.EqualByte(')') {
-		if k, v := q.ParseFuncArg(j), q.ParseFuncArg(j); v != "" {
-			if o.Len() > 1 {
-				o.WriteString(",")
-			}
-			if k[0] == '"' {
-				o.WriteString(k)
-			} else {
-				o.WriteString(`"`)
-				o.WriteString(k)
-				o.WriteString(`"`)
-			}
-			o.WriteString(`:`)
-			o.WriteString(v)
-		}
-	}
-	o.WriteString("}")
-	return o.String()
-}
-
-func FuncArr(q *Query, j Json) string {
-	var o strings.Builder
-	o.WriteString("[")
-	for !q.EqualByte(')') {
-		if o.Len() > 1 {
-			o.WriteString(",")
-		}
-		v := q.ParseFuncArg(j)
-		o.WriteString(v)
-	}
-	o.WriteString("]")
-	return o.String()
-}
-
-func FuncFlatten(q *Query, j Json) string {
-	if v := q.ParseFuncArg(j); len(v) > 1 {
-		return v[1 : len(v)-1]
-	}
-	return j.String()
-}
-
-func FuncCollect(q *Query, j Json) string {
-	var o strings.Builder
-	o.WriteString("[")
-	j = New(q.ParseFuncArg(j)) // Input.
-	q.ForEach(j, func(sub *Query, item Json) {
-		if v := sub.ParseFuncArg(item); v != "" { // Filter.
-			if v = sub.ParseFuncArg(item); v != "" { // Mapper.
-				if o.Len() > 1 {
-					o.WriteString(",")
-				}
-				o.WriteString(v)
-			}
-		}
-	})
-	o.WriteString("]")
-	return o.String()
-}
-
-func FuncJoin(q *Query, j Json) string {
-	var o strings.Builder
-	o.WriteString("{")
-	j = New(q.ParseFuncArg(j)) // Input.
-	q.ForEach(j, func(sub *Query, item Json) {
-		if f := sub.ParseFuncArg(item); f == "" { // Filter.
-			return
-		}
-		for !sub.EqualByte(')') {
-			if o.Len() > 1 {
-				o.WriteString(",")
-			}
-			k := sub.ParseFuncArg(item) // Key.
-			v := sub.ParseFuncArg(item) // Value.
-			o.WriteString(k)
-			o.WriteString(":")
-			o.WriteString(v)
-		}
-	})
-	o.WriteString("}")
-	return o.String()
-}
-
-func FuncSize(q *Query, j Json) string {
-	c := 0
-	j = New(q.ParseFuncArg(j)) // Input.
-	j.ForEach(func(i string, v Json) bool {
-		c++
-		return false
-	})
-	return strconv.Itoa(c)
-}
-
-func FuncMerge(q *Query, j Json) string {
-	done := make(map[string]bool)
-	var b strings.Builder
-	b.WriteString("{")
-	j = New(q.ParseFuncArg(j)) // Input.
-	j.ForEach(func(i string, v Json) bool {
-		v.ForEachKeyVal(func(k string, v Json) bool {
-			if !done[k] {
-				if b.Len() > 1 {
-					b.WriteString(",")
-				}
-				b.WriteString(`"`)
-				b.WriteString(k)
-				b.WriteString(`":`)
-				b.WriteString(v.String())
-			}
-			done[k] = true
-			return false
-		})
-		return false
-	})
-	b.WriteString("}")
-	return b.String()
-}
-
-func FuncDefault(q *Query, j Json) string {
-	v := q.ParseFuncArg(j) // Input.
-	d := q.ParseFuncArg(j) // Value.
-	if v == "" {
-		return d
-	}
-	return v
-}
-
-func FuncOmitEmpty(q *Query, j Json) string {
-	v := q.ParseFuncArg(j)
-	if v == "{}" || v == "[]" {
-		return ""
-	}
-	return v
-}
-
-func FuncIterate(q *Query, j Json) string {
-	v := New(q.ParseFuncArg(j)) // Input.
-	m := q.TokenAnything()      // Map function.
-	_ = m
-	// TODO: create functions map.
-	return v.Iterate(num2str)
-}
 
 // #endregion Functions
 
