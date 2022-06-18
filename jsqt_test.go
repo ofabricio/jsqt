@@ -15,6 +15,8 @@ func TestGet2(t *testing.T) {
 		when string
 		then string
 	}{
+		// Equal Filter.
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},
 		// Iterate.
 		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,7]}`, when: `(iterate num2str)`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6","7"]}`},
 		{give: `{"a":3,"b":4}`, when: `(iterate num2str)`, then: `{"a":"3","b":"4"}`},
@@ -53,6 +55,7 @@ func TestGet2(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" a y b)`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
+		{give: `{"a":{"b":{"c":3}}}`, when: `(get a b (obj x c))`, then: `{"x":3}`},
 		// Get.
 		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 1 c)`, then: `4`},
 		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 0 b)`, then: `3`},

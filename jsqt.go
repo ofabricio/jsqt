@@ -15,6 +15,7 @@ func Get(jsn, qry string) Json {
 
 func Get2(jsn, qry string) Json {
 	src := New(jsn)
+	src.WS()
 	q := Query{Scanner: Scanner(qry), Root: src}
 	return q.Parse2(src)
 }
@@ -73,6 +74,8 @@ func (q *Query) CallFunc2(fname string, j Json) Json {
 		return FuncJoin2(q, j)
 	case "iterate":
 		return FuncIterate2(q, j)
+	case "==":
+		return FuncEq2(q, j)
 	case "flatten":
 		v := j.String()
 		return New(v[1 : len(v)-1])
@@ -83,8 +86,11 @@ func (q *Query) CallFunc2(fname string, j Json) Json {
 
 func (q *Query) ParseFuncArg2(j Json) Json {
 	if q.MatchByte(' ') {
-		if v := q.ParseFunc2(j); v.String() != "" {
-			return v
+		if q.EqualByte('(') {
+			if v := q.ParseFunc2(j); v.String() != "" {
+				return v
+			}
+			return New("")
 		}
 		return q.ParseFuncArgKey(j)
 	}
@@ -268,6 +274,15 @@ func FuncIterate2(q *Query, j Json) Json {
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
+}
+
+func FuncEq2(q *Query, j Json) Json {
+	f := q.ParseFuncArgKey(j) // Field.
+	v := q.ParseFuncArgRaw(j) // Value.
+	if f.String() == v.String() {
+		return j
+	}
+	return New("")
 }
 
 func (q *Query) Parse(j Json) string {
