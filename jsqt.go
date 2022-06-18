@@ -131,6 +131,8 @@ func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
 	})
 }
 
+// #region Functions
+
 func FuncRaw(q *Query, j Json) Json {
 	return q.ParseFuncArgRaw(j)
 }
@@ -212,7 +214,6 @@ func FuncDefault(q *Query, j Json) Json {
 }
 
 func FuncOmitempty(q *Query, j Json) Json {
-	// v := q.ParseFuncArg(j)
 	if j.String() == "{}" || j.String() == "[]" {
 		return New("")
 	}
@@ -291,6 +292,8 @@ func FuncFlatten(q *Query, j Json) Json {
 	v := j.String()
 	return New(v[1 : len(v)-1])
 }
+
+// #endregion Functions
 
 // #endregion Query
 
@@ -446,10 +449,6 @@ func (j *Json) WS() bool {
 }
 
 // #endregion Json
-
-// #region Functions
-
-// #endregion Functions
 
 func num2str(k string, v Json) (string, string) {
 	if v.IsNumber() {
