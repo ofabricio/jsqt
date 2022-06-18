@@ -110,6 +110,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return FuncEq(q, j)
 	case "root":
 		return q.Root
+	case ".":
+		return j
 	default:
 		return New("")
 	}
