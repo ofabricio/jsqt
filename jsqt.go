@@ -272,7 +272,7 @@ func funcDefault(q *Query, j Json) Json {
 }
 
 func funcOmitempty(q *Query, j Json) Json {
-	if j.String() == "{}" || j.String() == "[]" {
+	if j.IsEmptyObject() || j.IsEmptyArray() {
 		return New("")
 	}
 	return j
@@ -717,11 +717,11 @@ func (j Json) IsEmptyString() bool {
 }
 
 func (j Json) IsEmptyObject() bool {
-	return j.s.MatchByte('{') && j.ws() && j.s.MatchByte('}')
+	return j.s.MatchByte('{') && j.ws() && j.s.EqualByte('}')
 }
 
 func (j Json) IsEmptyArray() bool {
-	return j.s.MatchByte('[') && j.ws() && j.s.MatchByte(']')
+	return j.s.MatchByte('[') && j.ws() && j.s.EqualByte(']')
 }
 
 func (j Json) IsEmpty() bool {
