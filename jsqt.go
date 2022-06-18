@@ -119,12 +119,22 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return FuncJoin(q, j)
 	case "iterate":
 		return FuncIterate(q, j)
-	case "==":
-		return FuncEq(q, j)
 	case "root":
 		return q.Root
 	case ".":
 		return j
+	case "==":
+		return FuncEQ(q, j)
+	case "!=":
+		return FuncNEQ(q, j)
+	case ">=":
+		return FuncGTE(q, j)
+	case "<=":
+		return FuncLTE(q, j)
+	case ">":
+		return FuncGT(q, j)
+	case "<":
+		return FuncLT(q, j)
 	default:
 		return New("")
 	}
@@ -294,10 +304,55 @@ func FuncIterate(q *Query, j Json) Json {
 	return New(j.Iterate(num2str))
 }
 
-func FuncEq(q *Query, j Json) Json {
+func FuncEQ(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() == v.String() {
+		return j
+	}
+	return New("")
+}
+
+func FuncNEQ(q *Query, j Json) Json {
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
+	if f.String() != v.String() {
+		return j
+	}
+	return New("")
+}
+
+func FuncGTE(q *Query, j Json) Json {
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
+	if f.String() >= v.String() {
+		return j
+	}
+	return New("")
+}
+
+func FuncLTE(q *Query, j Json) Json {
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
+	if f.String() <= v.String() {
+		return j
+	}
+	return New("")
+}
+
+func FuncGT(q *Query, j Json) Json {
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
+	if f.String() > v.String() {
+		return j
+	}
+	return New("")
+}
+
+func FuncLT(q *Query, j Json) Json {
+	f := q.ParseArgFunOrKey(j) // Field.
+	v := q.ParseArgFunOrRaw(j) // Value.
+	if f.String() < v.String() {
 		return j
 	}
 	return New("")

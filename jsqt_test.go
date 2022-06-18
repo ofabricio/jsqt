@@ -15,8 +15,13 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
-		// Equal Filter.
+		// Filters.
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (!= b 7) a)`, then: `[3,5]`},
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (>= b 7) a)`, then: `[4,5]`},
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (<= b 7) a)`, then: `[3,4]`},
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
+		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
 		// Iterate.
 		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,7]}`, when: `(iterate num2str)`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6","7"]}`},
 		{give: `{"a":3,"b":4}`, when: `(iterate num2str)`, then: `{"a":"3","b":"4"}`},
