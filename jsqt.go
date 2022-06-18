@@ -373,8 +373,36 @@ type Json struct {
 	Scanner
 }
 
+// String returns the raw JSON data.
 func (j Json) String() string {
 	return j.Scanner.String()
+}
+
+// Str returns a string value.
+// Example: "Hello" -> Hello.
+func (j Json) Str() string {
+	if v := j.String(); len(v) >= 2 {
+		return v[1 : len(v)-1]
+	}
+	return ""
+}
+
+// Int returns an int value.
+func (j Json) Int() int {
+	v, _ := strconv.ParseInt(j.String(), 10, 0)
+	return int(v)
+}
+
+// Float returns a float value.
+func (j Json) Float() float64 {
+	v, _ := strconv.ParseFloat(j.String(), 64)
+	return v
+}
+
+// Bool returns a bool value.
+func (j Json) Bool() bool {
+	v, _ := strconv.ParseBool(j.String())
+	return v
 }
 
 func (j *Json) IsObject() bool {

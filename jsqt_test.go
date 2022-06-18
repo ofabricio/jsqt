@@ -229,3 +229,68 @@ func TestJsonForEach(t *testing.T) {
 		assert.Equal(t, tc.out, r, tc.inp)
 	}
 }
+
+func TestJsonStr(t *testing.T) {
+	tt := []struct {
+		inp string
+		out string
+	}{
+		{inp: ``, out: ``},
+		{inp: `""`, out: ``},
+		{inp: `"a"`, out: `a`},
+		{inp: `""a""`, out: `"a"`},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Str(), tc.inp)
+	}
+}
+
+func TestJsonInt(t *testing.T) {
+	tt := []struct {
+		inp string
+		out int
+	}{
+		{inp: ``, out: 0},
+		{inp: `0`, out: 0},
+		{inp: `1`, out: 1},
+		{inp: `-2`, out: -2},
+		{inp: `100`, out: 100},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Int(), tc.inp)
+	}
+}
+
+func TestJsonFloat(t *testing.T) {
+	tt := []struct {
+		inp string
+		out float64
+	}{
+		{inp: ``, out: 0},
+		{inp: `0`, out: 0},
+		{inp: `1`, out: 1},
+		{inp: `-2.2`, out: -2.2},
+		{inp: `1e2`, out: 100},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Float(), tc.inp)
+	}
+}
+
+func TestJsonBool(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `false`, out: false},
+		{inp: `true`, out: true},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Bool(), tc.inp)
+	}
+}
