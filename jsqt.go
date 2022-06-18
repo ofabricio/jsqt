@@ -1,6 +1,7 @@
 package jsqt
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -135,6 +136,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return FuncGT(q, j)
 	case "<":
 		return FuncLT(q, j)
+	case "debug":
+		return FuncDebug(q, j)
 	default:
 		return New("")
 	}
@@ -356,6 +359,15 @@ func FuncLT(q *Query, j Json) Json {
 		return j
 	}
 	return New("")
+}
+
+func FuncDebug(q *Query, j Json) Json {
+	msg := "debug"
+	if !q.EqualByte(')') {
+		msg = q.ParseArgRaw(j).String()
+	}
+	fmt.Printf("[%s] %s\n", msg, j)
+	return j
 }
 
 func FuncFlatten(q *Query, j Json) Json {

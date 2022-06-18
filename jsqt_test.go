@@ -294,3 +294,21 @@ func TestJsonBool(t *testing.T) {
 		assert.Equal(t, tc.out, j.Bool(), tc.inp)
 	}
 }
+
+func ExampleFuncDebug() {
+
+	j := `[{ "a": { "b": [3] } }, { "a": { "b": [4] } }]`
+
+	v := Get(j, `(collect a (debug) b (debug b_val) (flatten) (debug flatd))`)
+
+	fmt.Println("Result:", v)
+
+	// Output:
+	// [debug] { "b": [3] }
+	// [b_val] [3]
+	// [flatd] 3
+	// [debug] { "b": [4] }
+	// [b_val] [4]
+	// [flatd] 4
+	// Result: [3,4]
+}
