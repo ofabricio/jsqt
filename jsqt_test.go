@@ -333,7 +333,39 @@ func TestJsonBool(t *testing.T) {
 	}
 }
 
-func ExampleFuncDebug() {
+func TestJsonIsEmpty(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `{  }`, out: true},
+		{inp: `[]`, out: true},
+		{inp: `[ ]`, out: true},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsEmpty(), tc.inp)
+	}
+}
+
+func TestJsonIsEmptyString(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `""`, out: true},
+		{inp: `"a"`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsEmptyString(), tc.inp)
+	}
+}
+
+func ExamplefuncDebug() {
 
 	j := `[{ "a": { "b": [3] } }, { "a": { "b": [4] } }]`
 

@@ -688,28 +688,42 @@ func (j Json) Bool() bool {
 	return v
 }
 
-func (j *Json) IsObject() bool {
+func (j Json) IsObject() bool {
 	return j.s.EqualByte('{')
 }
 
-func (j *Json) IsArray() bool {
+func (j Json) IsArray() bool {
 	return j.s.EqualByte('[')
 }
 
-func (j *Json) IsNumber() bool {
+func (j Json) IsNumber() bool {
 	return j.s.EqualByteRange('0', '9') || j.s.EqualByte('-')
 }
 
-func (j *Json) IsString() bool {
+func (j Json) IsString() bool {
 	return j.s.EqualByte('"')
 }
 
-func (j *Json) IsBool() bool {
+func (j Json) IsBool() bool {
 	return j.s.EqualByte('t') || j.s.EqualByte('f')
 }
 
-func (j *Json) IsNull() bool {
+func (j Json) IsNull() bool {
 	return j.s.EqualByte('n')
+}
+
+func (j Json) IsEmptyString() bool {
+	return j.String() == `""`
+}
+
+func (j Json) IsEmpty() bool {
+	if j.s.MatchByte('[') && j.ws() && j.s.MatchByte(']') {
+		return true
+	}
+	if j.s.MatchByte('{') && j.ws() && j.s.MatchByte('}') {
+		return true
+	}
+	return j.String() == `""`
 }
 
 // Iterate iterates over a valid Json.
