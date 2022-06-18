@@ -15,6 +15,10 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Ugly / Nice / Pretty.
+		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5 } ], "c": [] } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5\n            }\n        ],\n        \"c\": []\n    }\n]"},
+		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5 } ], "c": [] } ]`, when: `(nice)`, then: `[{ "a": 3, "b": [4, { "c": 5 }], "c": [] }]`},
+		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5 } ], "c": [] } ]`, when: `(ugly)`, then: `[{"a":3,"b":[4,{"c":5}],"c":[]}]`},
 		// Filters.
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (!= b 7) a)`, then: `[3,5]`},
