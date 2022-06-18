@@ -97,53 +97,53 @@ func (q *Query) ParseArgRaw(j Json) Json {
 func (q *Query) CallFunc(fname string, j Json) Json {
 	switch fname {
 	case "get":
-		return FuncGet(q, j)
+		return funcGet(q, j)
 	case "obj":
-		return FuncObj(q, j)
+		return funcObj(q, j)
 	case "arr":
-		return FuncArr(q, j)
+		return funcArr(q, j)
 	case "raw":
-		return FuncRaw(q, j)
+		return funcRaw(q, j)
 	case "collect":
-		return FuncCollect(q, j)
+		return funcCollect(q, j)
 	case "flatten":
-		return FuncFlatten(q, j)
+		return funcFlatten(q, j)
 	case "size":
-		return FuncSize(q, j)
+		return funcSize(q, j)
 	case "default":
-		return FuncDefault(q, j)
+		return funcDefault(q, j)
 	case "omitempty":
-		return FuncOmitempty(q, j)
+		return funcOmitempty(q, j)
 	case "merge":
-		return FuncMerge(q, j)
+		return funcMerge(q, j)
 	case "join":
-		return FuncJoin(q, j)
+		return funcJoin(q, j)
 	case "iterate":
-		return FuncIterate(q, j)
+		return funcIterate(q, j)
 	case "root":
 		return q.Root
 	case ".":
 		return j
 	case "==":
-		return FuncEQ(q, j)
+		return funcEQ(q, j)
 	case "!=":
-		return FuncNEQ(q, j)
+		return funcNEQ(q, j)
 	case ">=":
-		return FuncGTE(q, j)
+		return funcGTE(q, j)
 	case "<=":
-		return FuncLTE(q, j)
+		return funcLTE(q, j)
 	case ">":
-		return FuncGT(q, j)
+		return funcGT(q, j)
 	case "<":
-		return FuncLT(q, j)
+		return funcLT(q, j)
 	case "debug":
-		return FuncDebug(q, j)
+		return funcDebug(q, j)
 	case "ugly":
-		return FuncUgly(q, j)
+		return funcUgly(q, j)
 	case "nice":
-		return FuncNice(q, j)
+		return funcNice(q, j)
 	case "pretty":
-		return FuncPretty(q, j)
+		return funcPretty(q, j)
 	default:
 		return New("")
 	}
@@ -167,18 +167,18 @@ func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
 
 // #region Functions
 
-func FuncRaw(q *Query, j Json) Json {
+func funcRaw(q *Query, j Json) Json {
 	return q.ParseArgRaw(j)
 }
 
-func FuncGet(q *Query, j Json) Json {
+func funcGet(q *Query, j Json) Json {
 	for !q.EqualByte(')') {
 		j = q.ParseArgFunOrKey(j)
 	}
 	return j
 }
 
-func FuncArr(q *Query, j Json) Json {
+func funcArr(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
 	for !q.EqualByte(')') {
@@ -192,7 +192,7 @@ func FuncArr(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncObj(q *Query, j Json) Json {
+func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for !q.EqualByte(')') {
@@ -215,7 +215,7 @@ func FuncObj(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncCollect(q *Query, j Json) Json {
+func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
 	for !q.EqualByte(')') {
@@ -239,7 +239,7 @@ func FuncCollect(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncDefault(q *Query, j Json) Json {
+func funcDefault(q *Query, j Json) Json {
 	d := q.ParseArgRaw(j) // Default value.
 	if j.String() == "" {
 		return d
@@ -247,14 +247,14 @@ func FuncDefault(q *Query, j Json) Json {
 	return j
 }
 
-func FuncOmitempty(q *Query, j Json) Json {
+func funcOmitempty(q *Query, j Json) Json {
 	if j.String() == "{}" || j.String() == "[]" {
 		return New("")
 	}
 	return j
 }
 
-func FuncSize(q *Query, j Json) Json {
+func funcSize(q *Query, j Json) Json {
 	c := 0
 	j.ForEach(func(i string, v Json) bool {
 		c++
@@ -263,7 +263,7 @@ func FuncSize(q *Query, j Json) Json {
 	return New(strconv.Itoa(c))
 }
 
-func FuncMerge(q *Query, j Json) Json {
+func funcMerge(q *Query, j Json) Json {
 	done := make(map[string]bool)
 	var b strings.Builder
 	b.WriteString("{")
@@ -287,7 +287,7 @@ func FuncMerge(q *Query, j Json) Json {
 	return New(b.String())
 }
 
-func FuncJoin(q *Query, j Json) Json {
+func funcJoin(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	q.ForEach(j, func(sub *Query, item Json) {
@@ -306,14 +306,14 @@ func FuncJoin(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncIterate(q *Query, j Json) Json {
+func funcIterate(q *Query, j Json) Json {
 	m := q.TokenAnything() // Map function.
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
 }
 
-func FuncEQ(q *Query, j Json) Json {
+func funcEQ(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() == v.String() {
@@ -322,7 +322,7 @@ func FuncEQ(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncNEQ(q *Query, j Json) Json {
+func funcNEQ(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() != v.String() {
@@ -331,7 +331,7 @@ func FuncNEQ(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncGTE(q *Query, j Json) Json {
+func funcGTE(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() >= v.String() {
@@ -340,7 +340,7 @@ func FuncGTE(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncLTE(q *Query, j Json) Json {
+func funcLTE(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() <= v.String() {
@@ -349,7 +349,7 @@ func FuncLTE(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncGT(q *Query, j Json) Json {
+func funcGT(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() > v.String() {
@@ -358,7 +358,7 @@ func FuncGT(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncLT(q *Query, j Json) Json {
+func funcLT(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() < v.String() {
@@ -367,7 +367,7 @@ func FuncLT(q *Query, j Json) Json {
 	return New("")
 }
 
-func FuncDebug(q *Query, j Json) Json {
+func funcDebug(q *Query, j Json) Json {
 	msg := "debug"
 	if !q.EqualByte(')') {
 		msg = q.ParseArgRaw(j).String()
@@ -376,7 +376,7 @@ func FuncDebug(q *Query, j Json) Json {
 	return j
 }
 
-func FuncUgly(q *Query, j Json) Json {
+func funcUgly(q *Query, j Json) Json {
 	var o strings.Builder
 	if j.IsObject() {
 		o.WriteString("{")
@@ -387,7 +387,7 @@ func FuncUgly(q *Query, j Json) Json {
 			o.WriteString(`"`)
 			o.WriteString(k)
 			o.WriteString(`":`)
-			o.WriteString(FuncUgly(q, v).String())
+			o.WriteString(funcUgly(q, v).String())
 			return false
 		})
 		o.WriteString("}")
@@ -397,7 +397,7 @@ func FuncUgly(q *Query, j Json) Json {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			o.WriteString(FuncUgly(q, v).String())
+			o.WriteString(funcUgly(q, v).String())
 			return false
 		})
 		o.WriteString("]")
@@ -407,7 +407,7 @@ func FuncUgly(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncNice(q *Query, j Json) Json {
+func funcNice(q *Query, j Json) Json {
 	var o strings.Builder
 	if j.IsObject() {
 		o.WriteString("{")
@@ -420,7 +420,7 @@ func FuncNice(q *Query, j Json) Json {
 			o.WriteString(` "`)
 			o.WriteString(k)
 			o.WriteString(`": `)
-			o.WriteString(FuncNice(q, v).String())
+			o.WriteString(funcNice(q, v).String())
 			return false
 		})
 		if !empty {
@@ -433,7 +433,7 @@ func FuncNice(q *Query, j Json) Json {
 			if o.Len() > 1 {
 				o.WriteString(", ")
 			}
-			o.WriteString(FuncNice(q, v).String())
+			o.WriteString(funcNice(q, v).String())
 			return false
 		})
 		o.WriteString("]")
@@ -443,7 +443,7 @@ func FuncNice(q *Query, j Json) Json {
 	return New(o.String())
 }
 
-func FuncPretty(q *Query, j Json) Json {
+func funcPretty(q *Query, j Json) Json {
 	return funcPrettyInternal(j, 0)
 }
 
@@ -498,7 +498,7 @@ func funcPrettyInternal(j Json, depth int) Json {
 	return New(o.String())
 }
 
-func FuncFlatten(q *Query, j Json) Json {
+func funcFlatten(q *Query, j Json) Json {
 	v := j.String()
 	return New(v[1 : len(v)-1])
 }
