@@ -252,7 +252,7 @@ func funcCollect(q *Query, j Json) Json {
 				}
 			})
 		} else {
-			j = q.ParseArgKey(j)
+			j = q.ParseArgFunOrKey(j)
 		}
 	}
 	o.WriteString("]")

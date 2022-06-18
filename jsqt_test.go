@@ -16,6 +16,7 @@ func TestGet(t *testing.T) {
 		then string
 	}{
 		// Entries.
+		{give: `{"a":3,"b":4}`, when: `(collect (entries) (flatten))`, then: `["a",3,"b",4]`},
 		{give: `{"a":3,"b":4}`, when: `(entries)`, then: `[["a",3],["b",4]]`},
 		// Values.
 		{give: `{"a":3,"b":4}`, when: `(values)`, then: `[3,4]`},
