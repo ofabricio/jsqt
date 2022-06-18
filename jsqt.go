@@ -132,6 +132,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcIsBool(q, j)
 	case "is-null":
 		return funcIsNull(q, j)
+	case "if":
+		return funcIf(q, j)
 	case "root":
 		return q.Root
 	case ".":
@@ -323,6 +325,16 @@ func funcIterate(q *Query, j Json) Json {
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
+}
+
+func funcIf(q *Query, j Json) Json {
+	cond := q.ParseArgFunOrKey(j)
+	then := q.ParseArgFunOrKey(j)
+	elze := q.ParseArgFunOrKey(j)
+	if cond.String() != "" {
+		return then
+	}
+	return elze
 }
 
 func funcIsNum(q *Query, j Json) Json {

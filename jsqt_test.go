@@ -15,6 +15,11 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// If.
+		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},       // Then.
+		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (.)))`, then: `{"b":3}`}, // Else.
+		{give: `3`, when: `(if (is-num) (obj b (.)) (raw 3))`, then: `{"b":3}`},              // Then.
+		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (.))`, then: `{"b":3}`},                // Else.
 		// IsNull
 		{give: `3`, when: `(is-null)`, then: ``},
 		{give: `null`, when: `(is-null)`, then: `null`},
