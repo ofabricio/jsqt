@@ -9,7 +9,7 @@ import (
 
 func Get(jsn, qry string) Json {
 	src := New(jsn)
-	src.WS()
+	src.ws()
 	q := Query{Scanner: Scanner(qry), Root: src}
 	return q.Parse(src)
 }
@@ -370,12 +370,12 @@ func FuncFlatten(q *Query, j Json) Json {
 // #region Json
 
 type Json struct {
-	Scanner
+	s Scanner
 }
 
 // String returns the raw JSON data.
 func (j Json) String() string {
-	return j.Scanner.String()
+	return j.s.String()
 }
 
 // Str returns a string value.
@@ -406,27 +406,27 @@ func (j Json) Bool() bool {
 }
 
 func (j *Json) IsObject() bool {
-	return j.EqualByte('{')
+	return j.s.EqualByte('{')
 }
 
 func (j *Json) IsArray() bool {
-	return j.EqualByte('[')
+	return j.s.EqualByte('[')
 }
 
 func (j *Json) IsNumber() bool {
-	return j.EqualByteRange('0', '9') || j.EqualByte('-')
+	return j.s.EqualByteRange('0', '9') || j.s.EqualByte('-')
 }
 
 func (j *Json) IsString() bool {
-	return j.EqualByte('"')
+	return j.s.EqualByte('"')
 }
 
 func (j *Json) IsBool() bool {
-	return j.EqualByte('t') && j.EqualByte('f')
+	return j.s.EqualByte('t') && j.s.EqualByte('f')
 }
 
 func (j *Json) IsNull() bool {
-	return j.EqualByte('n')
+	return j.s.EqualByte('n')
 }
 
 // Iterate iterates over a valid Json.
@@ -497,10 +497,10 @@ func (j *Json) Collect(keyOrIndex string) Json {
 }
 
 func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
-	if j.MatchByte('{') {
-		for j.WS() && !j.MatchByte('}') {
-			k, _, _, _ := j.TokenFor(j.MatchString), j.WS(), j.MatchByte(':'), j.WS()
-			v, _, _ := j.GetValue(), j.WS(), j.MatchByte(',')
+	if j.s.MatchByte('{') {
+		for j.ws() && !j.s.MatchByte('}') {
+			k, _, _, _ := j.s.TokenFor(j.matchString), j.ws(), j.s.MatchByte(':'), j.ws()
+			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
 			if f(k[1:len(k)-1], New(v)) {
 				return
 			}
@@ -509,10 +509,10 @@ func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
 }
 
 func (j *Json) ForEach(f func(string, Json) bool) {
-	if j.MatchByte('[') {
-		for i := 0; j.WS() && !j.MatchByte(']'); i++ {
+	if j.s.MatchByte('[') {
+		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
-			v, _, _ := j.GetValue(), j.WS(), j.MatchByte(',')
+			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
 			if f(k, New(v)) {
 				return
 			}
@@ -520,29 +520,29 @@ func (j *Json) ForEach(f func(string, Json) bool) {
 	}
 }
 
-func (j *Json) GetValue() string {
-	m := j.Mark()
-	if j.UtilMatchOpenCloseCount('{', '}', '"') { // Match Object.
-		return j.Token(m)
+func (j *Json) getValue() string {
+	m := j.s.Mark()
+	if j.s.UtilMatchOpenCloseCount('{', '}', '"') { // Match Object.
+		return j.s.Token(m)
 	}
-	if j.UtilMatchOpenCloseCount('[', ']', '"') { // Match Array.
-		return j.Token(m)
+	if j.s.UtilMatchOpenCloseCount('[', ']', '"') { // Match Array.
+		return j.s.Token(m)
 	}
-	if j.MatchString() {
-		return j.Token(m)
+	if j.matchString() {
+		return j.s.Token(m)
 	}
-	if j.MatchUntilAnyByte4(',', '}', ']', ' ') { // Match Anything.
-		return j.Token(m)
+	if j.s.MatchUntilAnyByte4(',', '}', ']', ' ') { // Match Anything.
+		return j.s.Token(m)
 	}
 	return ""
 }
 
-func (j *Json) MatchString() bool {
-	return j.UtilMatchString('"')
+func (j *Json) matchString() bool {
+	return j.s.UtilMatchString('"')
 }
 
-func (j *Json) WS() bool {
-	j.MatchWhileAnyByte4(' ', '\t', '\n', '\r')
+func (j *Json) ws() bool {
+	j.s.MatchWhileAnyByte4(' ', '\t', '\n', '\r')
 	return true
 }
 
