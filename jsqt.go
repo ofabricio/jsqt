@@ -152,6 +152,12 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcLT(q, j)
 	case "debug":
 		return funcDebug(q, j)
+	case "keys":
+		return funcKeys(q, j)
+	case "values":
+		return funcValues(q, j)
+	case "entries":
+		return funcEntries(q, j)
 	case "ugly":
 		return funcUgly(q, j)
 	case "nice":
@@ -431,6 +437,55 @@ func funcLT(q *Query, j Json) Json {
 		return j
 	}
 	return New("")
+}
+
+func funcKeys(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("[")
+	j.ForEachKeyVal(func(k string, v Json) bool {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		o.WriteString(`"`)
+		o.WriteString(k)
+		o.WriteString(`"`)
+		return false
+	})
+	o.WriteString("]")
+	return New(o.String())
+}
+
+func funcValues(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("[")
+	j.ForEachKeyVal(func(k string, v Json) bool {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		o.WriteString(v.String())
+		return false
+	})
+	o.WriteString("]")
+	return New(o.String())
+}
+
+func funcEntries(q *Query, j Json) Json {
+	var o strings.Builder
+	o.WriteString("[")
+	j.ForEachKeyVal(func(k string, v Json) bool {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		o.WriteString("[")
+		o.WriteString(`"`)
+		o.WriteString(k)
+		o.WriteString(`",`)
+		o.WriteString(v.String())
+		o.WriteString("]")
+		return false
+	})
+	o.WriteString("]")
+	return New(o.String())
 }
 
 func funcDebug(q *Query, j Json) Json {

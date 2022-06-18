@@ -15,6 +15,12 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Entries.
+		{give: `{"a":3,"b":4}`, when: `(entries)`, then: `[["a",3],["b",4]]`},
+		// Values.
+		{give: `{"a":3,"b":4}`, when: `(values)`, then: `[3,4]`},
+		// Keys.
+		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
 		// If.
 		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},       // Then.
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (.)))`, then: `{"b":3}`}, // Else.
