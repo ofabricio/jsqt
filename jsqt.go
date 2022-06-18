@@ -150,6 +150,10 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcGT(q, j)
 	case "<":
 		return funcLT(q, j)
+	case "or":
+		return funcOr(q, j)
+	case "and":
+		return funcAnd(q, j)
 	case "debug":
 		return funcDebug(q, j)
 	case "keys":
@@ -434,6 +438,24 @@ func funcLT(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
 	if f.String() < v.String() {
+		return j
+	}
+	return New("")
+}
+
+func funcOr(q *Query, j Json) Json {
+	a := q.ParseArgFunOrKey(j)
+	b := q.ParseArgFunOrRaw(j)
+	if a.String() != "" || b.String() != "" {
+		return j
+	}
+	return New("")
+}
+
+func funcAnd(q *Query, j Json) Json {
+	a := q.ParseArgFunOrKey(j)
+	b := q.ParseArgFunOrRaw(j)
+	if a.String() != "" && b.String() != "" {
 		return j
 	}
 	return New("")
