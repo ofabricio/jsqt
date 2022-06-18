@@ -343,6 +343,7 @@ func TestJsonIsEmpty(t *testing.T) {
 		{inp: `{  }`, out: true},
 		{inp: `[]`, out: true},
 		{inp: `[ ]`, out: true},
+		{inp: `""`, out: true},
 	}
 	for _, tc := range tt {
 		j := New(tc.inp)
@@ -362,6 +363,42 @@ func TestJsonIsEmptyString(t *testing.T) {
 	for _, tc := range tt {
 		j := New(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmptyString(), tc.inp)
+	}
+}
+
+func TestJsonIsEmptyObject(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `{   }`, out: true},
+		{inp: `[]`, out: false},
+		{inp: `""`, out: false},
+		{inp: `3`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsEmptyObject(), tc.inp)
+	}
+}
+
+func TestJsonIsEmptyArray(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `[]`, out: true},
+		{inp: `[  ]`, out: true},
+		{inp: `{}`, out: false},
+		{inp: `""`, out: false},
+		{inp: `3`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsEmptyArray(), tc.inp)
 	}
 }
 

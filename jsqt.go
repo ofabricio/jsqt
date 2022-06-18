@@ -46,7 +46,7 @@ func (q *Query) ParseFunc(j Json) Json {
 func (q *Query) ParseArgFunOrKey(j Json) Json {
 	if q.MatchByte(' ') {
 		if q.EqualByte('(') {
-			if v := q.ParseFunc(j); v.String() != "" {
+			if v := q.ParseFunc(j); v.IsSomething() {
 				return v
 			}
 			return New("")
@@ -59,7 +59,7 @@ func (q *Query) ParseArgFunOrKey(j Json) Json {
 func (q *Query) ParseArgFunOrRaw(j Json) Json {
 	if q.MatchByte(' ') {
 		if q.EqualByte('(') {
-			if v := q.ParseFunc(j); v.String() != "" {
+			if v := q.ParseFunc(j); v.IsSomething() {
 				return v
 			}
 			return New("")
@@ -220,7 +220,7 @@ func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for !q.EqualByte(')') {
-		if k, v := q.ParseArgFunOrRaw(j), q.ParseArgFunOrKey(j); v.String() != "" {
+		if k, v := q.ParseArgFunOrRaw(j), q.ParseArgFunOrKey(j); v.IsSomething() {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -248,7 +248,7 @@ func funcCollect(q *Query, j Json) Json {
 				for !sub.EqualByte(')') {
 					item = sub.ParseArgFunOrKey(item)
 				}
-				if item.String() != "" {
+				if item.IsSomething() {
 					if o.Len() > 1 {
 						o.WriteString(",")
 					}
@@ -341,7 +341,7 @@ func funcIf(q *Query, j Json) Json {
 	cond := q.ParseArgFunOrKey(j)
 	then := q.ParseArgFunOrKey(j)
 	elze := q.ParseArgFunOrKey(j)
-	if cond.String() != "" {
+	if cond.IsSomething() {
 		return then
 	}
 	return elze
@@ -446,7 +446,7 @@ func funcLT(q *Query, j Json) Json {
 func funcOr(q *Query, j Json) Json {
 	a := q.ParseArgFunOrKey(j)
 	b := q.ParseArgFunOrRaw(j)
-	if a.String() != "" || b.String() != "" {
+	if a.IsSomething() || b.IsSomething() {
 		return j
 	}
 	return New("")
@@ -455,7 +455,7 @@ func funcOr(q *Query, j Json) Json {
 func funcAnd(q *Query, j Json) Json {
 	a := q.ParseArgFunOrKey(j)
 	b := q.ParseArgFunOrRaw(j)
-	if a.String() != "" && b.String() != "" {
+	if a.IsSomething() && b.IsSomething() {
 		return j
 	}
 	return New("")
@@ -716,14 +716,20 @@ func (j Json) IsEmptyString() bool {
 	return j.String() == `""`
 }
 
+func (j Json) IsEmptyObject() bool {
+	return j.s.MatchByte('{') && j.ws() && j.s.MatchByte('}')
+}
+
+func (j Json) IsEmptyArray() bool {
+	return j.s.MatchByte('[') && j.ws() && j.s.MatchByte(']')
+}
+
 func (j Json) IsEmpty() bool {
-	if j.s.MatchByte('[') && j.ws() && j.s.MatchByte(']') {
-		return true
-	}
-	if j.s.MatchByte('{') && j.ws() && j.s.MatchByte('}') {
-		return true
-	}
-	return j.String() == `""`
+	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString()
+}
+
+func (j Json) IsSomething() bool {
+	return j.String() != ""
 }
 
 // Iterate iterates over a valid Json.
@@ -779,11 +785,11 @@ func (j *Json) Collect(keyOrIndex string) Json {
 		var o strings.Builder
 		o.WriteString("[")
 		j.ForEach(func(i string, v Json) bool {
-			if s := v.Collect(keyOrIndex).String(); s != "" {
+			if v = v.Collect(keyOrIndex); v.IsSomething() {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
-				o.WriteString(s)
+				o.WriteString(v.String())
 			}
 			return false
 		})
