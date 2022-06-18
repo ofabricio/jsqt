@@ -120,6 +120,18 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcJoin(q, j)
 	case "iterate":
 		return funcIterate(q, j)
+	case "is-num":
+		return funcIsNum(q, j)
+	case "is-obj":
+		return funcIsObj(q, j)
+	case "is-arr":
+		return funcIsArr(q, j)
+	case "is-str":
+		return funcIsStr(q, j)
+	case "is-bool":
+		return funcIsBool(q, j)
+	case "is-null":
+		return funcIsNull(q, j)
 	case "root":
 		return q.Root
 	case ".":
@@ -311,6 +323,48 @@ func funcIterate(q *Query, j Json) Json {
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
+}
+
+func funcIsNum(q *Query, j Json) Json {
+	if j.IsNumber() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsObj(q *Query, j Json) Json {
+	if j.IsObject() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsArr(q *Query, j Json) Json {
+	if j.IsArray() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsStr(q *Query, j Json) Json {
+	if j.IsString() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsBool(q *Query, j Json) Json {
+	if j.IsBool() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsNull(q *Query, j Json) Json {
+	if j.IsNull() {
+		return j
+	}
+	return New("")
 }
 
 func funcEQ(q *Query, j Json) Json {
@@ -562,7 +616,7 @@ func (j *Json) IsString() bool {
 }
 
 func (j *Json) IsBool() bool {
-	return j.s.EqualByte('t') && j.s.EqualByte('f')
+	return j.s.EqualByte('t') || j.s.EqualByte('f')
 }
 
 func (j *Json) IsNull() bool {

@@ -15,6 +15,25 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// IsNull
+		{give: `3`, when: `(is-null)`, then: ``},
+		{give: `null`, when: `(is-null)`, then: `null`},
+		// IsBool
+		{give: `3`, when: `(is-bool)`, then: ``},
+		{give: `true`, when: `(is-bool)`, then: `true`},
+		{give: `false`, when: `(is-bool)`, then: `false`},
+		// IsStr
+		{give: `3`, when: `(is-str)`, then: ``},
+		{give: `"3"`, when: `(is-str)`, then: `"3"`},
+		// IsArr
+		{give: `3`, when: `(is-arr)`, then: ``},
+		{give: `[]`, when: `(is-arr)`, then: `[]`},
+		// IsObj
+		{give: `3`, when: `(is-obj)`, then: ``},
+		{give: `{}`, when: `(is-obj)`, then: `{}`},
+		// IsNum
+		{give: `"3"`, when: `(is-num)`, then: ``},
+		{give: `3`, when: `(is-num)`, then: `3`},
 		// Ugly / Nice / Pretty.
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5 } ], "c": [] } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5\n            }\n        ],\n        \"c\": []\n    }\n]"},
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5 } ], "c": [] } ]`, when: `(nice)`, then: `[{ "a": 3, "b": [4, { "c": 5 }], "c": [] }]`},
