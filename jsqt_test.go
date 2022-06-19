@@ -16,6 +16,7 @@ func TestGet(t *testing.T) {
 		then string
 	}{
 		// Or / And.
+		{give: `[3,"",4,"5"]`, when: `(collect (is-str) (.))`, then: `["","5"]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (and (>= a 4) (<= a 5)) a)`, then: `[4,5]`},
 		// Entries.
@@ -30,6 +31,44 @@ func TestGet(t *testing.T) {
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (.)))`, then: `{"b":3}`}, // Else.
 		{give: `3`, when: `(if (is-num) (obj b (.)) (raw 3))`, then: `{"b":3}`},              // Then.
 		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (.))`, then: `{"b":3}`},                // Else.
+		// truthy
+		{give: `{}`, when: `(truthy)`, then: ``},
+		{give: `[]`, when: `(truthy)`, then: ``},
+		{give: `0`, when: `(truthy)`, then: ``},
+		{give: `""`, when: `(truthy)`, then: ``},
+		{give: `null`, when: `(truthy)`, then: ``},
+		{give: `[0]`, when: `(truthy)`, then: `[0]`},
+		{give: `3`, when: `(truthy)`, then: `3`},
+		{give: `{"a":3}`, when: `(truthy)`, then: `{"a":3}`},
+		{give: `true`, when: `(truthy)`, then: `true`},
+		// falsy
+		{give: `{}`, when: `(falsy)`, then: `{}`},
+		{give: `[]`, when: `(falsy)`, then: `[]`},
+		{give: `0`, when: `(falsy)`, then: `0`},
+		{give: `""`, when: `(falsy)`, then: `""`},
+		{give: `false`, when: `(falsy)`, then: `false`},
+		{give: `[0]`, when: `(falsy)`, then: ``},
+		{give: `3`, when: `(falsy)`, then: ``},
+		{give: `null`, when: `(falsy)`, then: `null`},
+		// is-empty-obj
+		{give: `{}`, when: `(is-empty-obj)`, then: `{}`},
+		{give: `{"a":3}`, when: `(is-empty-obj)`, then: ``},
+		{give: `[]`, when: `(is-empty-obj)`, then: ``},
+		// is-empty-arr
+		{give: `{}`, when: `(is-empty-arr)`, then: ``},
+		{give: `[0]`, when: `(is-empty-arr)`, then: ``},
+		{give: `[]`, when: `(is-empty-arr)`, then: `[]`},
+		// is-empty
+		{give: `3`, when: `(is-empty)`, then: ``},
+		{give: `{}`, when: `(is-empty)`, then: `{}`},
+		{give: `[]`, when: `(is-empty)`, then: `[]`},
+		{give: `""`, when: `(is-empty)`, then: `""`},
+		// is-empty-str
+		{give: `3`, when: `(is-empty-str)`, then: ``},
+		{give: `""`, when: `(is-empty-str)`, then: `""`},
+		// is-anything
+		{give: `3`, when: `(is-anything)`, then: `3`},
+		{give: `""`, when: `(is-anything)`, then: `""`},
 		// IsNull
 		{give: `3`, when: `(is-null)`, then: ``},
 		{give: `null`, when: `(is-null)`, then: `null`},
@@ -399,6 +438,55 @@ func TestJsonIsEmptyArray(t *testing.T) {
 	for _, tc := range tt {
 		j := New(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmptyArray(), tc.inp)
+	}
+}
+
+func TestJsonIsFalsy(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: `[]`, out: true},
+		{inp: `{}`, out: true},
+		{inp: `""`, out: true},
+		{inp: `false`, out: true},
+		{inp: `null`, out: true},
+		{inp: `0`, out: true},
+		//
+		{inp: `3`, out: false},
+		{inp: `[0]`, out: false},
+		{inp: `{"a":0}`, out: false},
+		{inp: `"a"`, out: false},
+		{inp: `true`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsFalsy(), tc)
+	}
+}
+
+func TestJsonIsTruthy(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `[]`, out: false},
+		{inp: `{}`, out: false},
+		{inp: `""`, out: false},
+		{inp: `false`, out: false},
+		{inp: `null`, out: false},
+		{inp: `0`, out: false},
+		//
+		{inp: `3`, out: true},
+		{inp: `[0]`, out: true},
+		{inp: `{"a":0}`, out: true},
+		{inp: `"a"`, out: true},
+		{inp: `true`, out: true},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsTruthy(), tc)
 	}
 }
 

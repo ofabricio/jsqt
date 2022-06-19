@@ -132,6 +132,20 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcIsBool(q, j)
 	case "is-null":
 		return funcIsNull(q, j)
+	case "is-empty":
+		return funcIsEmpty(q, j)
+	case "is-empty-arr":
+		return funcIsEmptyArr(q, j)
+	case "is-empty-obj":
+		return funcIsEmptyObj(q, j)
+	case "is-empty-str":
+		return funcIsEmptyStr(q, j)
+	case "is-anything":
+		return funcIsAnything(q, j)
+	case "truthy":
+		return funcIsTruthy(q, j)
+	case "falsy":
+		return funcIsFalsy(q, j)
 	case "if":
 		return funcIf(q, j)
 	case "root":
@@ -384,6 +398,55 @@ func funcIsBool(q *Query, j Json) Json {
 
 func funcIsNull(q *Query, j Json) Json {
 	if j.IsNull() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsEmpty(q *Query, j Json) Json {
+	if j.IsEmpty() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsEmptyObj(q *Query, j Json) Json {
+	if j.IsEmptyObject() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsEmptyArr(q *Query, j Json) Json {
+	if j.IsEmptyArray() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsEmptyStr(q *Query, j Json) Json {
+	if j.IsEmptyString() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsTruthy(q *Query, j Json) Json {
+	if j.IsTruthy() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsFalsy(q *Query, j Json) Json {
+	if j.IsFalsy() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsAnything(q *Query, j Json) Json {
+	if j.IsAnything() {
 		return j
 	}
 	return New("")
@@ -726,6 +789,15 @@ func (j Json) IsEmptyArray() bool {
 
 func (j Json) IsEmpty() bool {
 	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString()
+}
+
+func (j Json) IsTruthy() bool {
+	return !j.IsFalsy() && j.String() != ""
+}
+
+func (j Json) IsFalsy() bool {
+	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString() ||
+		j.s.EqualByte('f') || j.IsNull() || j.s.EqualByte('0')
 }
 
 func (j Json) IsAnything() bool {
