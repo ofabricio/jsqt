@@ -140,6 +140,12 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcIsEmptyStr(q, j)
 	case "is-some":
 		return funcIsSome(q, j)
+	case "is-void":
+		return funcIsVoid(q, j)
+	case "is-blank":
+		return funcIsBlank(q, j)
+	case "is-nully":
+		return funcIsNully(q, j)
 	case "truthy":
 		return funcIsTruthy(q, j)
 	case "falsy":
@@ -429,6 +435,27 @@ func funcIsFalsy(q *Query, j Json) Json {
 
 func funcIsSome(q *Query, j Json) Json {
 	if j.IsSome() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsVoid(q *Query, j Json) Json {
+	if j.IsVoid() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsNully(q *Query, j Json) Json {
+	if j.IsNully() {
+		return j
+	}
+	return New("")
+}
+
+func funcIsBlank(q *Query, j Json) Json {
+	if j.IsBlank() {
 		return j
 	}
 	return New("")
