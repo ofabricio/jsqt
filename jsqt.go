@@ -116,8 +116,6 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcOmitempty(q, j)
 	case "merge":
 		return funcMerge(q, j)
-	case "join":
-		return funcJoin(q, j)
 	case "iterate":
 		return funcIterate(q, j)
 	case "is-num":
@@ -323,25 +321,6 @@ func funcMerge(q *Query, j Json) Json {
 	})
 	b.WriteString("}")
 	return New(b.String())
-}
-
-func funcJoin(q *Query, j Json) Json {
-	var o strings.Builder
-	o.WriteString("{")
-	q.ForEach(j, func(sub *Query, item Json) {
-		for !sub.EqualByte(')') {
-			if o.Len() > 1 {
-				o.WriteString(",")
-			}
-			k := sub.ParseArgFunOrKey(item) // Key.
-			v := sub.ParseArgFunOrKey(item) // Value.
-			o.WriteString(k.String())
-			o.WriteString(":")
-			o.WriteString(v.String())
-		}
-	})
-	o.WriteString("}")
-	return New(o.String())
 }
 
 func funcIterate(q *Query, j Json) Json {
