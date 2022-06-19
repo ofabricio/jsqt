@@ -750,7 +750,15 @@ func (j Json) IsString() bool {
 }
 
 func (j Json) IsBool() bool {
-	return j.s.EqualByte('t') || j.s.EqualByte('f')
+	return j.IsTrue() || j.IsFalse()
+}
+
+func (j Json) IsTrue() bool {
+	return j.s.EqualByte('t')
+}
+
+func (j Json) IsFalse() bool {
+	return j.s.EqualByte('f')
 }
 
 func (j Json) IsNull() bool {
@@ -769,8 +777,20 @@ func (j Json) IsEmptyArray() bool {
 	return j.s.MatchByte('[') && j.ws() && j.s.EqualByte(']')
 }
 
+func (j Json) IsVoid() bool {
+	return j.IsEmptyObject() || j.IsEmptyArray()
+}
+
 func (j Json) IsEmpty() bool {
 	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString()
+}
+
+func (j Json) IsBlank() bool {
+	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsNull()
+}
+
+func (j Json) IsNully() bool {
+	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString() || j.IsNull()
 }
 
 func (j Json) IsTruthy() bool {
@@ -779,7 +799,11 @@ func (j Json) IsTruthy() bool {
 
 func (j Json) IsFalsy() bool {
 	return j.IsEmptyObject() || j.IsEmptyArray() || j.IsEmptyString() ||
-		j.s.EqualByte('f') || j.IsNull() || j.s.EqualByte('0')
+		j.IsFalse() || j.IsNull() || j.s.EqualByte('0')
+}
+
+func (j Json) IsSome() bool {
+	return !j.IsNull() && j.String() != ""
 }
 
 func (j Json) IsAnything() bool {

@@ -374,10 +374,12 @@ func TestJsonIsEmpty(t *testing.T) {
 	}{
 		{inp: ``, out: false},
 		{inp: `{}`, out: true},
-		{inp: `{  }`, out: true},
 		{inp: `[]`, out: true},
-		{inp: `[ ]`, out: true},
 		{inp: `""`, out: true},
+		{inp: `null`, out: false},
+		{inp: `0`, out: false},
+		{inp: `false`, out: false},
+		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
 		j := New(tc.inp)
@@ -441,6 +443,7 @@ func TestJsonIsFalsy(t *testing.T) {
 		inp string
 		out bool
 	}{
+		{inp: ``, out: false},
 		{inp: `[]`, out: true},
 		{inp: `{}`, out: true},
 		{inp: `""`, out: true},
@@ -482,6 +485,86 @@ func TestJsonIsTruthy(t *testing.T) {
 	for _, tc := range tt {
 		j := New(tc.inp)
 		assert.Equal(t, tc.out, j.IsTruthy(), tc)
+	}
+}
+
+func TestJsonIsVoid(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `[]`, out: true},
+		{inp: `""`, out: false},
+		{inp: `null`, out: false},
+		{inp: `0`, out: false},
+		{inp: `false`, out: false},
+		{inp: `true`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsVoid(), tc.inp)
+	}
+}
+
+func TestJsonIsBlank(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `[]`, out: true},
+		{inp: `""`, out: false},
+		{inp: `null`, out: true},
+		{inp: `0`, out: false},
+		{inp: `false`, out: false},
+		{inp: `true`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsBlank(), tc.inp)
+	}
+}
+
+func TestJsonIsNully(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `[]`, out: true},
+		{inp: `""`, out: true},
+		{inp: `null`, out: true},
+		{inp: `0`, out: false},
+		{inp: `false`, out: false},
+		{inp: `true`, out: false},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsNully(), tc.inp)
+	}
+}
+
+func TestJsonIsSome(t *testing.T) {
+	tt := []struct {
+		inp string
+		out bool
+	}{
+		{inp: ``, out: false},
+		{inp: `{}`, out: true},
+		{inp: `[]`, out: true},
+		{inp: `""`, out: true},
+		{inp: `null`, out: false},
+		{inp: `0`, out: true},
+		{inp: `false`, out: true},
+		{inp: `true`, out: true},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.IsSome(), tc)
 	}
 }
 
