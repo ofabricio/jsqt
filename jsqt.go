@@ -291,6 +291,9 @@ func funcOmitempty(q *Query, j Json) Json {
 }
 
 func funcSize(q *Query, j Json) Json {
+	if j.IsString() {
+		return New(strconv.Itoa(len(j.String()) - 2))
+	}
 	c := 0
 	j.ForEach(func(i string, v Json) bool {
 		c++
