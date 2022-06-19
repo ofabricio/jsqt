@@ -31,6 +31,9 @@ func TestGet(t *testing.T) {
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (.)))`, then: `{"b":3}`}, // Else.
 		{give: `3`, when: `(if (is-num) (obj b (.)) (raw 3))`, then: `{"b":3}`},              // Then.
 		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (.))`, then: `{"b":3}`},                // Else.
+		// is-anything
+		{give: `3`, when: `(is-anything)`, then: `3`},
+		{give: `""`, when: `(is-anything)`, then: `""`},
 		// truthy
 		{give: `{}`, when: `(truthy)`, then: ``},
 		{give: `[]`, when: `(truthy)`, then: ``},
@@ -58,34 +61,31 @@ func TestGet(t *testing.T) {
 		{give: `{}`, when: `(is-empty-arr)`, then: ``},
 		{give: `[0]`, when: `(is-empty-arr)`, then: ``},
 		{give: `[]`, when: `(is-empty-arr)`, then: `[]`},
+		// is-empty-str
+		{give: `3`, when: `(is-empty-str)`, then: ``},
+		{give: `""`, when: `(is-empty-str)`, then: `""`},
 		// is-empty
 		{give: `3`, when: `(is-empty)`, then: ``},
 		{give: `{}`, when: `(is-empty)`, then: `{}`},
 		{give: `[]`, when: `(is-empty)`, then: `[]`},
 		{give: `""`, when: `(is-empty)`, then: `""`},
-		// is-empty-str
-		{give: `3`, when: `(is-empty-str)`, then: ``},
-		{give: `""`, when: `(is-empty-str)`, then: `""`},
-		// is-anything
-		{give: `3`, when: `(is-anything)`, then: `3`},
-		{give: `""`, when: `(is-anything)`, then: `""`},
-		// IsNull
+		// is-null
 		{give: `3`, when: `(is-null)`, then: ``},
 		{give: `null`, when: `(is-null)`, then: `null`},
-		// IsBool
+		// is-bool
 		{give: `3`, when: `(is-bool)`, then: ``},
 		{give: `true`, when: `(is-bool)`, then: `true`},
 		{give: `false`, when: `(is-bool)`, then: `false`},
-		// IsStr
+		// is-str
 		{give: `3`, when: `(is-str)`, then: ``},
 		{give: `"3"`, when: `(is-str)`, then: `"3"`},
-		// IsArr
+		// is-arr
 		{give: `3`, when: `(is-arr)`, then: ``},
 		{give: `[]`, when: `(is-arr)`, then: `[]`},
-		// IsObj
+		// is-obj
 		{give: `3`, when: `(is-obj)`, then: ``},
 		{give: `{}`, when: `(is-obj)`, then: `{}`},
-		// IsNum
+		// is-num
 		{give: `"3"`, when: `(is-num)`, then: ``},
 		{give: `3`, when: `(is-num)`, then: `3`},
 		// Ugly / Nice / Pretty.
