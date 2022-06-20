@@ -129,8 +129,6 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcSize(q, j)
 	case "default":
 		return funcDefault(q, j)
-	case "omitempty":
-		return funcOmitempty(q, j)
 	case "merge":
 		return funcMerge(q, j)
 	case "iterate":
@@ -306,13 +304,6 @@ func funcDefault(q *Query, j Json) Json {
 	d := q.ParseArgRaw(j) // Default value.
 	if j.String() == "" {
 		return d
-	}
-	return j
-}
-
-func funcOmitempty(q *Query, j Json) Json {
-	if j.IsEmptyObject() || j.IsEmptyArray() {
-		return New("")
 	}
 	return j
 }

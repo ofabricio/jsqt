@@ -123,10 +123,6 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(iterate num2str)`, then: `{"a":"3","b":"4"}`},
 		{give: `[3,4]`, when: `(iterate num2str)`, then: `["3","4"]`},
 		{give: `3`, when: `(iterate num2str)`, then: `"3"`},
-		// OmitEmpty.
-		{give: `{"a":[[3],[]]}`, when: `(collect a (omitempty))`, then: `[[3]]`},
-		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(collect a (obj x b) (omitempty))`, then: `[{"x":3}]`},
-		{give: `{"a":{}}`, when: `(get a (omitempty))`, then: ``},
 		// Default.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
 		// Size.
