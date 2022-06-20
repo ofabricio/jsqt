@@ -205,6 +205,10 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcNice(q, j)
 	case "pretty":
 		return funcPretty(q, j)
+	case "to-json":
+		return funcToJson(q, j)
+	case "to-str":
+		return funcToStr(q, j)
 	default:
 		return New("")
 	}
@@ -700,6 +704,15 @@ func funcNice(q *Query, j Json) Json {
 
 func funcPretty(q *Query, j Json) Json {
 	return funcPrettyInternal(j, 0)
+}
+
+func funcToJson(q *Query, j Json) Json {
+	v, _ := strconv.Unquote(j.String())
+	return New(v)
+}
+
+func funcToStr(q *Query, j Json) Json {
+	return New(strconv.Quote(j.Str()))
 }
 
 func funcPrettyInternal(j Json, depth int) Json {

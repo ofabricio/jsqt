@@ -15,6 +15,17 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// to-str
+		{give: `3`, when: `(to-str)`, then: `"3"`},
+		{give: `-3`, when: `(to-str)`, then: `"-3"`},
+		{give: `[]`, when: `(to-str)`, then: `"[]"`},
+		{give: `{}`, when: `(to-str)`, then: `"{}"`},
+		{give: `""`, when: `(to-str)`, then: `""`},
+		{give: `"a"`, when: `(get (to-str) (to-str))`, then: `"a"`},
+		{give: `"a\"b\"c"`, when: `(to-str)`, then: `"a\"b\"c"`},
+		{give: `{"a":[{"b":3},4,"5"]}`, when: `(to-str)`, then: `"{\"a\":[{\"b\":3},4,\"5\"]}"`},
+		// to-json
+		{give: `"{\"a\":[{\"b\":3},4,\"5\"]}"`, when: `(to-json)`, then: `{"a":[{"b":3},4,"5"]}`},
 		// Bool.
 		{give: `3`, when: `(get (is-num) (bool))`, then: `true`},
 		{give: `{}`, when: `(get (is-num) (bool))`, then: `false`},
