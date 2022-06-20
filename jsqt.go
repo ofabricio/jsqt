@@ -280,7 +280,7 @@ func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
 	for !q.EqualByte(')') {
-		if j.IsArray() {
+		if j.IsArray() && !j.IsEmptyArray() {
 			q.ForEach(j, func(sub *Query, item Json) {
 				for !sub.EqualByte(')') {
 					item = sub.ParseArgFunOrKey(item)

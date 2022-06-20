@@ -136,6 +136,7 @@ func TestGet(t *testing.T) {
 			when: `(collect a b c (obj x d e (collect e f g h i j (flatten) k l)))`,
 			then: `[{"x":"one","e":["hi"]},{"x":"two","e":[]}]`,
 		},
+		{give: `[]`, when: `(collect a)`, then: `[]`},
 		{give: `{"a":[{"b":{"c":3}},{"b":{}}]}`, when: `(collect a b c)`, then: `[3]`},
 		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(collect a b)`, then: `[3,4]`},
 		{give: `[{"a":3},{"b":4},{"a":5}]`, when: `(collect a)`, then: `[3,5]`},
