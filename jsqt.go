@@ -350,7 +350,7 @@ func funcMerge(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
-	m := q.TokenAnything() // Map function.
+	m := q.ParseArgRaw(j)
 	_ = m
 	// TODO: create functions map.
 	return New(j.Iterate(num2str))
