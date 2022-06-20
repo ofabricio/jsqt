@@ -27,10 +27,10 @@ type Query struct {
 }
 
 func (q *Query) Parse(j Json) Json {
-	return q.ParseFunc(j)
+	return q.ParseFun(j)
 }
 
-func (q *Query) ParseFunc(j Json) Json {
+func (q *Query) ParseFun(j Json) Json {
 	if q.MatchByte('(') {
 		if fname := q.TokenAnything(); fname != "" {
 			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
@@ -43,28 +43,7 @@ func (q *Query) ParseFunc(j Json) Json {
 	return New("")
 }
 
-func (q *Query) ParseArgFunOrKey(j Json) Json {
-	if q.MatchByte(' ') {
-		if q.EqualByte('(') {
-			return q.ParseFunc(j)
-		}
-		return q.ParseArgKey(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgFunOrRaw(j Json) Json {
-	if q.MatchByte(' ') {
-		if q.EqualByte('(') {
-			return q.ParseFunc(j)
-		}
-		return q.ParseArgRaw(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgKey(j Json) Json {
-	q.MatchByte(' ')
+func (q *Query) ParseKey(j Json) Json {
 	key := ""
 	m := q.Mark()
 	if q.UtilMatchString('"') {
@@ -76,16 +55,56 @@ func (q *Query) ParseArgKey(j Json) Json {
 	return j.Get(key)
 }
 
-func (q *Query) ParseArgRaw(j Json) Json {
-	q.MatchByte(' ')
-	v := ""
+func (q *Query) ParseRaw(j Json) Json {
+	raw := ""
 	m := q.Mark()
 	if q.UtilMatchString('"') {
-		v = q.Token(m)
+		raw = q.Token(m)
 	} else if q.MatchUntilAnyByte(' ', ')') { // Anything.
-		v = q.Token(m)
+		raw = q.Token(m)
 	}
-	return New(v)
+	return New(raw)
+}
+
+func (q *Query) ParseArgFunOrKey(j Json) Json {
+	if q.MatchByte(' ') {
+		if q.EqualByte('(') {
+			return q.ParseFun(j)
+		}
+		return q.ParseKey(j)
+	}
+	return New("")
+}
+
+func (q *Query) ParseArgFunOrRaw(j Json) Json {
+	if q.MatchByte(' ') {
+		if q.EqualByte('(') {
+			return q.ParseFun(j)
+		}
+		return q.ParseRaw(j)
+	}
+	return New("")
+}
+
+func (q *Query) ParseArgFun(j Json) Json {
+	if q.MatchByte(' ') {
+		return q.ParseFun(j)
+	}
+	return New("")
+}
+
+func (q *Query) ParseArgKey(j Json) Json {
+	if q.MatchByte(' ') {
+		return q.ParseKey(j)
+	}
+	return New("")
+}
+
+func (q *Query) ParseArgRaw(j Json) Json {
+	if q.MatchByte(' ') {
+		return q.ParseRaw(j)
+	}
+	return New("")
 }
 
 func (q *Query) CallFunc(fname string, j Json) Json {
