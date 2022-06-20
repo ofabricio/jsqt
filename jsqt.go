@@ -46,10 +46,7 @@ func (q *Query) ParseFunc(j Json) Json {
 func (q *Query) ParseArgFunOrKey(j Json) Json {
 	if q.MatchByte(' ') {
 		if q.EqualByte('(') {
-			if v := q.ParseFunc(j); v.IsAnything() {
-				return v
-			}
-			return New("")
+			return q.ParseFunc(j)
 		}
 		return q.ParseArgKey(j)
 	}
@@ -59,10 +56,7 @@ func (q *Query) ParseArgFunOrKey(j Json) Json {
 func (q *Query) ParseArgFunOrRaw(j Json) Json {
 	if q.MatchByte(' ') {
 		if q.EqualByte('(') {
-			if v := q.ParseFunc(j); v.IsAnything() {
-				return v
-			}
-			return New("")
+			return q.ParseFunc(j)
 		}
 		return q.ParseArgRaw(j)
 	}
