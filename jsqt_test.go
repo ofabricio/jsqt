@@ -15,8 +15,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
-		// Or / And.
-		{give: `[3,"",4,"5"]`, when: `(collect (is-str) (.))`, then: `["","5"]`},
+		// Or / And / Not.
+		{give: `[3,"",4,"5"]`, when: `(collect (not (is-str)))`, then: `[3,4]`},
+		{give: `[3,"",4,"5"]`, when: `(collect (is-str))`, then: `["","5"]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (and (>= a 4) (<= a 5)) a)`, then: `[4,5]`},
 		// Entries.

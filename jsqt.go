@@ -172,6 +172,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcOr(q, j)
 	case "and":
 		return funcAnd(q, j)
+	case "not":
+		return funcNot(q, j)
 	case "debug":
 		return funcDebug(q, j)
 	case "keys":
@@ -531,6 +533,14 @@ func funcAnd(q *Query, j Json) Json {
 		return j
 	}
 	return New("")
+}
+
+func funcNot(q *Query, j Json) Json {
+	a := q.ParseArgFunOrKey(j)
+	if a.IsAnything() {
+		return New("")
+	}
+	return j
 }
 
 func funcKeys(q *Query, j Json) Json {
