@@ -191,6 +191,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcAnd(q, j)
 	case "not":
 		return funcNot(q, j)
+	case "bool":
+		return funcBool(q, j)
 	case "debug":
 		return funcDebug(q, j)
 	case "keys":
@@ -558,6 +560,13 @@ func funcNot(q *Query, j Json) Json {
 		return New("")
 	}
 	return j
+}
+
+func funcBool(q *Query, j Json) Json {
+	if j.IsAnything() {
+		return New("true")
+	}
+	return New("false")
 }
 
 func funcKeys(q *Query, j Json) Json {

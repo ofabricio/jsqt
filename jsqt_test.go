@@ -15,6 +15,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Bool.
+		{give: `3`, when: `(get (is-num) (bool))`, then: `true`},
+		{give: `{}`, when: `(get (is-num) (bool))`, then: `false`},
 		// Or / And / Not.
 		{give: `[3,"",4,"5"]`, when: `(collect (not (is-str)))`, then: `[3,4]`},
 		{give: `[3,"",4,"5"]`, when: `(collect (is-str))`, then: `["","5"]`},
