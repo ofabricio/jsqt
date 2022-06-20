@@ -771,10 +771,11 @@ func (j Json) String() string {
 // Str returns a string value.
 // Example: "Hello" -> Hello.
 func (j Json) Str() string {
-	if v := j.String(); len(v) >= 2 {
-		return v[1 : len(v)-1]
+	v := j.String()
+	if j.IsString() {
+		v, _ = strconv.Unquote(v)
 	}
-	return ""
+	return v
 }
 
 // Int returns an int value.

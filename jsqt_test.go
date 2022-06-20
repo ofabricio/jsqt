@@ -326,7 +326,7 @@ func TestJsonStr(t *testing.T) {
 		{inp: ``, out: ``},
 		{inp: `""`, out: ``},
 		{inp: `"a"`, out: `a`},
-		{inp: `""a""`, out: `"a"`},
+		{inp: `"\"a\""`, out: `"a"`},
 	}
 	for _, tc := range tt {
 		j := New(tc.inp)
