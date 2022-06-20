@@ -300,6 +300,11 @@ func funcCollect(q *Query, j Json) Json {
 	return New(o.String())
 }
 
+func funcFlatten(q *Query, j Json) Json {
+	v := j.String()
+	return New(v[1 : len(v)-1])
+}
+
 func funcDefault(q *Query, j Json) Json {
 	d := q.ParseArgRaw(j) // Default value.
 	if j.String() == "" {
@@ -360,6 +365,8 @@ func funcIf(q *Query, j Json) Json {
 	}
 	return elze
 }
+
+// #region funcIS
 
 func funcIsNum(q *Query, j Json) Json {
 	if j.IsNumber() {
@@ -473,6 +480,10 @@ func funcIsBlank(q *Query, j Json) Json {
 	return New("")
 }
 
+// #endregion funcIS
+
+// #region Filters
+
 func funcEQ(q *Query, j Json) Json {
 	f := q.ParseArgFunOrKey(j) // Field.
 	v := q.ParseArgFunOrRaw(j) // Value.
@@ -526,6 +537,8 @@ func funcLT(q *Query, j Json) Json {
 	}
 	return New("")
 }
+
+// #endregion Filters
 
 func funcOr(q *Query, j Json) Json {
 	a := q.ParseArgFun(j)
@@ -738,11 +751,6 @@ func funcPrettyInternal(j Json, depth int) Json {
 		return j
 	}
 	return New(o.String())
-}
-
-func funcFlatten(q *Query, j Json) Json {
-	v := j.String()
-	return New(v[1 : len(v)-1])
 }
 
 // #endregion Functions
