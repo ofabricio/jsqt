@@ -531,8 +531,8 @@ func funcLT(q *Query, j Json) Json {
 }
 
 func funcOr(q *Query, j Json) Json {
-	a := q.ParseArgFunOrKey(j)
-	b := q.ParseArgFunOrRaw(j)
+	a := q.ParseArgFun(j)
+	b := q.ParseArgFun(j)
 	if a.IsAnything() || b.IsAnything() {
 		return j
 	}
@@ -540,8 +540,8 @@ func funcOr(q *Query, j Json) Json {
 }
 
 func funcAnd(q *Query, j Json) Json {
-	a := q.ParseArgFunOrKey(j)
-	b := q.ParseArgFunOrRaw(j)
+	a := q.ParseArgFun(j)
+	b := q.ParseArgFun(j)
 	if a.IsAnything() && b.IsAnything() {
 		return j
 	}
@@ -549,7 +549,7 @@ func funcAnd(q *Query, j Json) Json {
 }
 
 func funcNot(q *Query, j Json) Json {
-	a := q.ParseArgFunOrKey(j)
+	a := q.ParseArgFun(j)
 	if a.IsAnything() {
 		return New("")
 	}
