@@ -130,10 +130,12 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
 		// Iterate.
-		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,7]}`, when: `(iterate num2str)`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6","7"]}`},
-		{give: `{"a":3,"b":4}`, when: `(iterate num2str)`, then: `{"a":"3","b":"4"}`},
-		{give: `[3,4]`, when: `(iterate num2str)`, then: `["3","4"]`},
-		{give: `3`, when: `(iterate num2str)`, then: `"3"`},
+		{give: `{"a":"aaa","b":"bbb"}`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
+		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,true]}`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{"a":3,"b":4}`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.))))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.))))`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate 0 (get 1 (to-str)))`, then: `"3"`},
+		{give: `3`, when: `(iterate 0 1)`, then: `3`},
 		// Default.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
 		// Size.
@@ -272,11 +274,12 @@ func TestJsonCollect(t *testing.T) {
 func ExampleJson_Iterate() {
 
 	j := New(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}},"d":1}`)
-	v := j.Iterate(func(k string, v Json) (string, string) {
+	v := j.Iterate(func(k, v Json) (Json, Json) {
+		k = New(strings.ToUpper(k.String()))
 		if v.IsNumber() {
-			return strings.ToUpper(k), `"` + v.String() + `"`
+			return k, v.ToString()
 		}
-		return strings.ToUpper(k), v.String()
+		return k, v
 	})
 
 	fmt.Println(v)

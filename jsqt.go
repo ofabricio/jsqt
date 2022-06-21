@@ -230,6 +230,16 @@ func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
 	})
 }
 
+func (q *Query) ForEachKeyVal(j Json, f func(sub *Query, k string, v Json)) {
+	ini := *q
+	j.ForEachKeyVal(func(k string, v Json) bool {
+		end := ini
+		f(&end, k, v)
+		*q = end
+		return false
+	})
+}
+
 // #region Functions
 
 func funcRaw(q *Query, j Json) Json {
@@ -354,10 +364,14 @@ func funcMerge(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
-	m := q.ParseArgRaw(j)
-	_ = m
-	// TODO: create functions map.
-	return New(j.Iterate(num2str))
+	ini := *q
+	return j.Iterate(func(k Json, v Json) (Json, Json) {
+		arr := New(`[` + k.String() + "," + v.String() + `]`)
+		i := ini
+		mk, mv := i.ParseArgFunOrKey(arr), i.ParseArgFunOrKey(arr)
+		*q = i
+		return mk, mv
+	})
 }
 
 func funcIf(q *Query, j Json) Json {
@@ -781,6 +795,11 @@ func (j Json) String() string {
 	return j.s.String()
 }
 
+// ToString converts a JSON value to a JSON string.
+func (j Json) ToString() Json {
+	return New(strconv.Quote(j.String()))
+}
+
 // Str returns a string value.
 // Example: "Hello" -> Hello.
 func (j Json) Str() string {
@@ -887,41 +906,44 @@ func (j Json) IsAnything() bool {
 }
 
 // Iterate iterates over a valid Json.
-func (j *Json) Iterate(m func(string, Json) (string, string)) string {
+func (j *Json) Iterate(m func(Json, Json) (Json, Json)) Json {
+	_, mv := j.iterateInternal(New("null"), m)
+	return mv
+}
+
+func (j *Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, Json) {
+	mk, mv := m(k, *j)
 	var o strings.Builder
-	if j.IsObject() {
+	if mv.IsObject() {
 		o.WriteString("{")
-		j.ForEachKeyVal(func(k string, v Json) bool {
+		mv.ForEachKeyVal(func(k string, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			nk, _ := m(k, v)
-			o.WriteString(`"`)
-			o.WriteString(nk)
-			o.WriteString(`":`)
-			o.WriteString(v.Iterate(m))
+			sk, sv := v.iterateInternal(New(`"`+k+`"`), m)
+			o.WriteString(sk.String())
+			o.WriteString(`:`)
+			o.WriteString(sv.String())
 			return false
 		})
 		o.WriteString("}")
-		return o.String()
-	}
-	if j.IsArray() {
+		mv = New(o.String())
+	} else if mv.IsArray() {
 		o.WriteString("[")
-		j.ForEach(func(i string, v Json) bool {
+		mv.ForEach(func(i string, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			o.WriteString(v.Iterate(m))
+			o.WriteString(v.Iterate(m).String())
 			return false
 		})
 		o.WriteString("]")
-		return o.String()
+		mv = New(o.String())
 	}
-	_, nv := m("", *j)
-	return nv
+	return mk, mv
 }
 
-func (j *Json) Get(keyOrIndex string) (r Json) {
+func (j Json) Get(keyOrIndex string) (r Json) {
 	f := func(k string, v Json) bool {
 		if k == keyOrIndex {
 			r = v
