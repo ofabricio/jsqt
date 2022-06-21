@@ -222,7 +222,7 @@ func (q *Query) TokenAnything() string {
 
 func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
 	ini := *q
-	j.ForEach(func(i string, item Json) bool {
+	j.ForEach(func(i, item Json) bool {
 		end := ini
 		f(&end, item)
 		*q = end
@@ -230,9 +230,9 @@ func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
 	})
 }
 
-func (q *Query) ForEachKeyVal(j Json, f func(sub *Query, k string, v Json)) {
+func (q *Query) ForEachKeyVal(j Json, f func(sub *Query, k, v Json)) {
 	ini := *q
-	j.ForEachKeyVal(func(k string, v Json) bool {
+	j.ForEachKeyVal(func(k, v Json) bool {
 		end := ini
 		f(&end, k, v)
 		*q = end
@@ -332,7 +332,7 @@ func funcSize(q *Query, j Json) Json {
 		return New(strconv.Itoa(len(j.String()) - 2))
 	}
 	c := 0
-	j.ForEach(func(i string, v Json) bool {
+	j.ForEach(func(i, v Json) bool {
 		c++
 		return false
 	})
@@ -343,18 +343,17 @@ func funcMerge(q *Query, j Json) Json {
 	done := make(map[string]bool)
 	var b strings.Builder
 	b.WriteString("{")
-	j.ForEach(func(i string, v Json) bool {
-		v.ForEachKeyVal(func(k string, v Json) bool {
-			if !done[k] {
+	j.ForEach(func(i, v Json) bool {
+		v.ForEachKeyVal(func(k, v Json) bool {
+			if !done[k.String()] {
 				if b.Len() > 1 {
 					b.WriteString(",")
 				}
-				b.WriteString(`"`)
-				b.WriteString(k)
-				b.WriteString(`":`)
+				b.WriteString(k.String())
+				b.WriteString(`:`)
 				b.WriteString(v.String())
 			}
-			done[k] = true
+			done[k.String()] = true
 			return false
 		})
 		return false
@@ -365,7 +364,7 @@ func funcMerge(q *Query, j Json) Json {
 
 func funcIterate(q *Query, j Json) Json {
 	ini := *q
-	return j.Iterate(func(k Json, v Json) (Json, Json) {
+	return j.Iterate(func(k, v Json) (Json, Json) {
 		arr := New(`[` + k.String() + "," + v.String() + `]`)
 		i := ini
 		mk, mv := i.ParseArgFunOrKey(arr), i.ParseArgFunOrKey(arr)
@@ -594,13 +593,11 @@ func funcBool(q *Query, j Json) Json {
 func funcKeys(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
-	j.ForEachKeyVal(func(k string, v Json) bool {
+	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
-		o.WriteString(`"`)
-		o.WriteString(k)
-		o.WriteString(`"`)
+		o.WriteString(k.String())
 		return false
 	})
 	o.WriteString("]")
@@ -610,7 +607,7 @@ func funcKeys(q *Query, j Json) Json {
 func funcValues(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
-	j.ForEachKeyVal(func(k string, v Json) bool {
+	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
@@ -624,14 +621,13 @@ func funcValues(q *Query, j Json) Json {
 func funcEntries(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
-	j.ForEachKeyVal(func(k string, v Json) bool {
+	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
 		o.WriteString("[")
-		o.WriteString(`"`)
-		o.WriteString(k)
-		o.WriteString(`",`)
+		o.WriteString(k.String())
+		o.WriteString(`,`)
 		o.WriteString(v.String())
 		o.WriteString("]")
 		return false
@@ -653,20 +649,19 @@ func funcUgly(q *Query, j Json) Json {
 	var o strings.Builder
 	if j.IsObject() {
 		o.WriteString("{")
-		j.ForEachKeyVal(func(k string, v Json) bool {
+		j.ForEachKeyVal(func(k, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			o.WriteString(`"`)
-			o.WriteString(k)
-			o.WriteString(`":`)
+			o.WriteString(k.String())
+			o.WriteString(`:`)
 			o.WriteString(funcUgly(q, v).String())
 			return false
 		})
 		o.WriteString("}")
 	} else if j.IsArray() {
 		o.WriteString("[")
-		j.ForEach(func(i string, v Json) bool {
+		j.ForEach(func(i, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -685,14 +680,14 @@ func funcNice(q *Query, j Json) Json {
 	if j.IsObject() {
 		o.WriteString("{")
 		empty := true
-		j.ForEachKeyVal(func(k string, v Json) bool {
+		j.ForEachKeyVal(func(k, v Json) bool {
 			empty = false
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			o.WriteString(` "`)
-			o.WriteString(k)
-			o.WriteString(`": `)
+			o.WriteString(` `)
+			o.WriteString(k.String())
+			o.WriteString(`: `)
 			o.WriteString(funcNice(q, v).String())
 			return false
 		})
@@ -702,7 +697,7 @@ func funcNice(q *Query, j Json) Json {
 		o.WriteString("}")
 	} else if j.IsArray() {
 		o.WriteString("[")
-		j.ForEach(func(i string, v Json) bool {
+		j.ForEach(func(i, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(", ")
 			}
@@ -736,16 +731,15 @@ func funcPrettyInternal(j Json, depth int) Json {
 		pad0 := pad1[:len(pad1)-4]
 		o.WriteString("{")
 		empty := true
-		j.ForEachKeyVal(func(k string, v Json) bool {
+		j.ForEachKeyVal(func(k, v Json) bool {
 			empty = false
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
 			o.WriteString("\n")
 			o.WriteString(pad1)
-			o.WriteString(`"`)
-			o.WriteString(k)
-			o.WriteString(`": `)
+			o.WriteString(k.String())
+			o.WriteString(`: `)
 			o.WriteString(funcPrettyInternal(v, depth+1).String())
 			return false
 		})
@@ -759,7 +753,7 @@ func funcPrettyInternal(j Json, depth int) Json {
 		pad0 := pad1[:len(pad1)-4]
 		o.WriteString("[")
 		empty := true
-		j.ForEach(func(i string, v Json) bool {
+		j.ForEach(func(i, v Json) bool {
 			empty = false
 			if o.Len() > 1 {
 				o.WriteString(",")
@@ -806,6 +800,16 @@ func (j Json) Str() string {
 	v := j.String()
 	if j.IsString() {
 		v, _ = strconv.Unquote(v)
+	}
+	return v
+}
+
+// TrimKey removes the quotes from an object key.
+// Example: "name" -> name.
+func (j Json) TrimKey() string {
+	v := j.String()
+	if j.IsString() {
+		return v[1 : len(v)-1]
 	}
 	return v
 }
@@ -916,11 +920,11 @@ func (j *Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, J
 	var o strings.Builder
 	if mv.IsObject() {
 		o.WriteString("{")
-		mv.ForEachKeyVal(func(k string, v Json) bool {
+		mv.ForEachKeyVal(func(k, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			sk, sv := v.iterateInternal(New(`"`+k+`"`), m)
+			sk, sv := v.iterateInternal(k, m)
 			o.WriteString(sk.String())
 			o.WriteString(`:`)
 			o.WriteString(sv.String())
@@ -930,7 +934,7 @@ func (j *Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, J
 		mv = New(o.String())
 	} else if mv.IsArray() {
 		o.WriteString("[")
-		mv.ForEach(func(i string, v Json) bool {
+		mv.ForEach(func(i, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -944,8 +948,8 @@ func (j *Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, J
 }
 
 func (j Json) Get(keyOrIndex string) (r Json) {
-	f := func(k string, v Json) bool {
-		if k == keyOrIndex {
+	f := func(k, v Json) bool {
+		if k.TrimKey() == keyOrIndex {
 			r = v
 			return true
 		}
@@ -960,7 +964,7 @@ func (j *Json) Collect(keyOrIndex string) Json {
 	if j.IsArray() && !(keyOrIndex[0] >= '0' && keyOrIndex[0] <= '9') {
 		var o strings.Builder
 		o.WriteString("[")
-		j.ForEach(func(i string, v Json) bool {
+		j.ForEach(func(i, v Json) bool {
 			if v = v.Collect(keyOrIndex); v.IsAnything() {
 				if o.Len() > 1 {
 					o.WriteString(",")
@@ -975,24 +979,24 @@ func (j *Json) Collect(keyOrIndex string) Json {
 	return j.Get(keyOrIndex)
 }
 
-func (j *Json) ForEachKeyVal(f func(string, Json) bool) {
+func (j *Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
 		for j.ws() && !j.s.MatchByte('}') {
 			k, _, _, _ := j.s.TokenFor(j.matchString), j.ws(), j.s.MatchByte(':'), j.ws()
 			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
-			if f(k[1:len(k)-1], New(v)) {
+			if f(New(k), New(v)) {
 				return
 			}
 		}
 	}
 }
 
-func (j *Json) ForEach(f func(string, Json) bool) {
+func (j *Json) ForEach(f func(k, v Json) bool) {
 	if j.s.MatchByte('[') {
 		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
 			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
-			if f(k, New(v)) {
+			if f(New(k), New(v)) {
 				return
 			}
 		}
@@ -1026,10 +1030,3 @@ func (j *Json) ws() bool {
 }
 
 // #endregion Json
-
-func num2str(k string, v Json) (string, string) {
-	if v.IsNumber() {
-		return k, `"` + v.String() + `"`
-	}
-	return k, v.String()
-}

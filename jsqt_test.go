@@ -302,8 +302,8 @@ func TestJsonForEachKeyVal(t *testing.T) {
 	for _, tc := range tt {
 		var r []string
 		j := New(tc.inp)
-		j.ForEachKeyVal(func(k string, v Json) bool {
-			r = append(r, k, v.String())
+		j.ForEachKeyVal(func(k, v Json) bool {
+			r = append(r, k.Str(), v.String())
 			return false
 		})
 		assert.Equal(t, tc.out, r, tc.inp)
@@ -324,8 +324,8 @@ func TestJsonForEach(t *testing.T) {
 	for _, tc := range tt {
 		var r []string
 		j := New(tc.inp)
-		j.ForEach(func(k string, v Json) bool {
-			r = append(r, k, v.String())
+		j.ForEach(func(i, v Json) bool {
+			r = append(r, i.String(), v.String())
 			return false
 		})
 		assert.Equal(t, tc.out, r, tc.inp)
