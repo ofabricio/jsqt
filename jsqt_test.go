@@ -245,6 +245,17 @@ func TestJsonGet(t *testing.T) {
 	}
 }
 
+func TestJsonGet_Order(t *testing.T) {
+
+	j := New(`{"a":3,"b":4}`)
+	assert.Equal(t, "4", j.Get("b").String())
+	assert.Equal(t, "3", j.Get("a").String())
+
+	j = New(`[3,4]`)
+	assert.Equal(t, "4", j.Get("1").String())
+	assert.Equal(t, "3", j.Get("0").String())
+}
+
 func TestJsonCollect(t *testing.T) {
 
 	tt := []struct {
