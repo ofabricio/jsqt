@@ -695,13 +695,13 @@ func (j Json) IsAnything() bool {
 }
 
 // Iterate iterates over a valid Json.
-func (j *Json) Iterate(m func(Json, Json) (Json, Json)) Json {
+func (j Json) Iterate(m func(Json, Json) (Json, Json)) Json {
 	_, mv := j.iterateInternal(New("null"), m)
 	return mv
 }
 
-func (j *Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, Json) {
-	mk, mv := m(k, *j)
+func (j Json) iterateInternal(k Json, m func(Json, Json) (Json, Json)) (Json, Json) {
+	mk, mv := m(k, j)
 	var o strings.Builder
 	if mv.IsObject() {
 		o.WriteString("{")
