@@ -118,9 +118,8 @@ func TestGet(t *testing.T) {
 		// is-num
 		{give: `"3"`, when: `(is-num)`, then: ``},
 		{give: `3`, when: `(is-num)`, then: `3`},
-		// Ugly / Nice / Pretty.
+		// Ugly / Pretty.
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5,\n                \"d\": \"e f\"\n            }\n        ],\n        \"c\": [],\n        \"d\": {}\n    }\n]"},
-		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(nice)`, then: `[{ "a": 3, "b": [4, { "c": 5, "d": "e f" }], "c": [], "d": {} }]`},
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(ugly)`, then: `[{"a":3,"b":[4,{"c":5,"d":"e f"}],"c":[],"d":{}}]`},
 		// Filters.
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},

@@ -201,8 +201,6 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return j.Entries()
 	case "ugly":
 		return j.Uglify()
-	case "nice":
-		return j.Nicify()
 	case "pretty":
 		return j.Prettify()
 	case "to-json":
@@ -921,64 +919,6 @@ func (j Json) Uglify() Json {
 				}
 			} else {
 				x.WriteByte(s[i])
-			}
-		}
-	}
-	return New(x.String())
-}
-
-func (j Json) Nicify() Json {
-	ss := j.String()
-	var x strings.Builder
-	x.Grow(len(ss) << 1)
-top:
-	for i := 0; i < len(ss); i++ {
-		if ss[i] > ' ' {
-			switch ss[i] {
-			case '"':
-				ini := i
-				for i = i + 1; i < len(ss); i++ {
-					if ss[i] == '"' && ss[i-1] != '\\' {
-						x.WriteString(ss[ini : i+1])
-						break
-					}
-				}
-			case ',':
-				x.WriteString(", ")
-			case '{':
-				// Check for empty object.
-				for j := i + 1; j < len(ss); j++ {
-					if ss[j] > ' ' {
-						if ss[j] == '}' {
-							i = j
-							x.WriteString("{}")
-							continue top
-						}
-						break
-					}
-				}
-				x.WriteString("{ ")
-			case '}':
-				x.WriteString(" }")
-			case '[':
-				// Check for empty array.
-				for j := i + 1; j < len(ss); j++ {
-					if ss[j] > ' ' {
-						if ss[j] == ']' {
-							i = j
-							x.WriteString("[]")
-							continue top
-						}
-						break
-					}
-				}
-				x.WriteString("[")
-			case ']':
-				x.WriteString("]")
-			case ':':
-				x.WriteString(": ")
-			default:
-				x.WriteByte(ss[i])
 			}
 		}
 	}
