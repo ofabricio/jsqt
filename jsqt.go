@@ -747,7 +747,7 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 	return r
 }
 
-func (j *Json) Collect(keyOrIndex string) Json {
+func (j Json) Collect(keyOrIndex string) Json {
 	if j.IsArray() && !(keyOrIndex[0] >= '0' && keyOrIndex[0] <= '9') {
 		var o strings.Builder
 		o.WriteString("[")
@@ -766,7 +766,7 @@ func (j *Json) Collect(keyOrIndex string) Json {
 	return j.Get(keyOrIndex)
 }
 
-func (j *Json) ForEachKeyVal(f func(k, v Json) bool) {
+func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
 		for j.ws() && !j.s.MatchByte('}') {
 			k, _, _, _ := j.s.TokenFor(j.matchString), j.ws(), j.s.MatchByte(':'), j.ws()
@@ -778,7 +778,7 @@ func (j *Json) ForEachKeyVal(f func(k, v Json) bool) {
 	}
 }
 
-func (j *Json) ForEach(f func(k, v Json) bool) {
+func (j Json) ForEach(f func(k, v Json) bool) {
 	if j.s.MatchByte('[') {
 		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
 			k := strconv.Itoa(i)
@@ -906,119 +906,164 @@ func (j Json) Merge() Json {
 }
 
 func (j Json) Uglify() Json {
-	var o strings.Builder
-	if j.IsObject() {
-		o.WriteString("{")
-		j.ForEachKeyVal(func(k, v Json) bool {
-			if o.Len() > 1 {
-				o.WriteString(",")
+	s := j.String()
+	var x strings.Builder
+	x.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] > ' ' {
+			if s[i] == '"' {
+				ini := i
+				for i = i + 1; i < len(s); i++ {
+					if s[i] == '"' && s[i-1] != '\\' {
+						x.WriteString(s[ini : i+1])
+						break
+					}
+				}
+			} else {
+				x.WriteByte(s[i])
 			}
-			o.WriteString(k.String())
-			o.WriteString(`:`)
-			o.WriteString(v.Uglify().String())
-			return false
-		})
-		o.WriteString("}")
-	} else if j.IsArray() {
-		o.WriteString("[")
-		j.ForEach(func(i, v Json) bool {
-			if o.Len() > 1 {
-				o.WriteString(",")
-			}
-			o.WriteString(v.Uglify().String())
-			return false
-		})
-		o.WriteString("]")
-	} else {
-		return j
+		}
 	}
-	return New(o.String())
+	return New(x.String())
 }
 
 func (j Json) Nicify() Json {
-	var o strings.Builder
-	if j.IsObject() {
-		o.WriteString("{")
-		j.ForEachKeyVal(func(k, v Json) bool {
-			if o.Len() > 1 {
-				o.WriteString(",")
+	ss := j.String()
+	var x strings.Builder
+	x.Grow(len(ss) << 1)
+top:
+	for i := 0; i < len(ss); i++ {
+		if ss[i] > ' ' {
+			switch ss[i] {
+			case '"':
+				ini := i
+				for i = i + 1; i < len(ss); i++ {
+					if ss[i] == '"' && ss[i-1] != '\\' {
+						x.WriteString(ss[ini : i+1])
+						break
+					}
+				}
+			case ',':
+				x.WriteString(", ")
+			case '{':
+				// Check for empty object.
+				for j := i + 1; j < len(ss); j++ {
+					if ss[j] > ' ' {
+						if ss[j] == '}' {
+							i = j
+							x.WriteString("{}")
+							continue top
+						}
+						break
+					}
+				}
+				x.WriteString("{ ")
+			case '}':
+				x.WriteString(" }")
+			case '[':
+				// Check for empty array.
+				for j := i + 1; j < len(ss); j++ {
+					if ss[j] > ' ' {
+						if ss[j] == ']' {
+							i = j
+							x.WriteString("[]")
+							continue top
+						}
+						break
+					}
+				}
+				x.WriteString("[")
+			case ']':
+				x.WriteString("]")
+			case ':':
+				x.WriteString(": ")
+			default:
+				x.WriteByte(ss[i])
 			}
-			o.WriteString(` `)
-			o.WriteString(k.String())
-			o.WriteString(`: `)
-			o.WriteString(v.Nicify().String())
-			return false
-		})
-		if !j.IsEmptyObject() {
-			o.WriteString(" ")
 		}
-		o.WriteString("}")
-	} else if j.IsArray() {
-		o.WriteString("[")
-		j.ForEach(func(i, v Json) bool {
-			if o.Len() > 1 {
-				o.WriteString(", ")
-			}
-			o.WriteString(v.Nicify().String())
-			return false
-		})
-		o.WriteString("]")
-	} else {
-		return j
 	}
-	return New(o.String())
+	return New(x.String())
 }
 
 func (j Json) Prettify() Json {
-	return j.prettifyInternal(0)
-}
-
-func (j Json) prettifyInternal(depth int) Json {
-	var o strings.Builder
-	if j.IsObject() {
-		pad1 := strings.Repeat("    ", depth+1)
-		pad0 := pad1[:len(pad1)-4]
-		o.WriteString("{")
-		j.ForEachKeyVal(func(k, v Json) bool {
-			if o.Len() > 1 {
-				o.WriteString(",")
+	pad := "    "
+	s := j.String()
+	var x strings.Builder
+	x.Grow(len(s) << 1)
+	depth := 0
+top:
+	for i := 0; i < len(s); i++ {
+		if s[i] > ' ' {
+			switch s[i] {
+			case '"':
+				ini := i
+				for i = i + 1; i < len(s); i++ {
+					if s[i] == '"' && s[i-1] != '\\' {
+						x.WriteString(s[ini : i+1])
+						break
+					}
+				}
+			case ',':
+				x.WriteString(",\n")
+				for d := 0; d < depth; d++ {
+					x.WriteString(pad)
+				}
+			case '{':
+				// Check for empty object.
+				for j := i + 1; j < len(s); j++ {
+					if s[j] > ' ' {
+						if s[j] == '}' {
+							i = j
+							x.WriteString("{}")
+							continue top
+						}
+						break
+					}
+				}
+				x.WriteString("{\n")
+				depth++
+				for d := 0; d < depth; d++ {
+					x.WriteString(pad)
+				}
+			case '}':
+				x.WriteString("\n")
+				depth--
+				for d := 0; d < depth; d++ {
+					x.WriteString(pad)
+				}
+				x.WriteString("}")
+			case '[':
+				// Check for empty array.
+				for j := i + 1; j < len(s); j++ {
+					if s[j] > ' ' {
+						if s[j] == ']' {
+							i = j
+							x.WriteString("[]")
+							continue top
+						}
+						break
+					}
+				}
+				x.WriteString("[\n")
+				depth++
+				for d := 0; d < depth; d++ {
+					x.WriteString(pad)
+				}
+			case ']':
+				x.WriteString("\n")
+				depth--
+				for d := 0; d < depth; d++ {
+					x.WriteString(pad)
+				}
+				x.WriteString("]")
+			case ':':
+				x.WriteString(": ")
+			default:
+				x.WriteByte(s[i])
 			}
-			o.WriteString("\n")
-			o.WriteString(pad1)
-			o.WriteString(k.String())
-			o.WriteString(`: `)
-			o.WriteString(v.prettifyInternal(depth + 1).String())
-			return false
-		})
-		if !j.IsEmptyObject() {
-			o.WriteString("\n")
-			o.WriteString(pad0)
 		}
-		o.WriteString("}")
-	} else if j.IsArray() {
-		pad1 := strings.Repeat("    ", depth+1)
-		pad0 := pad1[:len(pad1)-4]
-		o.WriteString("[")
-		empty := true
-		j.ForEach(func(i, v Json) bool {
-			empty = false
-			if o.Len() > 1 {
-				o.WriteString(",")
-			}
-			o.WriteString("\n")
-			o.WriteString(pad1)
-			o.WriteString(v.prettifyInternal(depth + 1).String())
-			return false
-		})
-		if !empty {
-			o.WriteString("\n")
-			o.WriteString(pad0)
-		}
-		o.WriteString("]")
-	} else {
-		return j
 	}
-	return New(o.String())
+	return New(x.String())
 }
 
 // #endregion Json
