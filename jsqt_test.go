@@ -765,5 +765,23 @@ func BenchmarkJson_Iterator(b *testing.B) {
 	}
 }
 
+func ExampleJson_Uglify() {
+
+	j := New(`{ "a": "b" }`)
+	j = j.Uglify()
+
+	fmt.Println(j)
+
+	// Output:
+	// {"a":"b"}
+}
+
+func BenchmarkJson_Uglify(b *testing.B) {
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		_ = j.Uglify()
+	}
+}
+
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
