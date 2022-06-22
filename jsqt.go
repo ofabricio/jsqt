@@ -1093,8 +1093,8 @@ func (j Json) Uglify() Json {
 func (j Json) Prettify() Json {
 	pad := "    "
 	s := j.String()
-	var x strings.Builder
-	x.Grow(len(s) << 2)
+	var o strings.Builder
+	o.Grow(len(s) << 2)
 	depth := 0
 	for i := 0; i < len(s); i++ {
 		if s[i] > ' ' {
@@ -1103,14 +1103,14 @@ func (j Json) Prettify() Json {
 				ini := i
 				for i = i + 1; i < len(s); i++ {
 					if s[i] == '"' && s[i-1] != '\\' {
-						x.WriteString(s[ini : i+1])
+						o.WriteString(s[ini : i+1])
 						break
 					}
 				}
 			case ',':
-				x.WriteString(",\n")
+				o.WriteString(",\n")
 				for d := 0; d < depth; d++ {
-					x.WriteString(pad)
+					o.WriteString(pad)
 				}
 			case '{', '[':
 				ini := i
@@ -1121,35 +1121,35 @@ func (j Json) Prettify() Json {
 				// Is empty object or array?
 				if s[i] == clos {
 					if open == '{' {
-						x.WriteString("{}")
+						o.WriteString("{}")
 					} else {
-						x.WriteString("[]")
+						o.WriteString("[]")
 					}
 					continue
 				}
 				// Nop, go back.
 				i = ini
-				x.WriteByte(open)
-				x.WriteByte('\n')
+				o.WriteByte(open)
+				o.WriteByte('\n')
 				depth++
 				for d := 0; d < depth; d++ {
-					x.WriteString(pad)
+					o.WriteString(pad)
 				}
 			case '}', ']':
-				x.WriteString("\n")
+				o.WriteString("\n")
 				depth--
 				for d := 0; d < depth; d++ {
-					x.WriteString(pad)
+					o.WriteString(pad)
 				}
-				x.WriteByte(s[i])
+				o.WriteByte(s[i])
 			case ':':
-				x.WriteString(": ")
+				o.WriteString(": ")
 			default:
-				x.WriteByte(s[i])
+				o.WriteByte(s[i])
 			}
 		}
 	}
-	return New(x.String())
+	return New(o.String())
 }
 
 // #endregion Json
