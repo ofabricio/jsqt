@@ -1096,7 +1096,6 @@ func (j Json) Prettify() Json {
 	var x strings.Builder
 	x.Grow(len(s) << 1)
 	depth := 0
-top:
 	for i := 0; i < len(s); i++ {
 		if s[i] > ' ' {
 			switch s[i] {
@@ -1114,22 +1113,22 @@ top:
 					x.WriteString(pad)
 				}
 			case '{', '[':
+				ini := i
 				open, clos := s[i], s[i]+2
-				// Check for empty object or array.
-				for j := i + 1; j < len(s); j++ {
-					if s[j] > ' ' {
-						if s[j] == clos {
-							i = j
-							if open == '{' {
-								x.WriteString("{}")
-							} else {
-								x.WriteString("[]")
-							}
-							continue top
-						}
-						break
-					}
+				// Skip spaces.
+				for i = i + 1; i < len(s) && s[i] <= ' '; i++ {
 				}
+				// Is empty object or array?
+				if s[i] == clos {
+					if open == '{' {
+						x.WriteString("{}")
+					} else {
+						x.WriteString("[]")
+					}
+					continue
+				}
+				// Nop, go back.
+				i = ini
 				x.WriteByte(open)
 				x.WriteByte('\n')
 				depth++
