@@ -1070,24 +1070,24 @@ func (j Json) Merge() Json {
 
 func (j Json) Uglify() Json {
 	s := j.String()
-	var x strings.Builder
-	x.Grow(len(s))
+	var o strings.Builder
+	o.Grow(len(s))
 	for i := 0; i < len(s); i++ {
 		if s[i] > ' ' {
 			if s[i] == '"' {
 				ini := i
 				for i = i + 1; i < len(s); i++ {
 					if s[i] == '"' && s[i-1] != '\\' {
-						x.WriteString(s[ini : i+1])
+						o.WriteString(s[ini : i+1])
 						break
 					}
 				}
 			} else {
-				x.WriteByte(s[i])
+				o.WriteByte(s[i])
 			}
 		}
 	}
-	return New(x.String())
+	return New(o.String())
 }
 
 func (j Json) Prettify() Json {
