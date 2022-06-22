@@ -975,7 +975,7 @@ func (j *Json) matchString() bool {
 }
 
 func (j *Json) ws() bool {
-	j.s.MatchWhileAnyByte4(' ', '\t', '\n', '\r')
+	j.s.MatchWhileByteLTE(' ')
 	return true
 }
 
