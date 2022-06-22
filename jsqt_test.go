@@ -15,6 +15,10 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Upper.
+		{give: `"a"`, when: `(upper)`, then: `"A"`},
+		// Lower.
+		{give: `"A"`, when: `(lower)`, then: `"a"`},
 		// to-str
 		{give: `3`, when: `(to-str)`, then: `"3"`},
 		{give: `-3`, when: `(to-str)`, then: `"-3"`},

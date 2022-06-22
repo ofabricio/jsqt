@@ -207,6 +207,10 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return j.ToJson()
 	case "to-str":
 		return j.ToString()
+	case "upper":
+		return New(strings.ToUpper(j.String()))
+	case "lower":
+		return New(strings.ToLower(j.String()))
 	default:
 		return New("")
 	}
