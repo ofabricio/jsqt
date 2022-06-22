@@ -591,7 +591,7 @@ func TestJsonIsSome(t *testing.T) {
 	}
 }
 
-func ExamplefuncDebug() {
+func Example_funcDebug() {
 
 	j := `[{ "a": { "b": [3] } }, { "a": { "b": [4] } }]`
 
