@@ -966,11 +966,20 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 func (j Json) ForEach(f func(k, v Json) bool) {
 	if j.s.MatchByte('[') {
 		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
-			k := strconv.Itoa(i)
-			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
-			if f(New(k), New(v)) {
+			ini := j.s.Mark()
+			c := j.s.Curr()
+			if c == '{' || c == '[' {
+				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
+			} else if c == '"' {
+				j.s.UtilMatchString('"')
+			} else {
+				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
+			}
+			if f(New(strconv.Itoa(i)), New(j.s.Token(ini))) {
 				return
 			}
+			j.ws()
+			j.s.MatchByte(',')
 		}
 	}
 }
