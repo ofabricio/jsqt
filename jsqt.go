@@ -694,6 +694,34 @@ func (j Json) IsAnything() bool {
 	return j.String() != ""
 }
 
+func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k, v Json)) {
+	m(o, k, j)
+	i := 0
+	if j.IsObject() {
+		o.WriteString("{")
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if i > 0 {
+				o.WriteString(",")
+			}
+			i++
+			v.Iterator(o, k, m)
+			return false
+		})
+		o.WriteString("}")
+	} else if j.IsArray() {
+		o.WriteString("[")
+		j.ForEach(func(k, v Json) bool {
+			if i > 0 {
+				o.WriteString(",")
+			}
+			i++
+			v.Iterator(o, New(""), m)
+			return false
+		})
+		o.WriteString("]")
+	}
+}
+
 // IterateValues iterates over the values of a valid Json.
 func (j Json) IterateValues(m func(Json) Json) Json {
 	var o strings.Builder

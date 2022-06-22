@@ -711,5 +711,59 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 	}
 }
 
+func ExampleJson_Iterator() {
+
+	m := func(o *strings.Builder, k, v Json) {
+		if k.String() == "" {
+			if !v.IsObject() && !v.IsArray() {
+				o.WriteString(v.String())
+			}
+			return
+		}
+		o.WriteString(k.String())
+		o.WriteString(":")
+		if !v.IsObject() && !v.IsArray() {
+			fmt.Println(k, v)
+			o.WriteString(v.String())
+		}
+	}
+
+	var o strings.Builder
+
+	j := New(TestData1)
+	j.Iterator(&o, New(""), m)
+
+	fmt.Println(o.String())
+
+	// Output:
+	// "name" "Mary"
+	// "last" "Jane"
+	// "token" null
+	// "city" "Place"
+	// "country" "USA"
+	// "name" "Karen"
+	// "name" "Michelle"
+	// "last" "Jane"
+	// "age" 33
+	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}
+}
+
+func BenchmarkJson_Iterator(b *testing.B) {
+	m := func(o *strings.Builder, k, v Json) {
+		o.WriteString(k.String())
+		o.WriteString(":")
+		if !v.IsObject() && !v.IsArray() {
+			o.WriteString(v.String())
+		}
+	}
+	var o strings.Builder
+	o.Grow(2550)
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		o.Reset()
+		j.Iterator(&o, New(""), m)
+	}
+}
+
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
