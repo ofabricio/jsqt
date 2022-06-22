@@ -217,6 +217,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return New(strings.ToUpper(j.String()))
 	case "lower":
 		return New(strings.ToLower(j.String()))
+	case "replace":
+		return funcReplace(q, j)
 	default:
 		return New("")
 	}
@@ -586,6 +588,15 @@ func funcDebug(q *Query, j Json) Json {
 		msg = q.ParseArgRaw(j).String()
 	}
 	fmt.Printf("[%s] %s\n", msg, j)
+	return j
+}
+
+func funcReplace(q *Query, j Json) Json {
+	old := q.ParseArgRaw(j)
+	new := q.ParseArgRaw(j)
+	if j.IsString() {
+		return New(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
+	}
 	return j
 }
 

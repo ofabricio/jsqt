@@ -15,6 +15,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Replace.
+		{give: `"a b"`, when: `(replace " " "_")`, then: `"a_b"`},
 		// Upper.
 		{give: `"a"`, when: `(upper)`, then: `"A"`},
 		// Lower.
