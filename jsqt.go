@@ -779,31 +779,30 @@ func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k,
 // of a valid Json and apply a map function to transform
 // each emitted value.
 func (j Json) IterateKeys(m func(Json) Json) Json {
-	s := j.String()
 	var o strings.Builder
-	o.Grow(len(s))
-	for i := 0; i < len(s); i++ {
-		if s[i] > ' ' {
-			if s[i] == '"' {
+	o.Grow(len(j.s))
+	for i := 0; i < len(j.s); i++ {
+		if j.s[i] > ' ' {
+			if j.s[i] == '"' {
 				// Scans through the string.
 				ini := i
-				for i = i + 1; i < len(s); i++ {
-					if s[i] == '"' && s[i-1] != '\\' {
+				for i = i + 1; i < len(j.s); i++ {
+					if j.s[i] == '"' && j.s[i-1] != '\\' {
 						// Skip spaces.
-						for i = i + 1; i < len(s) && s[i] <= ' '; i++ {
+						for i = i + 1; i < len(j.s) && j.s[i] <= ' '; i++ {
 						}
 						// Emits if a key.
-						if s[i] == ':' {
-							o.WriteString(m(New(s[ini:i])).String())
+						if j.s[i] == ':' {
+							o.WriteString(m(New(j.s[ini:i].String())).String())
 						} else {
-							o.WriteString(s[ini:i])
+							o.WriteString(j.s[ini:i].String())
 						}
-						o.WriteByte(s[i])
+						o.WriteByte(j.s[i])
 						break
 					}
 				}
 			} else {
-				o.WriteByte(s[i])
+				o.WriteByte(j.s[i])
 			}
 		}
 	}
@@ -814,38 +813,37 @@ func (j Json) IterateKeys(m func(Json) Json) Json {
 // of a valid Json and apply a map function to transform each
 // emitted value.
 func (j Json) IterateValues(m func(Json) Json) Json {
-	s := j.String()
 	var o strings.Builder
-	o.Grow(len(s))
-	for i := 0; i < len(s); i++ {
-		if s[i] > ' ' {
-			if s[i] == '"' {
+	o.Grow(len(j.s))
+	for i := 0; i < len(j.s); i++ {
+		if j.s[i] > ' ' {
+			if j.s[i] == '"' {
 				// Scans through the string.
 				ini := i
-				for i = i + 1; i < len(s); i++ {
-					if s[i] == '"' && s[i-1] != '\\' {
+				for i = i + 1; i < len(j.s); i++ {
+					if j.s[i] == '"' && j.s[i-1] != '\\' {
 						// Skip spaces.
-						for i = i + 1; i < len(s) && s[i] <= ' '; i++ {
+						for i = i + 1; i < len(j.s) && j.s[i] <= ' '; i++ {
 						}
 						// Emits if not a key.
-						if s[i] == ':' {
-							o.WriteString(s[ini:i])
+						if j.s[i] == ':' {
+							o.WriteString(j.s[ini:i].String())
 						} else {
-							o.WriteString(m(New(s[ini:i])).String())
+							o.WriteString(m(New(j.s[ini:i].String())).String())
 						}
-						o.WriteByte(s[i])
+						o.WriteByte(j.s[i])
 						break
 					}
 				}
-			} else if s[i] == '{' || s[i] == '}' || s[i] == ',' || s[i] == ':' || s[i] == '[' || s[i] == ']' {
-				o.WriteByte(s[i])
+			} else if j.s[i] == '{' || j.s[i] == '}' || j.s[i] == ',' || j.s[i] == ':' || j.s[i] == '[' || j.s[i] == ']' {
+				o.WriteByte(j.s[i])
 			} else {
 				// Scans through anything until these characters.
 				ini := i
-				for ; i < len(s); i++ {
-					if s[i] == ',' || s[i] == '}' || s[i] == ' ' || s[i] == ']' {
-						o.WriteString(m(New(s[ini:i])).String())
-						o.WriteByte(s[i])
+				for ; i < len(j.s); i++ {
+					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ' ' || j.s[i] == ']' {
+						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteByte(j.s[i])
 						break
 					}
 				}
@@ -859,29 +857,28 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 // a valid Json consecutively and apply a map function to
 // transform each emitted value.
 func (j Json) IterateKeysValues(m func(Json) Json) Json {
-	s := j.String()
 	var o strings.Builder
-	o.Grow(len(s))
-	for i := 0; i < len(s); i++ {
-		if s[i] > ' ' {
-			if s[i] == '"' {
+	o.Grow(len(j.s))
+	for i := 0; i < len(j.s); i++ {
+		if j.s[i] > ' ' {
+			if j.s[i] == '"' {
 				// Scans through the string.
 				ini := i
-				for i = i + 1; i < len(s); i++ {
-					if s[i] == '"' && s[i-1] != '\\' {
-						o.WriteString(m(New(s[ini : i+1])).String())
+				for i = i + 1; i < len(j.s); i++ {
+					if j.s[i] == '"' && j.s[i-1] != '\\' {
+						o.WriteString(m(New(j.s[ini : i+1].String())).String())
 						break
 					}
 				}
-			} else if s[i] == '{' || s[i] == '}' || s[i] == ',' || s[i] == ':' || s[i] == '[' || s[i] == ']' {
-				o.WriteByte(s[i])
+			} else if j.s[i] == '{' || j.s[i] == '}' || j.s[i] == ',' || j.s[i] == ':' || j.s[i] == '[' || j.s[i] == ']' {
+				o.WriteByte(j.s[i])
 			} else {
 				// Scans through anything until these characters.
 				ini := i
-				for ; i < len(s); i++ {
-					if s[i] == ',' || s[i] == '}' || s[i] == ' ' || s[i] == ']' {
-						o.WriteString(m(New(s[ini:i])).String())
-						o.WriteByte(s[i])
+				for ; i < len(j.s); i++ {
+					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ' ' || j.s[i] == ']' {
+						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteByte(j.s[i])
 						break
 					}
 				}
@@ -894,29 +891,28 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 // Iterate iterates over the keys and values of a valid Json
 // and applies a map function to transform both at once.
 func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
-	ss := j.s
 	var o strings.Builder
-	o.Grow(len(ss))
-	for ss.More() {
-		c := ss.Curr()
+	o.Grow(len(j.s))
+	for j.s.More() {
+		c := j.s.Curr()
 		if c > ' ' {
 			// Is a string?
-			if ini := ss.Mark(); ss.UtilMatchString('"') {
-				str := ss.Token(ini)
-				ss.MatchWhileByteLTE(' ')
+			if ini := j.s.Mark(); j.s.UtilMatchString('"') {
+				str := j.s.Token(ini)
+				j.s.MatchWhileByteLTE(' ')
 				// Is a key?
-				if ss.MatchByte(':') {
-					ss.MatchWhileByteLTE(' ')
+				if j.s.MatchByte(':') {
+					j.s.MatchWhileByteLTE(' ')
 					// Is a key of an object or array? Emit only the key.
-					if ss.EqualByte('{') || ss.EqualByte('[') {
+					if j.s.EqualByte('{') || j.s.EqualByte('[') {
 						k, _ := m(New(str), New(""))
 						o.WriteString(k.String())
 						o.WriteByte(':')
 						continue
 					}
 					// Is a key of a value (string or anything else)? Emit both key and value.
-					if ini := ss.Mark(); ss.UtilMatchString('"') || ss.MatchUntilAnyByte4(',', '}', ']', ' ') {
-						val := ss.Token(ini)
+					if ini := j.s.Mark(); j.s.UtilMatchString('"') || j.s.MatchUntilAnyByte4(',', '}', ']', ' ') {
+						val := j.s.Token(ini)
 						k, v := m(New(str), New(val))
 						o.WriteString(k.String())
 						o.WriteByte(':')
@@ -933,19 +929,19 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 				o.WriteByte(c)
 			} else {
 				// Gets anything and emit it as a value.
-				if ini := ss.Mark(); ss.MatchUntilAnyByte4(',', ' ', '}', ']') {
-					val := ss.Token(ini)
+				if ini := j.s.Mark(); j.s.MatchUntilAnyByte4(',', ' ', '}', ']') {
+					val := j.s.Token(ini)
 					_, v := m(New(""), New(val))
 					o.WriteString(v.String())
-					o.WriteByte(ss.Curr())
+					o.WriteByte(j.s.Curr())
 				} else {
 					// EOF case.
-					_, v := m(New(""), New(ss.String()))
+					_, v := m(New(""), New(j.s.String()))
 					o.WriteString(v.String())
 				}
 			}
 		}
-		ss.Next()
+		j.s.Next()
 	}
 	return New(o.String())
 }
