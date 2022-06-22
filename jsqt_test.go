@@ -281,23 +281,6 @@ func TestJsonCollect(t *testing.T) {
 	}
 }
 
-func ExampleJson_Iterate() {
-
-	j := New(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0]}]}},"d":1}`)
-	v := j.Iterate(func(k, v Json) (Json, Json) {
-		k = New(strings.ToUpper(k.String()))
-		if v.IsNumber() {
-			return k, v.ToString()
-		}
-		return k, v
-	})
-
-	fmt.Println(v)
-
-	// Output:
-	// {"A":"1","B":"2","C":{"A":"3","B":{"A":"4","B":[{"A":"5"},{"A":"6","B":"7","C":["8","9","0"]}]}},"D":"1"}
-}
-
 func TestJsonForEachKeyVal(t *testing.T) {
 	tt := []struct {
 		inp string
@@ -678,6 +661,33 @@ func BenchmarkJson_ForEach(b *testing.B) {
 	j := New(TestData2)
 	for i := 0; i < b.N; i++ {
 		j.ForEach(m)
+	}
+}
+
+func ExampleJson_Iterate() {
+
+	j := New(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0,{},[]]}]}},"d":1}`)
+	v := j.Iterate(func(k, v Json) (Json, Json) {
+		k = New(strings.ToUpper(k.String()))
+		if v.IsNumber() {
+			return k, v.ToString()
+		}
+		return k, v
+	})
+
+	fmt.Println(v)
+
+	// Output:
+	// {"A":"1","B":"2","C":{"A":"3","B":{"A":"4","B":[{"A":"5"},{"A":"6","B":"7","C":["8","9","0",{},[]]}]}},"D":"1"}
+}
+
+func BenchmarkJson_Iterate(b *testing.B) {
+	m := func(k, v Json) (Json, Json) {
+		return k, v
+	}
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		_ = j.Iterate(m)
 	}
 }
 
