@@ -132,6 +132,21 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (<= b 7) a)`, then: `[3,4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
+		// Iterate Keys Values.
+		{give: `{"a":3,"b":[3,{"c":"d"}]}`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
+		{give: `{"a":3}`, when: `(iterate-kv (to-str))`, then: `{"a":"3"}`},
+		{give: `3`, when: `(iterate-kv (to-str))`, then: `"3"`},
+		{give: `3`, when: `(iterate-kv (.))`, then: `3`},
+		// Iterate Values.
+		{give: `{"a":3,"b":[3,{"a":3}]}`, when: `(iterate-v (if (== (.) 3) (raw 4) (.))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
+		{give: `{"a":3}`, when: `(iterate-v (if (== (.) 3) (raw 4) (.)))`, then: `{"a":4}`},
+		{give: `3`, when: `(iterate-v (to-str))`, then: `"3"`},
+		{give: `3`, when: `(iterate-v (.))`, then: `3`},
+		// Iterate Keys.
+		{give: `{"a":3,"b":[3,{"a":3}]}`, when: `(iterate-k (if (== (.) "a") (raw "x") (.))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
+		{give: `{"a":3}`, when: `(iterate-k (if (== (.) "a") (raw "x") (.)))`, then: `{"x":3}`},
+		{give: `3`, when: `(iterate-k (to-str))`, then: `3`},
+		{give: `3`, when: `(iterate-k (.))`, then: `3`},
 		// Iterate.
 		{give: `{"a":"aaa","b":"bbb"}`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
 		{give: `{"a":3,"b":[{"c":4},{"c":5}],"d":[6,true]}`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},

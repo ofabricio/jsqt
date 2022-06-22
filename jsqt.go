@@ -133,6 +133,12 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return j.Merge()
 	case "iterate":
 		return funcIterate(q, j)
+	case "iterate-v":
+		return funcIterateValues(q, j)
+	case "iterate-k":
+		return funcIterateKeys(q, j)
+	case "iterate-kv":
+		return funcIterateKeysValues(q, j)
 	case "is-num":
 		return funcIsNum(q, j)
 	case "is-obj":
@@ -320,6 +326,38 @@ func funcIterate(q *Query, j Json) Json {
 		arr := New(`[` + k.String() + "," + v.String() + `]`)
 		i := ini
 		mk, mv := i.ParseArgFunOrKey(arr), i.ParseArgFunOrKey(arr)
+		*q = i
+		return mk, mv
+	})
+}
+
+func funcIterateKeys(q *Query, j Json) Json {
+	ini := *q
+	return j.Iterate(func(k, v Json) (Json, Json) {
+		i := ini
+		mk := i.ParseArgFunOrKey(k)
+		*q = i
+		return mk, v
+	})
+}
+
+func funcIterateValues(q *Query, j Json) Json {
+	ini := *q
+	return j.Iterate(func(k, v Json) (Json, Json) {
+		i := ini
+		mv := i.ParseArgFunOrKey(v)
+		*q = i
+		return k, mv
+	})
+}
+
+func funcIterateKeysValues(q *Query, j Json) Json {
+	ini := *q
+	return j.Iterate(func(k, v Json) (Json, Json) {
+		i := ini
+		mk := i.ParseArgFunOrKey(k)
+		i = ini
+		mv := i.ParseArgFunOrKey(v)
 		*q = i
 		return mk, mv
 	})
