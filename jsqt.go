@@ -1058,10 +1058,17 @@ func (j Json) Size() Json {
 		return New(strconv.Itoa(len(j.String()) - 2))
 	}
 	c := 0
-	j.ForEach(func(i, v Json) bool {
-		c++
-		return false
-	})
+	if j.IsObject() {
+		j.ForEachKeyVal(func(k, v Json) bool {
+			c++
+			return false
+		})
+	} else {
+		j.ForEach(func(i, v Json) bool {
+			c++
+			return false
+		})
+	}
 	return New(strconv.Itoa(c))
 }
 
