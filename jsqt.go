@@ -905,8 +905,11 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 		}
 		return false
 	}
-	j.ForEachKeyVal(f)
-	j.ForEach(f)
+	if j.s.EqualByte('{') {
+		j.ForEachKeyVal(f)
+	} else {
+		j.ForEach(f)
+	}
 	return r
 }
 
