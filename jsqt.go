@@ -335,33 +335,31 @@ func funcIterate(q *Query, j Json) Json {
 
 func funcIterateKeys(q *Query, j Json) Json {
 	ini := *q
-	return j.Iterate(func(k, v Json) (Json, Json) {
+	return j.IterateKeys(func(k Json) Json {
 		i := ini
-		mk := i.ParseArgFunOrKey(k)
+		mk := i.ParseArgFun(k)
 		*q = i
-		return mk, v
+		return mk
 	})
 }
 
 func funcIterateValues(q *Query, j Json) Json {
 	ini := *q
-	return j.Iterate(func(k, v Json) (Json, Json) {
+	return j.IterateValues(func(v Json) Json {
 		i := ini
-		mv := i.ParseArgFunOrKey(v)
+		v = i.ParseArgFun(v)
 		*q = i
-		return k, mv
+		return v
 	})
 }
 
 func funcIterateKeysValues(q *Query, j Json) Json {
 	ini := *q
-	return j.Iterate(func(k, v Json) (Json, Json) {
+	return j.IterateKeysValues(func(v Json) Json {
 		i := ini
-		mk := i.ParseArgFunOrKey(k)
-		i = ini
-		mv := i.ParseArgFunOrKey(v)
+		kv := i.ParseArgFun(v)
 		*q = i
-		return mk, mv
+		return kv
 	})
 }
 
@@ -788,14 +786,15 @@ func (j Json) IterateKeys(m func(Json) Json) Json {
 				ini := i
 				for i = i + 1; i < len(j.s); i++ {
 					if j.s[i] == '"' && j.s[i-1] != '\\' {
+						end := i + 1
 						// Skip spaces.
 						for i = i + 1; i < len(j.s) && j.s[i] <= ' '; i++ {
 						}
 						// Emits if a key.
 						if j.s[i] == ':' {
-							o.WriteString(m(New(j.s[ini:i].String())).String())
+							o.WriteString(m(New(j.s[ini:end].String())).String())
 						} else {
-							o.WriteString(j.s[ini:i].String())
+							o.WriteString(j.s[ini:end].String())
 						}
 						o.WriteByte(j.s[i])
 						break
@@ -822,14 +821,15 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 				ini := i
 				for i = i + 1; i < len(j.s); i++ {
 					if j.s[i] == '"' && j.s[i-1] != '\\' {
+						end := i + 1
 						// Skip spaces.
 						for i = i + 1; i < len(j.s) && j.s[i] <= ' '; i++ {
 						}
 						// Emits if not a key.
 						if j.s[i] == ':' {
-							o.WriteString(j.s[ini:i].String())
+							o.WriteString(j.s[ini:end].String())
 						} else {
-							o.WriteString(m(New(j.s[ini:i].String())).String())
+							o.WriteString(m(New(j.s[ini:end].String())).String())
 						}
 						o.WriteByte(j.s[i])
 						break
@@ -841,10 +841,17 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 				// Scans through anything until these characters.
 				ini := i
 				for ; i < len(j.s); i++ {
-					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ' ' || j.s[i] == ']' {
+					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ']' {
 						o.WriteString(m(New(j.s[ini:i].String())).String())
 						o.WriteByte(j.s[i])
 						break
+					}
+					if j.s[i] == ' ' {
+						o.WriteString(m(New(j.s[ini:i].String())).String())
+						break
+					}
+					if i == len(j.s)-1 {
+						o.WriteString(m(New(j.s.String())).String())
 					}
 				}
 			}
@@ -876,10 +883,17 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 				// Scans through anything until these characters.
 				ini := i
 				for ; i < len(j.s); i++ {
-					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ' ' || j.s[i] == ']' {
+					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ']' {
 						o.WriteString(m(New(j.s[ini:i].String())).String())
 						o.WriteByte(j.s[i])
 						break
+					}
+					if j.s[i] == ' ' {
+						o.WriteString(m(New(j.s[ini:i].String())).String())
+						break
+					}
+					if i == len(j.s)-1 {
+						o.WriteString(m(New(j.s.String())).String())
 					}
 				}
 			}
@@ -933,7 +947,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 					val := j.s.Token(ini)
 					_, v := m(New(""), New(val))
 					o.WriteString(v.String())
-					o.WriteByte(j.s.Curr())
+					continue
 				} else {
 					// EOF case.
 					_, v := m(New(""), New(j.s.String()))
