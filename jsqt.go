@@ -984,27 +984,6 @@ func (j Json) ForEach(f func(k, v Json) bool) {
 	}
 }
 
-func (j *Json) getValue() string {
-	m := j.s.Mark()
-	if j.s.UtilMatchOpenCloseCount('{', '}', '"') { // Match Object.
-		return j.s.Token(m)
-	}
-	if j.s.UtilMatchOpenCloseCount('[', ']', '"') { // Match Array.
-		return j.s.Token(m)
-	}
-	if j.matchString() {
-		return j.s.Token(m)
-	}
-	if j.s.MatchUntilAnyByte4(',', '}', ']', ' ') { // Match Anything.
-		return j.s.Token(m)
-	}
-	return ""
-}
-
-func (j *Json) matchString() bool {
-	return j.s.UtilMatchString('"')
-}
-
 func (j *Json) ws() bool {
 	j.s.MatchWhileByteLTE(' ')
 	return true
