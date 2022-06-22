@@ -722,25 +722,38 @@ func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k,
 	}
 }
 
-// IterateValues iterates over the values of a valid Json.
-func (j Json) IterateValues(m func(Json) Json) Json {
-	ma := func(o *strings.Builder, k, v Json) {
-		if k.String() == "" {
-			if !v.IsObject() && !v.IsArray() {
-				o.WriteString(m(v).String())
+// IterateKeysValues iterates over the keys and values of a valid Json consecutively.
+func (j Json) IterateKeysValues(m func(Json) Json) Json {
+	s := j.String()
+	var x strings.Builder
+	x.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] > ' ' {
+			if s[i] == '"' {
+				// Scans through the string.
+				ini := i
+				for i = i + 1; i < len(s); i++ {
+					if s[i] == '"' && s[i-1] != '\\' {
+						x.WriteString(m(New(s[ini : i+1])).String())
+						break
+					}
+				}
+			} else if s[i] == '{' || s[i] == '}' || s[i] == ',' || s[i] == ':' || s[i] == '[' || s[i] == ']' {
+				x.WriteByte(s[i])
+			} else {
+				// Scans through anything until these characters.
+				ini := i
+				for ; i < len(s); i++ {
+					if s[i] == ',' || s[i] == '}' || s[i] == ' ' || s[i] == ']' {
+						x.WriteString(m(New(s[ini:i])).String())
+						x.WriteByte(s[i])
+						break
+					}
+				}
 			}
-			return
-		}
-		o.WriteString(k.String())
-		o.WriteString(":")
-		if !v.IsObject() && !v.IsArray() {
-			o.WriteString(m(v).String())
 		}
 	}
-
-	var oo strings.Builder
-	j.Iterator(&oo, New(""), ma)
-	return New(oo.String())
+	return New(x.String())
 }
 
 // Iterate iterates over a valid Json.

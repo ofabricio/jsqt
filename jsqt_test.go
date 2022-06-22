@@ -644,6 +644,7 @@ func ExampleJson_ForEachKeyVal() {
 	// "address" {"city":"Place","country":"USA"}
 	// "contacts" [{"name":"Karen"},{"name":"Michelle","last":"Jane"}]
 	// "age" 33
+	// "random" [3,null,{},[],"",false]
 }
 
 func BenchmarkJson_ForEachKeyVal(b *testing.B) {
@@ -680,34 +681,55 @@ func BenchmarkJson_ForEach(b *testing.B) {
 	}
 }
 
-func ExampleJson_IterateValues() {
+func ExampleJson_IterateKeysValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)
 		return v
 	}
 
 	j := New(TestData1)
-	j.IterateValues(m)
+	r := j.IterateKeysValues(m)
+
+	fmt.Println(r)
 
 	// Output:
+	// "name"
 	// "Mary"
+	// "last"
 	// "Jane"
+	// "token"
 	// null
+	// "settings"
+	// "posts"
+	// "address"
+	// "city"
 	// "Place"
+	// "country"
 	// "USA"
+	// "contacts"
+	// "name"
 	// "Karen"
+	// "name"
 	// "Michelle"
+	// "last"
 	// "Jane"
+	// "age"
 	// 33
+	// "random"
+	// 3
+	// null
+	// ""
+	// false
+	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}
 }
 
-func BenchmarkJson_IterateValues(b *testing.B) {
+func BenchmarkJson_IterateKeysValues(b *testing.B) {
 	m := func(v Json) Json {
 		return v
 	}
 	j := New(TestData1)
 	for i := 0; i < b.N; i++ {
-		j.IterateValues(m)
+		_ = j.IterateKeysValues(m)
 	}
 }
 
@@ -745,7 +767,7 @@ func ExampleJson_Iterator() {
 	// "name" "Michelle"
 	// "last" "Jane"
 	// "age" 33
-	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}
+	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}
 }
 
 func BenchmarkJson_Iterator(b *testing.B) {
@@ -783,5 +805,5 @@ func BenchmarkJson_Uglify(b *testing.B) {
 	}
 }
 
-const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}`
+const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
