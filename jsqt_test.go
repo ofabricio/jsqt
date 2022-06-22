@@ -266,6 +266,13 @@ func TestJsonGet(t *testing.T) {
 	}
 }
 
+func BenchmarkJson_Get(b *testing.B) {
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		_ = j.Get("age")
+	}
+}
+
 func TestJsonGet_Order(t *testing.T) {
 
 	j := New(`{"a":3,"b":4}`)

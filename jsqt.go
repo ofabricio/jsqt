@@ -958,7 +958,7 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 		}
 		return false
 	}
-	if j.s.EqualByte('{') {
+	if j.IsObject() {
 		j.ForEachKeyVal(f)
 	} else {
 		j.ForEach(f)
