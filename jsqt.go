@@ -1113,54 +1113,36 @@ top:
 				for d := 0; d < depth; d++ {
 					x.WriteString(pad)
 				}
-			case '{':
-				// Check for empty object.
+			case '{', '[':
+				open, clos := s[i], s[i]+2
+				// Check for empty object or array.
 				for j := i + 1; j < len(s); j++ {
 					if s[j] > ' ' {
-						if s[j] == '}' {
+						if s[j] == clos {
 							i = j
-							x.WriteString("{}")
+							if open == '{' {
+								x.WriteString("{}")
+							} else {
+								x.WriteString("[]")
+							}
 							continue top
 						}
 						break
 					}
 				}
-				x.WriteString("{\n")
+				x.WriteByte(open)
+				x.WriteByte('\n')
 				depth++
 				for d := 0; d < depth; d++ {
 					x.WriteString(pad)
 				}
-			case '}':
+			case '}', ']':
 				x.WriteString("\n")
 				depth--
 				for d := 0; d < depth; d++ {
 					x.WriteString(pad)
 				}
-				x.WriteString("}")
-			case '[':
-				// Check for empty array.
-				for j := i + 1; j < len(s); j++ {
-					if s[j] > ' ' {
-						if s[j] == ']' {
-							i = j
-							x.WriteString("[]")
-							continue top
-						}
-						break
-					}
-				}
-				x.WriteString("[\n")
-				depth++
-				for d := 0; d < depth; d++ {
-					x.WriteString(pad)
-				}
-			case ']':
-				x.WriteString("\n")
-				depth--
-				for d := 0; d < depth; d++ {
-					x.WriteString(pad)
-				}
-				x.WriteString("]")
+				x.WriteByte(s[i])
 			case ':':
 				x.WriteString(": ")
 			default:
