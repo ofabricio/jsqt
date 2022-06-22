@@ -625,3 +625,36 @@ func ExamplefuncDebug() {
 	// [flatd] 4
 	// Result: [3,4]
 }
+
+func ExampleJson_IterateValues() {
+	m := func(v Json) Json {
+		fmt.Println(v)
+		return v
+	}
+
+	j := New(TestData1)
+	j.IterateValues(m)
+
+	// Output:
+	// "Mary"
+	// "Jane"
+	// null
+	// "Place"
+	// "USA"
+	// "Karen"
+	// "Michelle"
+	// "Jane"
+	// 33
+}
+
+func BenchmarkJson_IterateValues(b *testing.B) {
+	m := func(v Json) Json {
+		return v
+	}
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		j.IterateValues(m)
+	}
+}
+
+const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}`
