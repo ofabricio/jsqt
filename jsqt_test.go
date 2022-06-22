@@ -626,6 +626,60 @@ func ExamplefuncDebug() {
 	// Result: [3,4]
 }
 
+func ExampleJson_ForEachKeyVal() {
+	m := func(k, v Json) bool {
+		fmt.Println(k, v)
+		return false
+	}
+
+	j := New(TestData1)
+	j.ForEachKeyVal(m)
+
+	// Output:
+	// "name" "Mary"
+	// "last" "Jane"
+	// "token" null
+	// "settings" {}
+	// "posts" []
+	// "address" {"city":"Place","country":"USA"}
+	// "contacts" [{"name":"Karen"},{"name":"Michelle","last":"Jane"}]
+	// "age" 33
+}
+
+func BenchmarkJson_ForEachKeyVal(b *testing.B) {
+	m := func(k, v Json) bool {
+		return false
+	}
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		j.ForEachKeyVal(m)
+	}
+}
+
+func ExampleJson_ForEach() {
+	m := func(k, v Json) bool {
+		fmt.Println(k, v)
+		return false
+	}
+
+	j := New(TestData2)
+	j.ForEach(m)
+
+	// Output:
+	// 0 {"name":"Karen"}
+	// 1 {"name":"Michelle","last":"Jane"}
+}
+
+func BenchmarkJson_ForEach(b *testing.B) {
+	m := func(k, v Json) bool {
+		return false
+	}
+	j := New(TestData2)
+	for i := 0; i < b.N; i++ {
+		j.ForEach(m)
+	}
+}
+
 func ExampleJson_IterateValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)
@@ -658,3 +712,4 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 }
 
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33}`
+const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
