@@ -1094,7 +1094,7 @@ func (j Json) Prettify() Json {
 	pad := "    "
 	s := j.String()
 	var x strings.Builder
-	x.Grow(len(s) << 1)
+	x.Grow(len(s) << 2)
 	depth := 0
 	for i := 0; i < len(s); i++ {
 		if s[i] > ' ' {
