@@ -733,6 +733,45 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 	}
 }
 
+func ExampleJson_IterateKeys() {
+	m := func(v Json) Json {
+		fmt.Println(v)
+		return v
+	}
+
+	j := New(TestData1)
+	r := j.IterateKeys(m)
+
+	fmt.Println(r)
+
+	// Output:
+	// "name"
+	// "last"
+	// "token"
+	// "settings"
+	// "posts"
+	// "address"
+	// "city"
+	// "country"
+	// "contacts"
+	// "name"
+	// "name"
+	// "last"
+	// "age"
+	// "random"
+	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}
+}
+
+func BenchmarkJson_IterateKeys(b *testing.B) {
+	m := func(v Json) Json {
+		return v
+	}
+	j := New(TestData1)
+	for i := 0; i < b.N; i++ {
+		_ = j.IterateKeys(m)
+	}
+}
+
 func ExampleJson_IterateValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)

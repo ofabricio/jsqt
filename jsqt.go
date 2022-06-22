@@ -722,7 +722,41 @@ func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k,
 	}
 }
 
-// IterateValues iterates over the values (excluding the keys) of a valid Json.
+// IterateKeys iterates over the keys (excluding values)
+// of a valid Json and apply a map function to transform
+// each emitted value.
+func (j Json) IterateKeys(m func(Json) Json) Json {
+	s := j.String()
+	var x strings.Builder
+	x.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] > ' ' {
+			if s[i] == '"' {
+				// Scans through the string.
+				ini := i
+				for i = i + 1; i < len(s); i++ {
+					if s[i] == '"' && s[i-1] != '\\' {
+						// Skip spaces.
+						for i = i + 1; i < len(s) && s[i] <= ' '; i++ {
+						}
+						// Emits if a key.
+						if s[i] == ':' {
+							x.WriteString(m(New(s[ini:i])).String())
+						} else {
+							x.WriteString(s[ini:i])
+						}
+						x.WriteByte(s[i])
+						break
+					}
+				}
+			} else {
+				x.WriteByte(s[i])
+			}
+		}
+	}
+	return New(x.String())
+}
+
 // IterateValues iterates over the values (excluding the keys)
 // of a valid Json and apply a map function to transform each
 // emitted value.
