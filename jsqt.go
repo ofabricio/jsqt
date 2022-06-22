@@ -931,12 +931,34 @@ func (j Json) Collect(keyOrIndex string) Json {
 
 func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
-		for j.ws() && !j.s.MatchByte('}') {
-			k, _, _, _ := j.s.TokenFor(j.matchString), j.ws(), j.s.MatchByte(':'), j.ws()
-			v, _, _ := j.getValue(), j.ws(), j.s.MatchByte(',')
-			if f(New(k), New(v)) {
+		for !j.s.MatchByte('}') {
+			j.ws()
+
+			ini := j.s.Mark()
+			j.s.UtilMatchString('"')
+			key := j.s.Token(ini)
+
+			j.ws()
+			j.s.Next() // Skip ':' character.
+			j.ws()
+
+			ini = j.s.Mark()
+
+			c := j.s.Curr()
+			if c == '{' || c == '[' {
+				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
+			} else if c == '"' {
+				j.s.UtilMatchString('"')
+			} else {
+				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
+			}
+
+			if f(New(key), New(j.s.Token(ini))) {
 				return
 			}
+
+			j.ws()
+			j.s.MatchByte(',')
 		}
 	}
 }
