@@ -768,7 +768,9 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 	return New(x.String())
 }
 
-// IterateKeysValues iterates over the keys and values of a valid Json consecutively.
+// IterateKeysValues iterates over the keys and values of
+// a valid Json consecutively and apply a map function to
+// transform each emitted value.
 func (j Json) IterateKeysValues(m func(Json) Json) Json {
 	s := j.String()
 	var x strings.Builder
