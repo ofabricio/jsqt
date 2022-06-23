@@ -188,6 +188,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcIsFalsy(q, j)
 	case "if":
 		return funcIf(q, j)
+	case "either":
+		return funcEither(q, j)
 	case "root":
 		return q.Root
 	case ".":
@@ -388,6 +390,15 @@ func funcIf(q *Query, j Json) Json {
 		return then
 	}
 	return elze
+}
+
+func funcEither(q *Query, j Json) Json {
+	v := q.ParseArgFunOrKey(j)
+	for v.IsNully() && !q.EqualByte(')') {
+		v = q.ParseArgFunOrKey(j)
+	}
+	q.SkipArgs()
+	return v
 }
 
 // #region funcIS

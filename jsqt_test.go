@@ -15,6 +15,21 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// either should exhaust its arguments.
+		{give: `{"a":"","b":"B","c":""}`, when: `(get (either a b c) (lower))`, then: `"b"`},
+		// either
+		{give: `{"a":"","b":"","c":""}`, when: `(either a b c)`, then: `""`},
+		{give: `{"a":"A","b":"","c":"C"}`, when: `(either a b c)`, then: `"A"`},
+		{give: `{"a":"A","b":"B","c":""}`, when: `(either a b c)`, then: `"A"`},
+		{give: `{"a":"A","b":"","c":""}`, when: `(either a b c)`, then: `"A"`},
+		{give: `{"a":"","b":"","c":"C"}`, when: `(either a b c)`, then: `"C"`},
+		{give: `{"a":"","b":"B","c":""}`, when: `(either a b c)`, then: `"B"`},
+		{give: `{"a":"","b":"B","c":"C"}`, when: `(either a b c)`, then: `"B"`},
+		{give: `{"a":"A","b":"B","c":"C"}`, when: `(either a b c)`, then: `"A"`},
+		{give: `{"a":"","b":""}`, when: `(either a b)`, then: `""`},
+		{give: `{"a":"","b":"B"}`, when: `(either a b)`, then: `"B"`},
+		{give: `{"a":"A","b":""}`, when: `(either a b)`, then: `"A"`},
+		{give: `{"a":"A","b":"B"}`, when: `(either a b)`, then: `"A"`},
 		// Concat.
 		{give: `{ "one": "hello" }`, when: `(concat one (raw " \"world\""))`, then: `"hello \"world\""`},
 		{give: `{ "one": "hello", "two": "world" }`, when: `(concat one (raw " ") two)`, then: `"hello world"`},
