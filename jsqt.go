@@ -1034,8 +1034,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 
 			ini = j.s.Mark()
 
-			c := j.s.Curr()
-			if c == '{' || c == '[' {
+			if c := j.s.Curr(); c == '{' || c == '[' {
 				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
 			} else if c == '"' {
 				j.s.UtilMatchString('"')
@@ -1057,8 +1056,7 @@ func (j Json) ForEach(f func(k, v Json) bool) {
 	if j.s.MatchByte('[') {
 		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
 			ini := j.s.Mark()
-			c := j.s.Curr()
-			if c == '{' || c == '[' {
+			if c := j.s.Curr(); c == '{' || c == '[' {
 				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
 			} else if c == '"' {
 				j.s.UtilMatchString('"')
