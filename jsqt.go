@@ -601,13 +601,28 @@ func funcReplace(q *Query, j Json) Json {
 }
 
 func funcConcat(q *Query, j Json) Json {
-	concat := ""
-	for !q.EqualByte(')') {
-		if v := q.ParseArgFunOrKey(j); v.IsString() {
-			concat += v.Jsonify().String()
+	var o strings.Builder
+
+	v := q.ParseArgFunOrKey(j)
+
+	if v.IsString() {
+		o.WriteString(v.Jsonify().String())
+		for !q.EqualByte(')') {
+			v := q.ParseArgFunOrKey(j)
+			o.WriteString(v.Jsonify().String())
 		}
+		return New(o.String()).Stringify()
 	}
-	return New(concat).Stringify()
+
+	o.WriteByte('[')
+	o.WriteString(v.Flatten().String())
+	for !q.EqualByte(')') {
+		v := q.ParseArgFunOrKey(j)
+		o.WriteByte(',')
+		o.WriteString(v.Flatten().String())
+	}
+	o.WriteByte(']')
+	return New(o.String())
 }
 
 // #endregion Functions
