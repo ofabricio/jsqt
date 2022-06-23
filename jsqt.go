@@ -107,6 +107,21 @@ func (q *Query) ParseArgRaw(j Json) Json {
 	return New("")
 }
 
+func (q *Query) SkipArgs() {
+	for !q.EqualByte(')') {
+		q.SkipArg()
+	}
+}
+
+func (q *Query) SkipArg() {
+	q.MatchByte(' ')
+	q.MatchArg()
+}
+
+func (q *Query) MatchArg() {
+	_ = q.UtilMatchOpenCloseCount('(', ')', '"') || q.UtilMatchString('"') || q.MatchUntilAnyByte(' ', ')')
+}
+
 func (q Query) IsFun() bool {
 	return q.EqualByte('(')
 }
