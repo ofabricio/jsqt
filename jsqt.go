@@ -219,6 +219,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return New(strings.ToLower(j.String()))
 	case "replace":
 		return funcReplace(q, j)
+	case "concat":
+		return funcConcat(q, j)
 	default:
 		return New("")
 	}
@@ -596,6 +598,16 @@ func funcReplace(q *Query, j Json) Json {
 		return New(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
 	}
 	return j
+}
+
+func funcConcat(q *Query, j Json) Json {
+	concat := ""
+	for !q.EqualByte(')') {
+		if v := q.ParseArgFunOrKey(j); v.IsString() {
+			concat += v.Jsonify().String()
+		}
+	}
+	return New(concat).Stringify()
 }
 
 // #endregion Functions

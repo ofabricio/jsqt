@@ -15,6 +15,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Concat.
+		{give: `{ "one": "hello" }`, when: `(concat one (raw " \"world\""))`, then: `"hello \"world\""`},
+		{give: `{ "one": "hello", "two": "world" }`, when: `(concat one (raw " ") two)`, then: `"hello world"`},
 		// Replace.
 		{give: `"a b"`, when: `(replace " " "_")`, then: `"a_b"`},
 		// Upper.
