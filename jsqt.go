@@ -1000,25 +1000,6 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 	return r
 }
 
-func (j Json) Collect(keyOrIndex string) Json {
-	if j.IsArray() && !(keyOrIndex[0] >= '0' && keyOrIndex[0] <= '9') {
-		var o strings.Builder
-		o.WriteString("[")
-		j.ForEach(func(i, v Json) bool {
-			if v = v.Collect(keyOrIndex); v.IsAnything() {
-				if o.Len() > 1 {
-					o.WriteString(",")
-				}
-				o.WriteString(v.String())
-			}
-			return false
-		})
-		o.WriteString("]")
-		return New(o.String())
-	}
-	return j.Get(keyOrIndex)
-}
-
 func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
 		for !j.s.MatchByte('}') {

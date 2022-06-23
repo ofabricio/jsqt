@@ -289,32 +289,6 @@ func TestJsonGet_Order(t *testing.T) {
 	assert.Equal(t, "3", j.Get("0").String())
 }
 
-func TestJsonCollect(t *testing.T) {
-
-	tt := []struct {
-		jsn string
-		qry string
-		exp string
-	}{
-		{jsn: `[{"a":3},{"a":4}]`, qry: `a`, exp: `[3,4]`},
-		{jsn: `{"a":[2,3]}`, qry: `a`, exp: `[2,3]`},
-		{jsn: `{"a":2,"b":3}`, qry: `a`, exp: `2`},
-		{jsn: `{"a":2,"b":3}`, qry: `b`, exp: `3`},
-		{jsn: `{"a":2,"b":3}`, qry: `c`, exp: ``},
-		{jsn: `{"a":[2,3]}`, qry: `a`, exp: `[2,3]`},
-		{jsn: `[2,3]`, qry: `0`, exp: `2`},
-		{jsn: `[2,3]`, qry: `1`, exp: `3`},
-		{jsn: `[2,3]`, qry: `2`, exp: ``},
-		{jsn: `{"a":{"b":2}}`, qry: `a`, exp: `{"b":2}`},
-	}
-
-	for _, tc := range tt {
-		j := New(tc.jsn)
-		r := j.Collect(tc.qry)
-		assert.Equal(t, tc.exp, r.String(), "TC: %v", tc)
-	}
-}
-
 func TestJsonForEachKeyVal(t *testing.T) {
 	tt := []struct {
 		inp string
