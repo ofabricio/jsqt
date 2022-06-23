@@ -21,17 +21,19 @@ func TestGet(t *testing.T) {
 		{give: `"a"`, when: `(upper)`, then: `"A"`},
 		// Lower.
 		{give: `"A"`, when: `(lower)`, then: `"a"`},
-		// to-str
-		{give: `3`, when: `(to-str)`, then: `"3"`},
-		{give: `-3`, when: `(to-str)`, then: `"-3"`},
-		{give: `[]`, when: `(to-str)`, then: `"[]"`},
-		{give: `{}`, when: `(to-str)`, then: `"{}"`},
-		{give: `""`, when: `(to-str)`, then: `""`},
-		{give: `"a"`, when: `(get (to-str) (to-str))`, then: `"a"`},
-		{give: `"a\"b\"c"`, when: `(to-str)`, then: `"a\"b\"c"`},
-		{give: `{"a":[{"b":3},4,"5"]}`, when: `(to-str)`, then: `"{\"a\":[{\"b\":3},4,\"5\"]}"`},
-		// to-json
-		{give: `"{\"a\":[{\"b\":3},4,\"5\"]}"`, when: `(to-json)`, then: `{"a":[{"b":3},4,"5"]}`},
+		// stringify
+		{give: `3`, when: `(stringify)`, then: `"3"`},
+		{give: `-3`, when: `(stringify)`, then: `"-3"`},
+		{give: `[]`, when: `(stringify)`, then: `"[]"`},
+		{give: `{}`, when: `(stringify)`, then: `"{}"`},
+		{give: `""`, when: `(stringify)`, then: `""`},
+		{give: `"a"`, when: `(get (stringify) (stringify))`, then: `"a"`},
+		{give: `"a\"b\"c"`, when: `(stringify)`, then: `"a\"b\"c"`},
+		{give: `{"a":[{"b":3},4,"5"]}`, when: `(stringify)`, then: `"{\"a\":[{\"b\":3},4,\"5\"]}"`},
+		// jsonify
+		{give: `"{\"a\":[{\"b\":3},4,\"5\"]}"`, when: `(jsonify)`, then: `{"a":[{"b":3},4,"5"]}`},
+		{give: `"3"`, when: `(jsonify)`, then: `3`},
+		{give: `"{}"`, when: `(jsonify)`, then: `{}`},
 		// Bool.
 		{give: `3`, when: `(get (is-num) (bool))`, then: `true`},
 		{give: `{}`, when: `(get (is-num) (bool))`, then: `false`},
@@ -136,25 +138,25 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
 		// Iterate Keys Values.
 		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
-		{give: `{ "a": 3 }`, when: `(iterate-kv (to-str))`, then: `{"a":"3"}`},
-		{give: `3`, when: `(iterate-kv (to-str))`, then: `"3"`},
+		{give: `{ "a": 3 }`, when: `(iterate-kv (stringify))`, then: `{"a":"3"}`},
+		{give: `3`, when: `(iterate-kv (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-kv (.))`, then: `3`},
 		// Iterate Values.
 		{give: `{ "a" : 3, "b": [ 3 , { "a" : 3 } ] }`, when: `(iterate-v (if (== (.) 3) (raw 4) (.))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
 		{give: `{ "a": 3 }`, when: `(iterate-v (if (== (.) 3) (raw 4) (.)))`, then: `{"a":4}`},
-		{give: `3`, when: `(iterate-v (to-str))`, then: `"3"`},
+		{give: `3`, when: `(iterate-v (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-v (.))`, then: `3`},
 		// Iterate Keys.
 		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate-k (if (== (.) "a") (raw "x") (.))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
 		{give: `{ "a" : 3 }`, when: `(iterate-k (if (== (.) "a") (raw "x") (.)))`, then: `{"x":3}`},
-		{give: `3`, when: `(iterate-k (to-str))`, then: `3`},
+		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate-k (.))`, then: `3`},
 		// Iterate.
 		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
-		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.))))`, then: `{"a":"3","b":"4"}`},
-		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (to-str) (.))))`, then: `["3","4"]`},
-		{give: `3`, when: `(iterate 0 (get 1 (to-str)))`, then: `"3"`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.))))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.))))`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate 0 (get 1 (stringify)))`, then: `"3"`},
 		{give: `3`, when: `(iterate 0 1)`, then: `3`},
 		// Default.
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
@@ -620,6 +622,64 @@ func TestJsonIsSome(t *testing.T) {
 	}
 }
 
+func TestJsonStringify(t *testing.T) {
+	tt := []struct {
+		inp string
+		out string
+	}{
+		{inp: ``, out: `""`},
+		{inp: `{}`, out: `"{}"`},
+		{inp: `{ "hello": "wo\"rld" }`, out: `"{ \"hello\": \"wo\\\"rld\" }"`},
+		{inp: `[]`, out: `"[]"`},
+		{inp: `123`, out: `"123"`},
+		{inp: `null`, out: `"null"`},
+		{inp: `false`, out: `"false"`},
+		{inp: `true`, out: `"true"`},
+		{inp: `""`, out: `""`},
+		{inp: `"a b"`, out: `"a b"`},
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Stringify().String(), tc)
+	}
+}
+
+func BenchmarkJsonToStringify(b *testing.B) {
+	j := New(`{ "hello": "wo\"rld" }`)
+	for i := 0; i < b.N; i++ {
+		_ = j.Stringify()
+	}
+}
+
+func TestJsonJsonify(t *testing.T) {
+	tt := []struct {
+		inp string
+		out string
+	}{
+		{inp: ``, out: ``},
+		{inp: `""`, out: `""`},
+		{inp: `"{}"`, out: `{}`},
+		{inp: `"{ \"hello\": \"wo\\\"rld\" }"`, out: `{ "hello": "wo\"rld" }`},
+		{inp: `"[]"`, out: `[]`},
+		{inp: `"123"`, out: `123`},
+		{inp: `"null"`, out: `null`},
+		{inp: `"false"`, out: `false`},
+		{inp: `"true"`, out: `true`},
+		{inp: `"a b"`, out: `a b`}, // Invalid JSON.
+	}
+	for _, tc := range tt {
+		j := New(tc.inp)
+		assert.Equal(t, tc.out, j.Jsonify().String(), tc)
+	}
+}
+
+func BenchmarkJsonJsonify(b *testing.B) {
+	j := New(`"{ \"hello\": \"wo\\\"rld\" }"`)
+	for i := 0; i < b.N; i++ {
+		_ = j.Jsonify()
+	}
+}
+
 func Example_funcDebug() {
 
 	j := `[{ "a": { "b": [3] } }, { "a": { "b": [4] } }]`
@@ -699,7 +759,7 @@ func ExampleJson_Iterate() {
 	v := j.Iterate(func(k, v Json) (Json, Json) {
 		k = New(strings.ToUpper(k.String()))
 		if v.IsNumber() {
-			return k, v.ToString()
+			return k, v.Stringify()
 		}
 		return k, v
 	})

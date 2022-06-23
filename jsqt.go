@@ -209,10 +209,10 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return j.Uglify()
 	case "pretty":
 		return j.Prettify()
-	case "to-json":
-		return j.ToJson()
-	case "to-str":
-		return j.ToString()
+	case "jsonify":
+		return j.Jsonify()
+	case "stringify":
+		return j.Stringify()
 	case "upper":
 		return New(strings.ToUpper(j.String()))
 	case "lower":
@@ -613,17 +613,29 @@ func (j Json) String() string {
 	return j.s.String()
 }
 
-// ToString converts a JSON value to a JSON string.
-func (j Json) ToString() Json {
+// Stringify converts a JSON value to a JSON string.
+// Examples:
+//   "Hello" -> "Hello"
+//   3       -> "3"
+//   {}      -> "{}"
+//   "{ \"hello\": \"world\" }" -> { "hello": "world" }
+// Stringify reverts Jsonify.
+func (j Json) Stringify() Json {
 	if j.IsString() {
 		return j
 	}
 	return New(strconv.Quote(j.String()))
 }
 
-// ToString converts a JSON string to a JSON value.
-func (j Json) ToJson() Json {
-	if j.IsString() {
+// Jsonify converts a JSON string to a JSON value.
+// Examples:
+//   "Hello" -> "Hello"
+//   "3"     -> 3
+//   "{}"    -> {}
+//   "{ \"hello\": \"world\"}" -> { "hello": "world" }
+// Jsonify reverts Stringify.
+func (j Json) Jsonify() Json {
+	if j.IsString() && !j.IsEmptyString() {
 		v, _ := strconv.Unquote(j.String())
 		return New(v)
 	}
