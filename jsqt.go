@@ -767,7 +767,7 @@ func (j Json) IsNully() bool {
 }
 
 func (j Json) IsTruthy() bool {
-	return !j.IsFalsy() && j.String() != ""
+	return !j.IsFalsy() && j.IsAnything()
 }
 
 func (j Json) IsFalsy() bool {
@@ -776,7 +776,7 @@ func (j Json) IsFalsy() bool {
 }
 
 func (j Json) IsSome() bool {
-	return !j.IsNull() && j.String() != ""
+	return !j.IsNull() && j.IsAnything()
 }
 
 func (j Json) IsAnything() bool {
