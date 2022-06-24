@@ -981,15 +981,11 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 				o.WriteByte(c)
 			} else {
 				// Gets anything and emit it as a value.
-				if ini := j.s.Mark(); j.s.MatchUntilAnyByte4(',', ' ', '}', ']') {
+				if ini := j.s.Mark(); j.s.MatchUntilAnyByte5(',', ' ', '}', ']', 0) {
 					val := j.s.Token(ini)
 					_, v := m(New(""), New(val))
 					o.WriteString(v.String())
 					continue
-				} else {
-					// EOF case.
-					_, v := m(New(""), New(j.s.String()))
-					o.WriteString(v.String())
 				}
 			}
 		}
