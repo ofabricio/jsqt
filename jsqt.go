@@ -336,12 +336,12 @@ func funcIterateKeysValues(q *Query, j Json) Json {
 
 func funcIf(q *Query, j Json) Json {
 	cond := q.ParseFunOrKey(j)
-	then := q.ParseFunOrKey(j)
-	elze := q.ParseFunOrKey(j)
+	then := q.GrabArg()
+	elze := q.GrabArg()
 	if cond.IsAnything() {
-		return then
+		return then.ParseFunOrKey(j)
 	}
-	return elze
+	return elze.ParseFunOrKey(j)
 }
 
 func funcEither(q *Query, j Json) Json {
