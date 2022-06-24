@@ -292,9 +292,9 @@ func funcCollect(q *Query, j Json) Json {
 }
 
 func funcDefault(q *Query, j Json) Json {
-	d := q.ParseRaw() // Default value.
+	v := q.ParseRaw()
 	if j.String() == "" {
-		return d
+		return v
 	}
 	return j
 }
@@ -472,54 +472,54 @@ func funcIsBlank(q *Query, j Json) Json {
 // #region Filters
 
 func funcEQ(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() == v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() == b.String() {
 		return j
 	}
 	return New("")
 }
 
 func funcNEQ(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() != v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() != b.String() {
 		return j
 	}
 	return New("")
 }
 
 func funcGTE(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() >= v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() >= b.String() {
 		return j
 	}
 	return New("")
 }
 
 func funcLTE(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() <= v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() <= b.String() {
 		return j
 	}
 	return New("")
 }
 
 func funcGT(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() > v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() > b.String() {
 		return j
 	}
 	return New("")
 }
 
 func funcLT(q *Query, j Json) Json {
-	f := q.ParseFunOrKey(j) // Field.
-	v := q.ParseFunOrRaw(j) // Value.
-	if f.String() < v.String() {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.String() < b.String() {
 		return j
 	}
 	return New("")
