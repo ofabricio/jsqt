@@ -253,14 +253,9 @@ func funcObj(q *Query, j Json) Json {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			if k.IsString() {
-				o.WriteString(k.String())
-			} else {
-				o.WriteString(`"`)
-				o.WriteString(k.String())
-				o.WriteString(`"`)
-			}
-			o.WriteString(`:`)
+			o.WriteByte('"')
+			o.WriteString(k.TrimKey())
+			o.WriteString(`":`)
 			o.WriteString(v.String())
 		}
 	}
