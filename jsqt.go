@@ -2,6 +2,7 @@ package jsqt
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -238,6 +239,8 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 		return funcReplace(q, j)
 	case "concat":
 		return funcConcat(q, j)
+	case "sort":
+		return funcSort(q, j)
 	default:
 		return New("")
 	}
@@ -649,6 +652,27 @@ func funcConcat(q *Query, j Json) Json {
 	}
 	o.WriteByte(']')
 	return New(o.String())
+}
+
+func funcSort(q *Query, j Json) Json {
+	dir := q.ParseArgRaw(j).String()
+	var items []string
+	j.ForEach(func(i, v Json) bool {
+		items = append(items, v.String())
+		return false
+	})
+	sort.SliceStable(items, func(i, j int) bool {
+		aa := *q
+		bb := aa
+		va := aa.ParseArgFunOrKey(New(items[i])).String()
+		vb := bb.ParseArgFunOrKey(New(items[j])).String()
+		if dir == "asc" {
+			return va < vb
+		}
+		return va > vb
+	})
+	q.SkipArg()
+	return New("[" + strings.Join(items, ",") + "]")
 }
 
 // #endregion Functions
