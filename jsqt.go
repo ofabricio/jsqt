@@ -31,81 +31,50 @@ func (q *Query) Parse(j Json) Json {
 	return q.ParseFun(j)
 }
 
+func (q *Query) ParseFunOrKey(j Json) Json {
+	if q.EqualByte('(') {
+		return q.ParseFun(j)
+	}
+	return q.ParseKey(j)
+}
+
+func (q *Query) ParseFunOrRaw(j Json) Json {
+	if q.EqualByte('(') {
+		return q.ParseFun(j)
+	}
+	return q.ParseRaw()
+}
+
 func (q *Query) ParseFun(j Json) Json {
 	if q.MatchByte('(') {
-		if fname := q.TokenAnything(); fname != "" {
-			v, _ := q.CallFunc(fname, j), q.MatchByte(')')
-			return v
-		}
-		if q.MatchByte(')') {
-			return j
-		}
+		fname := q.ParseRaw().String()
+		j, _ = q.CallFun(fname, j), q.MatchByte(')')
+		q.ws()
 	}
-	return New("")
+	return j
 }
 
 func (q *Query) ParseKey(j Json) Json {
 	key := ""
-	m := q.Mark()
-	if q.UtilMatchString('"') {
+	if m := q.Mark(); q.UtilMatchString('"') {
 		key = q.Token(m)
 		key = key[1 : len(key)-1]
-	} else if q.MatchUntilAnyByte(' ', ')') { // Anything.
+	} else if q.MatchUntilAnyByte3(' ', ')', 0) { // Anything.
 		key = q.Token(m)
 	}
+	q.ws()
 	return j.Get(key)
 }
 
-func (q *Query) ParseRaw(j Json) Json {
+func (q *Query) ParseRaw() Json {
 	raw := ""
-	m := q.Mark()
-	if q.UtilMatchString('"') {
+	if m := q.Mark(); q.UtilMatchString('"') {
 		raw = q.Token(m)
-	} else if q.MatchUntilAnyByte(' ', ')') { // Anything.
+	} else if q.MatchUntilAnyByte3(' ', ')', 0) { // Anything.
 		raw = q.Token(m)
 	}
+	q.ws()
 	return New(raw)
-}
-
-func (q *Query) ParseArgFunOrKey(j Json) Json {
-	if q.MatchByte(' ') {
-		if q.IsFun() {
-			return q.ParseFun(j)
-		}
-		return q.ParseKey(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgFunOrRaw(j Json) Json {
-	if q.MatchByte(' ') {
-		if q.IsFun() {
-			return q.ParseFun(j)
-		}
-		return q.ParseRaw(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgFun(j Json) Json {
-	if q.MatchByte(' ') {
-		return q.ParseFun(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgKey(j Json) Json {
-	if q.MatchByte(' ') {
-		return q.ParseKey(j)
-	}
-	return New("")
-}
-
-func (q *Query) ParseArgRaw(j Json) Json {
-	if q.MatchByte(' ') {
-		return q.ParseRaw(j)
-	}
-	return New("")
 }
 
 func (q *Query) SkipArgs() {
@@ -115,19 +84,22 @@ func (q *Query) SkipArgs() {
 }
 
 func (q *Query) SkipArg() {
-	q.MatchByte(' ')
 	q.MatchArg()
+	q.ws()
 }
 
-func (q *Query) MatchArg() {
-	_ = q.UtilMatchOpenCloseCount('(', ')', '"') || q.UtilMatchString('"') || q.MatchUntilAnyByte(' ', ')')
+func (q *Query) MatchArg() bool {
+	return q.UtilMatchOpenCloseCount('(', ')', '"') || q.UtilMatchString('"') || q.MatchUntilAnyByte(' ', ')')
 }
 
-func (q Query) IsFun() bool {
-	return q.EqualByte('(')
+func (q *Query) GrabArg() Query {
+	qq := *q
+	qq.Scanner = Scanner(q.TokenFor(q.MatchArg))
+	q.ws()
+	return qq
 }
 
-func (q *Query) CallFunc(fname string, j Json) Json {
+func (q *Query) CallFun(fname string, j Json) Json {
 	switch fname {
 	case "get":
 		return funcGet(q, j)
@@ -136,7 +108,7 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 	case "arr":
 		return funcArr(q, j)
 	case "raw":
-		return funcRaw(q, j)
+		return q.ParseRaw()
 	case "collect":
 		return funcCollect(q, j)
 	case "flatten":
@@ -246,31 +218,15 @@ func (q *Query) CallFunc(fname string, j Json) Json {
 	}
 }
 
-func (q *Query) TokenAnything() string {
-	return q.TokenFor(func() bool {
-		return q.MatchUntilAnyByte(' ', ')')
-	})
-}
-
-func (q *Query) ForEach(j Json, f func(sub *Query, item Json)) {
-	ini := *q
-	j.ForEach(func(i, item Json) bool {
-		end := ini
-		f(&end, item)
-		*q = end
-		return false
-	})
+func (q *Query) ws() {
+	q.MatchByte(' ')
 }
 
 // #region Functions
 
-func funcRaw(q *Query, j Json) Json {
-	return q.ParseArgRaw(j)
-}
-
 func funcGet(q *Query, j Json) Json {
 	for !q.EqualByte(')') {
-		j = q.ParseArgFunOrKey(j)
+		j = q.ParseFunOrKey(j)
 	}
 	return j
 }
@@ -282,7 +238,7 @@ func funcArr(q *Query, j Json) Json {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
-		v := q.ParseArgFunOrKey(j)
+		v := q.ParseFunOrKey(j)
 		o.WriteString(v.String())
 	}
 	o.WriteString("]")
@@ -293,7 +249,7 @@ func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for !q.EqualByte(')') {
-		if k, v := q.ParseArgFunOrRaw(j), q.ParseArgFunOrKey(j); v.IsAnything() {
+		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); v.IsAnything() {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -317,9 +273,11 @@ func funcCollect(q *Query, j Json) Json {
 	o.WriteString("[")
 	for !q.EqualByte(')') {
 		if j.IsArray() && !j.IsEmptyArray() {
-			q.ForEach(j, func(sub *Query, item Json) {
+			ini := *q
+			j.ForEach(func(i, item Json) bool {
+				sub := ini
 				for !sub.EqualByte(')') {
-					item = sub.ParseArgFunOrKey(item)
+					item = sub.ParseFunOrKey(item)
 				}
 				if item.IsAnything() {
 					if o.Len() > 1 {
@@ -327,9 +285,11 @@ func funcCollect(q *Query, j Json) Json {
 					}
 					o.WriteString(item.String())
 				}
+				*q = sub
+				return false
 			})
 		} else {
-			j = q.ParseArgFunOrKey(j)
+			j = q.ParseFunOrKey(j)
 		}
 	}
 	o.WriteString("]")
@@ -337,7 +297,7 @@ func funcCollect(q *Query, j Json) Json {
 }
 
 func funcDefault(q *Query, j Json) Json {
-	d := q.ParseArgRaw(j) // Default value.
+	d := q.ParseRaw() // Default value.
 	if j.String() == "" {
 		return d
 	}
@@ -345,50 +305,44 @@ func funcDefault(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
-	ini := *q
+	keyArg := q.GrabArg()
+	valArg := q.GrabArg()
 	return j.Iterate(func(k, v Json) (Json, Json) {
 		arr := New(`[` + k.String() + "," + v.String() + `]`)
-		i := ini
-		mk, mv := i.ParseArgFunOrKey(arr), i.ParseArgFunOrKey(arr)
-		*q = i
-		return mk, mv
+		ka := keyArg
+		va := valArg
+		return ka.ParseFunOrKey(arr), va.ParseFunOrKey(arr)
 	})
 }
 
 func funcIterateKeys(q *Query, j Json) Json {
-	ini := *q
+	keyArg := q.GrabArg()
 	return j.IterateKeys(func(k Json) Json {
-		i := ini
-		mk := i.ParseArgFun(k)
-		*q = i
-		return mk
+		ka := keyArg
+		return ka.ParseFun(k)
 	})
 }
 
 func funcIterateValues(q *Query, j Json) Json {
-	ini := *q
+	valArg := q.GrabArg()
 	return j.IterateValues(func(v Json) Json {
-		i := ini
-		v = i.ParseArgFun(v)
-		*q = i
-		return v
+		va := valArg
+		return va.ParseFun(v)
 	})
 }
 
 func funcIterateKeysValues(q *Query, j Json) Json {
-	ini := *q
+	keyvalArg := q.GrabArg()
 	return j.IterateKeysValues(func(v Json) Json {
-		i := ini
-		kv := i.ParseArgFun(v)
-		*q = i
-		return kv
+		kv := keyvalArg
+		return kv.ParseFun(v)
 	})
 }
 
 func funcIf(q *Query, j Json) Json {
-	cond := q.ParseArgFunOrKey(j)
-	then := q.ParseArgFunOrKey(j)
-	elze := q.ParseArgFunOrKey(j)
+	cond := q.ParseFunOrKey(j)
+	then := q.ParseFunOrKey(j)
+	elze := q.ParseFunOrKey(j)
 	if cond.IsAnything() {
 		return then
 	}
@@ -396,9 +350,9 @@ func funcIf(q *Query, j Json) Json {
 }
 
 func funcEither(q *Query, j Json) Json {
-	v := q.ParseArgFunOrKey(j)
+	v := q.ParseFunOrKey(j)
 	for v.IsNully() && !q.EqualByte(')') {
-		v = q.ParseArgFunOrKey(j)
+		v = q.ParseFunOrKey(j)
 	}
 	q.SkipArgs()
 	return v
@@ -523,8 +477,8 @@ func funcIsBlank(q *Query, j Json) Json {
 // #region Filters
 
 func funcEQ(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() == v.String() {
 		return j
 	}
@@ -532,8 +486,8 @@ func funcEQ(q *Query, j Json) Json {
 }
 
 func funcNEQ(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() != v.String() {
 		return j
 	}
@@ -541,8 +495,8 @@ func funcNEQ(q *Query, j Json) Json {
 }
 
 func funcGTE(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() >= v.String() {
 		return j
 	}
@@ -550,8 +504,8 @@ func funcGTE(q *Query, j Json) Json {
 }
 
 func funcLTE(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() <= v.String() {
 		return j
 	}
@@ -559,8 +513,8 @@ func funcLTE(q *Query, j Json) Json {
 }
 
 func funcGT(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() > v.String() {
 		return j
 	}
@@ -568,8 +522,8 @@ func funcGT(q *Query, j Json) Json {
 }
 
 func funcLT(q *Query, j Json) Json {
-	f := q.ParseArgFunOrKey(j) // Field.
-	v := q.ParseArgFunOrRaw(j) // Value.
+	f := q.ParseFunOrKey(j) // Field.
+	v := q.ParseFunOrRaw(j) // Value.
 	if f.String() < v.String() {
 		return j
 	}
@@ -579,8 +533,8 @@ func funcLT(q *Query, j Json) Json {
 // #endregion Filters
 
 func funcOr(q *Query, j Json) Json {
-	a := q.ParseArgFun(j)
-	b := q.ParseArgFun(j)
+	a := q.ParseFun(j)
+	b := q.ParseFun(j)
 	if a.IsAnything() || b.IsAnything() {
 		return j
 	}
@@ -588,8 +542,8 @@ func funcOr(q *Query, j Json) Json {
 }
 
 func funcAnd(q *Query, j Json) Json {
-	a := q.ParseArgFun(j)
-	b := q.ParseArgFun(j)
+	a := q.ParseFun(j)
+	b := q.ParseFun(j)
 	if a.IsAnything() && b.IsAnything() {
 		return j
 	}
@@ -597,7 +551,7 @@ func funcAnd(q *Query, j Json) Json {
 }
 
 func funcNot(q *Query, j Json) Json {
-	a := q.ParseArgFun(j)
+	a := q.ParseFun(j)
 	if a.IsAnything() {
 		return New("")
 	}
@@ -614,15 +568,15 @@ func funcBool(q *Query, j Json) Json {
 func funcDebug(q *Query, j Json) Json {
 	msg := "debug"
 	if !q.EqualByte(')') {
-		msg = q.ParseArgRaw(j).String()
+		msg = q.ParseRaw().String()
 	}
 	fmt.Printf("[%s] %s\n", msg, j)
 	return j
 }
 
 func funcReplace(q *Query, j Json) Json {
-	old := q.ParseArgRaw(j)
-	new := q.ParseArgRaw(j)
+	old := q.ParseRaw()
+	new := q.ParseRaw()
 	if j.IsString() {
 		return New(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
 	}
@@ -632,12 +586,12 @@ func funcReplace(q *Query, j Json) Json {
 func funcConcat(q *Query, j Json) Json {
 	var o strings.Builder
 
-	v := q.ParseArgFunOrKey(j)
+	v := q.ParseFunOrKey(j)
 
 	if v.IsString() {
 		o.WriteString(v.Jsonify().String())
 		for !q.EqualByte(')') {
-			v := q.ParseArgFunOrKey(j)
+			v := q.ParseFunOrKey(j)
 			o.WriteString(v.Jsonify().String())
 		}
 		return New(o.String()).Stringify()
@@ -646,7 +600,7 @@ func funcConcat(q *Query, j Json) Json {
 	o.WriteByte('[')
 	o.WriteString(v.Flatten().String())
 	for !q.EqualByte(')') {
-		v := q.ParseArgFunOrKey(j)
+		v := q.ParseFunOrKey(j)
 		o.WriteByte(',')
 		o.WriteString(v.Flatten().String())
 	}
@@ -655,23 +609,23 @@ func funcConcat(q *Query, j Json) Json {
 }
 
 func funcSort(q *Query, j Json) Json {
-	dir := q.ParseArgRaw(j).String()
+	dir := q.ParseRaw().String()
+	arg := q.GrabArg()
 	var items []string
 	j.ForEach(func(i, v Json) bool {
 		items = append(items, v.String())
 		return false
 	})
 	sort.SliceStable(items, func(i, j int) bool {
-		aa := *q
-		bb := aa
-		va := aa.ParseArgFunOrKey(New(items[i])).String()
-		vb := bb.ParseArgFunOrKey(New(items[j])).String()
+		ia := arg
+		ja := ia
+		va := ia.ParseFunOrKey(New(items[i])).String()
+		vb := ja.ParseFunOrKey(New(items[j])).String()
 		if dir == "asc" {
 			return va < vb
 		}
 		return va > vb
 	})
-	q.SkipArg()
 	return New("[" + strings.Join(items, ",") + "]")
 }
 
@@ -1098,7 +1052,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	}
 }
 
-func (j Json) ForEach(f func(k, v Json) bool) {
+func (j Json) ForEach(f func(i, v Json) bool) {
 	if j.s.MatchByte('[') {
 		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
 			ini := j.s.Mark()
