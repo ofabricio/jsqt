@@ -604,7 +604,7 @@ func funcConcat(q *Query, j Json) Json {
 }
 
 func funcSort(q *Query, j Json) Json {
-	dir := q.ParseRaw().String()
+	asc := q.ParseRaw().String() == "asc"
 	arg := q.GrabArg()
 	var items []string
 	j.ForEach(func(i, v Json) bool {
@@ -616,7 +616,7 @@ func funcSort(q *Query, j Json) Json {
 		ja := ia
 		va := ia.ParseFunOrKey(New(items[i])).String()
 		vb := ja.ParseFunOrKey(New(items[j])).String()
-		if dir == "asc" {
+		if asc {
 			return va < vb
 		}
 		return va > vb
