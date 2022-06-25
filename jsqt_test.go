@@ -206,6 +206,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(arr a b a (raw "hi"))`, then: `[3,4,3,"hi"]`},
 		{give: `{"a":3,"b":4}`, when: `(arr a b a)`, then: `[3,4,3]`},
 		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
+		{give: ``, when: `(arr)`, then: `[]`},
 		// Object.
 		{give: `{"a":"aaa","b":"bbb"}}`, when: `(obj (get a) (get b))`, then: `{"aaa":"bbb"}`},
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" a y b)`, then: `{"a b":3,"y":4}`},
