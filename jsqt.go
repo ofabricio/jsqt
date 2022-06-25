@@ -99,6 +99,11 @@ func (q *Query) GrabArg() Query {
 	return qq
 }
 
+func (q Query) NewArg(arg string) Query {
+	q.Scanner = Scanner(arg)
+	return q
+}
+
 func (q *Query) CallFun(fname string, j Json) Json {
 	switch fname {
 	case "get":
