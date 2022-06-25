@@ -218,6 +218,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	}
 }
 
+func (q *Query) IsEmpty() bool {
+	return q.String() == ""
+}
+
 func (q *Query) ws() {
 	q.MatchByte(' ')
 }
