@@ -612,9 +612,9 @@ func funcSort(q *Query, j Json) Json {
 
 	if j.IsObject() {
 		if asc {
-			return Get(j.String(), "(get (entries) (sort asc 0) (objectify))")
+			return j.Query("(get (entries) (sort asc 0) (objectify))")
 		}
-		return Get(j.String(), "(get (entries) (sort desc 0) (objectify))")
+		return j.Query("(get (entries) (sort desc 0) (objectify))")
 	}
 
 	// Sort array.
