@@ -617,6 +617,20 @@ func funcConcat(q *Query, j Json) Json {
 func funcSort(q *Query, j Json) Json {
 	asc := q.ParseRaw().String() == "asc"
 	arg := q.GrabArg()
+
+	if arg.IsEmpty() {
+		arg = q.NewArg("(.)")
+	}
+
+	if j.IsObject() {
+		if asc {
+			return Get(j.String(), "(get (entries) (sort asc 0) (objectify))")
+		}
+		return Get(j.String(), "(get (entries) (sort desc 0) (objectify))")
+	}
+
+	// Sort array.
+
 	var items []string
 	j.ForEach(func(i, v Json) bool {
 		items = append(items, v.String())

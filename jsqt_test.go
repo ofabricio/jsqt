@@ -16,8 +16,10 @@ func TestGet(t *testing.T) {
 		then string
 	}{
 		// sort
-		{give: `[5,3,4]`, when: `(sort desc (.))`, then: `[5,4,3]`},
-		{give: `[5,4,3]`, when: `(sort asc (.))`, then: `[3,4,5]`},
+		{give: `{"c":5,"b":4,"a":3}`, when: `(sort asc)`, then: `{"a":3,"b":4,"c":5}`},
+		{give: `{"a":5,"b":4,"c":3}`, when: `(sort desc)`, then: `{"c":3,"b":4,"a":5}`},
+		{give: `[5,3,4]`, when: `(sort desc)`, then: `[5,4,3]`},
+		{give: `[5,4,3]`, when: `(sort asc)`, then: `[3,4,5]`},
 		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(sort desc a)`, then: `[{"a":5},{"a":4},{"a":3}]`},
 		{give: `[{"a":5},{"a":4},{"a":3}]`, when: `(sort asc a)`, then: `[{"a":3},{"a":4},{"a":5}]`},
 		// either should exhaust its arguments.
