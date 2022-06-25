@@ -10,9 +10,7 @@ import (
 )
 
 func Get(jsn, qry string) Json {
-	j := New(jsn)
-	q := Query{Scanner: Scanner(qry), Root: j}
-	return q.Parse(j)
+	return New(jsn).Query(qry)
 }
 
 func New(jsn string) Json {
@@ -647,6 +645,11 @@ func funcSort(q *Query, j Json) Json {
 
 type Json struct {
 	s Scanner
+}
+
+func (j Json) Query(qry string) Json {
+	q := Query{Scanner: Scanner(qry), Root: j}
+	return q.Parse(j)
 }
 
 // String returns the raw JSON data.
