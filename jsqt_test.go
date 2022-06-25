@@ -290,14 +290,14 @@ func TestJsonGet(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		j := New(tc.jsn)
+		j := JSON(tc.jsn)
 		r := j.Get(tc.qry)
 		assert.Equal(t, tc.exp, r.String(), "TC: %v", tc)
 	}
 }
 
 func BenchmarkJson_Get(b *testing.B) {
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.Get("age")
 	}
@@ -305,11 +305,11 @@ func BenchmarkJson_Get(b *testing.B) {
 
 func TestJsonGet_Order(t *testing.T) {
 
-	j := New(`{"a":3,"b":4}`)
+	j := JSON(`{"a":3,"b":4}`)
 	assert.Equal(t, "4", j.Get("b").String())
 	assert.Equal(t, "3", j.Get("a").String())
 
-	j = New(`[3,4]`)
+	j = JSON(`[3,4]`)
 	assert.Equal(t, "4", j.Get("1").String())
 	assert.Equal(t, "3", j.Get("0").String())
 }
@@ -327,7 +327,7 @@ func TestJsonForEachKeyVal(t *testing.T) {
 	}
 	for _, tc := range tt {
 		var r []string
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		j.ForEachKeyVal(func(k, v Json) bool {
 			r = append(r, k.Str(), v.String())
 			return false
@@ -349,7 +349,7 @@ func TestJsonForEach(t *testing.T) {
 	}
 	for _, tc := range tt {
 		var r []string
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		j.ForEach(func(i, v Json) bool {
 			r = append(r, i.String(), v.String())
 			return false
@@ -369,7 +369,7 @@ func TestJsonStr(t *testing.T) {
 		{inp: `"\"a\""`, out: `"a"`},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Str(), tc.inp)
 	}
 }
@@ -386,7 +386,7 @@ func TestJsonInt(t *testing.T) {
 		{inp: `100`, out: 100},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Int(), tc.inp)
 	}
 }
@@ -403,7 +403,7 @@ func TestJsonFloat(t *testing.T) {
 		{inp: `1e2`, out: 100},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Float(), tc.inp)
 	}
 }
@@ -418,7 +418,7 @@ func TestJsonBool(t *testing.T) {
 		{inp: `true`, out: true},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Bool(), tc.inp)
 	}
 }
@@ -438,7 +438,7 @@ func TestJsonIsEmpty(t *testing.T) {
 		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmpty(), tc.inp)
 	}
 }
@@ -453,7 +453,7 @@ func TestJsonIsEmptyString(t *testing.T) {
 		{inp: `"a"`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmptyString(), tc.inp)
 	}
 }
@@ -471,7 +471,7 @@ func TestJsonIsEmptyObject(t *testing.T) {
 		{inp: `3`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmptyObject(), tc.inp)
 	}
 }
@@ -489,7 +489,7 @@ func TestJsonIsEmptyArray(t *testing.T) {
 		{inp: `3`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsEmptyArray(), tc.inp)
 	}
 }
@@ -514,7 +514,7 @@ func TestJsonIsFalsy(t *testing.T) {
 		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsFalsy(), tc)
 	}
 }
@@ -539,7 +539,7 @@ func TestJsonIsTruthy(t *testing.T) {
 		{inp: `true`, out: true},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsTruthy(), tc)
 	}
 }
@@ -559,7 +559,7 @@ func TestJsonIsVoid(t *testing.T) {
 		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsVoid(), tc.inp)
 	}
 }
@@ -579,7 +579,7 @@ func TestJsonIsBlank(t *testing.T) {
 		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsBlank(), tc.inp)
 	}
 }
@@ -599,7 +599,7 @@ func TestJsonIsNully(t *testing.T) {
 		{inp: `true`, out: false},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsNully(), tc.inp)
 	}
 }
@@ -619,7 +619,7 @@ func TestJsonIsSome(t *testing.T) {
 		{inp: `true`, out: true},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.IsSome(), tc)
 	}
 }
@@ -641,13 +641,13 @@ func TestJsonStringify(t *testing.T) {
 		{inp: `"a b"`, out: `"a b"`},
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Stringify().String(), tc)
 	}
 }
 
 func BenchmarkJsonToStringify(b *testing.B) {
-	j := New(`{ "hello": "wo\"rld" }`)
+	j := JSON(`{ "hello": "wo\"rld" }`)
 	for i := 0; i < b.N; i++ {
 		_ = j.Stringify()
 	}
@@ -670,13 +670,13 @@ func TestJsonJsonify(t *testing.T) {
 		{inp: `"a b"`, out: `a b`}, // Invalid JSON.
 	}
 	for _, tc := range tt {
-		j := New(tc.inp)
+		j := JSON(tc.inp)
 		assert.Equal(t, tc.out, j.Jsonify().String(), tc)
 	}
 }
 
 func BenchmarkJsonJsonify(b *testing.B) {
-	j := New(`"{ \"hello\": \"wo\\\"rld\" }"`)
+	j := JSON(`"{ \"hello\": \"wo\\\"rld\" }"`)
 	for i := 0; i < b.N; i++ {
 		_ = j.Jsonify()
 	}
@@ -706,7 +706,7 @@ func ExampleJson_ForEachKeyVal() {
 		return false
 	}
 
-	j := New(TestData1)
+	j := JSON(TestData1)
 	j.ForEachKeyVal(m)
 
 	// Output:
@@ -725,7 +725,7 @@ func BenchmarkJson_ForEachKeyVal(b *testing.B) {
 	m := func(k, v Json) bool {
 		return false
 	}
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		j.ForEachKeyVal(m)
 	}
@@ -737,7 +737,7 @@ func ExampleJson_ForEach() {
 		return false
 	}
 
-	j := New(TestData2)
+	j := JSON(TestData2)
 	j.ForEach(m)
 
 	// Output:
@@ -749,7 +749,7 @@ func BenchmarkJson_ForEach(b *testing.B) {
 	m := func(k, v Json) bool {
 		return false
 	}
-	j := New(TestData2)
+	j := JSON(TestData2)
 	for i := 0; i < b.N; i++ {
 		j.ForEach(m)
 	}
@@ -757,9 +757,9 @@ func BenchmarkJson_ForEach(b *testing.B) {
 
 func ExampleJson_Iterate() {
 
-	j := New(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0,{},[]]}]}},"d":1}`)
+	j := JSON(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0,{},[]]}]}},"d":1}`)
 	v := j.Iterate(func(k, v Json) (Json, Json) {
-		k = New(strings.ToUpper(k.String()))
+		k = JSON(strings.ToUpper(k.String()))
 		if v.IsNumber() {
 			return k, v.Stringify()
 		}
@@ -776,7 +776,7 @@ func BenchmarkJson_Iterate(b *testing.B) {
 	m := func(k, v Json) (Json, Json) {
 		return k, v
 	}
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.Iterate(m)
 	}
@@ -788,7 +788,7 @@ func ExampleJson_IterateKeysValues() {
 		return v
 	}
 
-	j := New(TestData1)
+	j := JSON(TestData1)
 	r := j.IterateKeysValues(m)
 
 	fmt.Println(r)
@@ -828,7 +828,7 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 	m := func(v Json) Json {
 		return v
 	}
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.IterateKeysValues(m)
 	}
@@ -840,7 +840,7 @@ func ExampleJson_IterateKeys() {
 		return v
 	}
 
-	j := New(TestData1)
+	j := JSON(TestData1)
 	r := j.IterateKeys(m)
 
 	fmt.Println(r)
@@ -867,7 +867,7 @@ func BenchmarkJson_IterateKeys(b *testing.B) {
 	m := func(v Json) Json {
 		return v
 	}
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.IterateKeys(m)
 	}
@@ -879,7 +879,7 @@ func ExampleJson_IterateValues() {
 		return v
 	}
 
-	j := New(TestData1)
+	j := JSON(TestData1)
 	r := j.IterateValues(m)
 
 	fmt.Println(r)
@@ -905,7 +905,7 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 	m := func(v Json) Json {
 		return v
 	}
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.IterateValues(m)
 	}
@@ -930,8 +930,8 @@ func ExampleJson_Iterator() {
 
 	var o strings.Builder
 
-	j := New(TestData1)
-	j.Iterator(&o, New(""), m)
+	j := JSON(TestData1)
+	j.Iterator(&o, JSON(""), m)
 
 	fmt.Println(o.String())
 
@@ -958,16 +958,16 @@ func BenchmarkJson_Iterator(b *testing.B) {
 	}
 	var o strings.Builder
 	o.Grow(2550)
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		o.Reset()
-		j.Iterator(&o, New(""), m)
+		j.Iterator(&o, JSON(""), m)
 	}
 }
 
 func ExampleJson_Uglify() {
 
-	j := New(`{ "a": "b" }`)
+	j := JSON(`{ "a": "b" }`)
 	j = j.Uglify()
 
 	fmt.Println(j)
@@ -977,7 +977,7 @@ func ExampleJson_Uglify() {
 }
 
 func BenchmarkJson_Uglify(b *testing.B) {
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.Uglify()
 	}
@@ -985,7 +985,7 @@ func BenchmarkJson_Uglify(b *testing.B) {
 
 func ExampleJson_Prettify() {
 
-	j := New(`{ "a": "b" }`)
+	j := JSON(`{ "a": "b" }`)
 	j = j.Prettify()
 
 	fmt.Println(j)
@@ -997,7 +997,7 @@ func ExampleJson_Prettify() {
 }
 
 func BenchmarkJson_Prettify(b *testing.B) {
-	j := New(TestData1)
+	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.Prettify()
 	}

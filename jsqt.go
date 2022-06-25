@@ -10,10 +10,10 @@ import (
 )
 
 func Get(jsn, qry string) Json {
-	return New(jsn).Query(qry)
+	return JSON(jsn).Query(qry)
 }
 
-func New(jsn string) Json {
+func JSON(jsn string) Json {
 	return Json{Scanner(jsn)}
 }
 
@@ -71,7 +71,7 @@ func (q *Query) ParseRaw() Json {
 		raw = q.Token(m)
 	}
 	q.ws()
-	return New(raw)
+	return JSON(raw)
 }
 
 func (q *Query) SkipArgs() {
@@ -207,9 +207,9 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	case "stringify":
 		return j.Stringify()
 	case "upper":
-		return New(strings.ToUpper(j.String()))
+		return JSON(strings.ToUpper(j.String()))
 	case "lower":
-		return New(strings.ToLower(j.String()))
+		return JSON(strings.ToLower(j.String()))
 	case "replace":
 		return funcReplace(q, j)
 	case "concat":
@@ -217,7 +217,7 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	case "sort":
 		return funcSort(q, j)
 	default:
-		return New("")
+		return JSON("")
 	}
 }
 
@@ -249,7 +249,7 @@ func funcArr(q *Query, j Json) Json {
 		o.WriteString(v.String())
 	}
 	o.WriteString("]")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func funcObj(q *Query, j Json) Json {
@@ -267,7 +267,7 @@ func funcObj(q *Query, j Json) Json {
 		}
 	}
 	o.WriteString("}")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func funcCollect(q *Query, j Json) Json {
@@ -295,7 +295,7 @@ func funcCollect(q *Query, j Json) Json {
 		}
 	}
 	o.WriteString("]")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func funcDefault(q *Query, j Json) Json {
@@ -310,7 +310,7 @@ func funcIterate(q *Query, j Json) Json {
 	keyArg := q.GrabArg()
 	valArg := q.GrabArg()
 	return j.Iterate(func(k, v Json) (Json, Json) {
-		arr := New(`[` + k.String() + "," + v.String() + `]`)
+		arr := JSON(`[` + k.String() + "," + v.String() + `]`)
 		ka := keyArg
 		va := valArg
 		return ka.ParseFunOrKey(arr), va.ParseFunOrKey(arr)
@@ -364,112 +364,112 @@ func funcIsNum(q *Query, j Json) Json {
 	if j.IsNumber() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsObj(q *Query, j Json) Json {
 	if j.IsObject() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsArr(q *Query, j Json) Json {
 	if j.IsArray() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsStr(q *Query, j Json) Json {
 	if j.IsString() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsBool(q *Query, j Json) Json {
 	if j.IsBool() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsNull(q *Query, j Json) Json {
 	if j.IsNull() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsEmpty(q *Query, j Json) Json {
 	if j.IsEmpty() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsEmptyObj(q *Query, j Json) Json {
 	if j.IsEmptyObject() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsEmptyArr(q *Query, j Json) Json {
 	if j.IsEmptyArray() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsEmptyStr(q *Query, j Json) Json {
 	if j.IsEmptyString() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsTruthy(q *Query, j Json) Json {
 	if j.IsTruthy() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsFalsy(q *Query, j Json) Json {
 	if j.IsFalsy() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsSome(q *Query, j Json) Json {
 	if j.IsSome() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsVoid(q *Query, j Json) Json {
 	if j.IsVoid() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsNully(q *Query, j Json) Json {
 	if j.IsNully() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcIsBlank(q *Query, j Json) Json {
 	if j.IsBlank() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcEQ(q *Query, j Json) Json {
@@ -478,7 +478,7 @@ func funcEQ(q *Query, j Json) Json {
 	if a.String() == b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcNEQ(q *Query, j Json) Json {
@@ -487,7 +487,7 @@ func funcNEQ(q *Query, j Json) Json {
 	if a.String() != b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcGTE(q *Query, j Json) Json {
@@ -496,7 +496,7 @@ func funcGTE(q *Query, j Json) Json {
 	if a.String() >= b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcLTE(q *Query, j Json) Json {
@@ -505,7 +505,7 @@ func funcLTE(q *Query, j Json) Json {
 	if a.String() <= b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcGT(q *Query, j Json) Json {
@@ -514,7 +514,7 @@ func funcGT(q *Query, j Json) Json {
 	if a.String() > b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcLT(q *Query, j Json) Json {
@@ -523,7 +523,7 @@ func funcLT(q *Query, j Json) Json {
 	if a.String() < b.String() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcOr(q *Query, j Json) Json {
@@ -532,7 +532,7 @@ func funcOr(q *Query, j Json) Json {
 	if a.IsAnything() || b.IsAnything() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcAnd(q *Query, j Json) Json {
@@ -541,22 +541,22 @@ func funcAnd(q *Query, j Json) Json {
 	if a.IsAnything() && b.IsAnything() {
 		return j
 	}
-	return New("")
+	return JSON("")
 }
 
 func funcNot(q *Query, j Json) Json {
 	a := q.ParseFun(j)
 	if a.IsAnything() {
-		return New("")
+		return JSON("")
 	}
 	return j
 }
 
 func funcBool(q *Query, j Json) Json {
 	if j.IsAnything() {
-		return New("true")
+		return JSON("true")
 	}
-	return New("false")
+	return JSON("false")
 }
 
 func funcDebug(q *Query, j Json) Json {
@@ -572,7 +572,7 @@ func funcReplace(q *Query, j Json) Json {
 	old := q.ParseRaw()
 	new := q.ParseRaw()
 	if j.IsString() {
-		return New(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
+		return JSON(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
 	}
 	return j
 }
@@ -588,7 +588,7 @@ func funcConcat(q *Query, j Json) Json {
 			v := q.ParseFunOrKey(j)
 			o.WriteString(v.Jsonify().String())
 		}
-		return New(o.String()).Stringify()
+		return JSON(o.String()).Stringify()
 	}
 
 	o.WriteByte('[')
@@ -599,7 +599,7 @@ func funcConcat(q *Query, j Json) Json {
 		o.WriteString(v.Flatten().String())
 	}
 	o.WriteByte(']')
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func funcSort(q *Query, j Json) Json {
@@ -627,14 +627,14 @@ func funcSort(q *Query, j Json) Json {
 	sort.SliceStable(items, func(i, j int) bool {
 		ia := arg
 		ja := ia
-		va := ia.ParseFunOrKey(New(items[i])).String()
-		vb := ja.ParseFunOrKey(New(items[j])).String()
+		va := ia.ParseFunOrKey(JSON(items[i])).String()
+		vb := ja.ParseFunOrKey(JSON(items[j])).String()
 		if asc {
 			return va < vb
 		}
 		return va > vb
 	})
-	return New("[" + strings.Join(items, ",") + "]")
+	return JSON("[" + strings.Join(items, ",") + "]")
 }
 
 // #endregion Functions
@@ -668,7 +668,7 @@ func (j Json) Stringify() Json {
 	if j.IsString() {
 		return j
 	}
-	return New(strconv.Quote(j.String()))
+	return JSON(strconv.Quote(j.String()))
 }
 
 // Jsonify converts a JSON string to a JSON value.
@@ -681,7 +681,7 @@ func (j Json) Stringify() Json {
 func (j Json) Jsonify() Json {
 	if j.IsString() && !j.IsEmptyString() {
 		v, _ := strconv.Unquote(j.String())
-		return New(v)
+		return JSON(v)
 	}
 	return j
 }
@@ -822,7 +822,7 @@ func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k,
 				o.WriteString(",")
 			}
 			i++
-			v.Iterator(o, New(""), m)
+			v.Iterator(o, JSON(""), m)
 			return false
 		})
 		o.WriteString("]")
@@ -848,7 +848,7 @@ func (j Json) IterateKeys(m func(Json) Json) Json {
 						}
 						// Emits if a key.
 						if j.s[i] == ':' {
-							o.WriteString(m(New(j.s[ini:end].String())).String())
+							o.WriteString(m(JSON(j.s[ini:end].String())).String())
 						} else {
 							o.WriteString(j.s[ini:end].String())
 						}
@@ -861,7 +861,7 @@ func (j Json) IterateKeys(m func(Json) Json) Json {
 			}
 		}
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 // IterateValues iterates over the values (excluding the keys)
@@ -885,7 +885,7 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 						if j.s[i] == ':' {
 							o.WriteString(j.s[ini:end].String())
 						} else {
-							o.WriteString(m(New(j.s[ini:end].String())).String())
+							o.WriteString(m(JSON(j.s[ini:end].String())).String())
 						}
 						o.WriteByte(j.s[i])
 						break
@@ -898,22 +898,22 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 				ini := i
 				for ; i < len(j.s); i++ {
 					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ']' {
-						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						o.WriteByte(j.s[i])
 						break
 					}
 					if j.s[i] == ' ' {
-						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						break
 					}
 					if i == len(j.s)-1 {
-						o.WriteString(m(New(j.s.String())).String())
+						o.WriteString(m(JSON(j.s.String())).String())
 					}
 				}
 			}
 		}
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 // IterateKeysValues iterates over the keys and values of
@@ -929,7 +929,7 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 				ini := i
 				for i = i + 1; i < len(j.s); i++ {
 					if j.s[i] == '"' && j.s[i-1] != '\\' {
-						o.WriteString(m(New(j.s[ini : i+1].String())).String())
+						o.WriteString(m(JSON(j.s[ini : i+1].String())).String())
 						break
 					}
 				}
@@ -940,22 +940,22 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 				ini := i
 				for ; i < len(j.s); i++ {
 					if j.s[i] == ',' || j.s[i] == '}' || j.s[i] == ']' {
-						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						o.WriteByte(j.s[i])
 						break
 					}
 					if j.s[i] == ' ' {
-						o.WriteString(m(New(j.s[ini:i].String())).String())
+						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						break
 					}
 					if i == len(j.s)-1 {
-						o.WriteString(m(New(j.s.String())).String())
+						o.WriteString(m(JSON(j.s.String())).String())
 					}
 				}
 			}
 		}
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 // Iterate iterates over the keys and values of a valid Json
@@ -975,7 +975,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 					j.s.MatchWhileByteLTE(' ')
 					// Is a key of an object or array? Emit only the key.
 					if j.s.EqualByte('{') || j.s.EqualByte('[') {
-						k, _ := m(New(str), New(""))
+						k, _ := m(JSON(str), JSON(""))
 						o.WriteString(k.String())
 						o.WriteByte(':')
 						continue
@@ -983,14 +983,14 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 					// Is a key of a value (string or anything else)? Emit both key and value.
 					if ini := j.s.Mark(); j.s.UtilMatchString('"') || j.s.MatchUntilAnyByte4(',', '}', ']', ' ') {
 						val := j.s.Token(ini)
-						k, v := m(New(str), New(val))
+						k, v := m(JSON(str), JSON(val))
 						o.WriteString(k.String())
 						o.WriteByte(':')
 						o.WriteString(v.String())
 					}
 				} else {
 					// Not a key. Emit as a value.
-					_, v := m(New(""), New(str))
+					_, v := m(JSON(""), JSON(str))
 					o.WriteString(v.String())
 				}
 				continue
@@ -1001,7 +1001,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 				// Gets anything and emit it as a value.
 				if ini := j.s.Mark(); j.s.MatchUntilAnyByte5(',', ' ', '}', ']', 0) {
 					val := j.s.Token(ini)
-					_, v := m(New(""), New(val))
+					_, v := m(JSON(""), JSON(val))
 					o.WriteString(v.String())
 					continue
 				}
@@ -1009,7 +1009,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 		}
 		j.s.Next()
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Get(keyOrIndex string) (r Json) {
@@ -1052,7 +1052,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
 			}
 
-			if f(New(key), New(j.s.Token(ini))) {
+			if f(JSON(key), JSON(j.s.Token(ini))) {
 				return
 			}
 
@@ -1073,7 +1073,7 @@ func (j Json) ForEach(f func(i, v Json) bool) {
 			} else {
 				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
 			}
-			if f(New(strconv.Itoa(i)), New(j.s.Token(ini))) {
+			if f(JSON(strconv.Itoa(i)), JSON(j.s.Token(ini))) {
 				return
 			}
 			j.ws()
@@ -1090,14 +1090,14 @@ func (j *Json) ws() bool {
 func (j Json) Flatten() Json {
 	if j.IsArray() {
 		v := j.String()
-		return New(v[1 : len(v)-1])
+		return JSON(v[1 : len(v)-1])
 	}
 	return j
 }
 
 func (j Json) Size() Json {
 	if j.IsString() {
-		return New(strconv.Itoa(len(j.String()) - 2))
+		return JSON(strconv.Itoa(len(j.String()) - 2))
 	}
 	c := 0
 	if j.IsObject() {
@@ -1111,7 +1111,7 @@ func (j Json) Size() Json {
 			return false
 		})
 	}
-	return New(strconv.Itoa(c))
+	return JSON(strconv.Itoa(c))
 }
 
 func (j Json) Keys() Json {
@@ -1125,7 +1125,7 @@ func (j Json) Keys() Json {
 		return false
 	})
 	o.WriteString("]")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Values() Json {
@@ -1139,7 +1139,7 @@ func (j Json) Values() Json {
 		return false
 	})
 	o.WriteString("]")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Entries() Json {
@@ -1157,7 +1157,7 @@ func (j Json) Entries() Json {
 		return false
 	})
 	o.WriteString("]")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Objectify() Json {
@@ -1173,7 +1173,7 @@ func (j Json) Objectify() Json {
 		return false
 	})
 	o.WriteString("}")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Merge() Json {
@@ -1196,7 +1196,7 @@ func (j Json) Merge() Json {
 		return false
 	})
 	o.WriteString("}")
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Uglify() Json {
@@ -1218,7 +1218,7 @@ func (j Json) Uglify() Json {
 			}
 		}
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 func (j Json) Prettify() Json {
@@ -1280,7 +1280,7 @@ func (j Json) Prettify() Json {
 			}
 		}
 	}
-	return New(o.String())
+	return JSON(o.String())
 }
 
 // #endregion Json
