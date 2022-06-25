@@ -10,10 +10,10 @@ import (
 )
 
 func Get(jsn, qry string) Json {
-	src := New(jsn)
-	src.ws()
-	q := Query{Scanner: Scanner(qry), Root: src}
-	return q.Parse(src)
+	j := New(jsn)
+	j.ws()
+	q := Query{Scanner: Scanner(qry), Root: j}
+	return q.Parse(j)
 }
 
 func New(jsn string) Json {
