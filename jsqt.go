@@ -757,7 +757,7 @@ func (j Json) IsNull() bool {
 }
 
 func (j Json) IsEmptyString() bool {
-	return j.String() == `""`
+	return j.s.Equal(`""`)
 }
 
 func (j Json) IsEmptyObject() bool {
