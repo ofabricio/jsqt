@@ -363,8 +363,6 @@ func funcEither(q *Query, j Json) Json {
 	return v
 }
 
-// #region funcIS
-
 func funcIsNum(q *Query, j Json) Json {
 	if j.IsNumber() {
 		return j
@@ -477,10 +475,6 @@ func funcIsBlank(q *Query, j Json) Json {
 	return New("")
 }
 
-// #endregion funcIS
-
-// #region Filters
-
 func funcEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
@@ -534,8 +528,6 @@ func funcLT(q *Query, j Json) Json {
 	}
 	return New("")
 }
-
-// #endregion Filters
 
 func funcOr(q *Query, j Json) Json {
 	a := q.ParseFun(j)
