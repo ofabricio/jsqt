@@ -93,10 +93,9 @@ func (q *Query) MatchArg() bool {
 }
 
 func (q *Query) GrabArg() Query {
-	qq := *q
-	qq.Scanner = Scanner(q.TokenFor(q.MatchArg))
+	arg := q.TokenFor(q.MatchArg)
 	q.ws()
-	return qq
+	return q.NewArg(arg)
 }
 
 func (q Query) NewArg(arg string) Query {
