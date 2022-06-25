@@ -88,14 +88,14 @@ func (q *Query) SkipArg() {
 	q.ws()
 }
 
-func (q *Query) MatchArg() bool {
-	return q.UtilMatchOpenCloseCount('(', ')', '"') || q.UtilMatchString('"') || q.MatchUntilAnyByte(' ', ')')
-}
-
 func (q *Query) GrabArg() Query {
 	arg := q.TokenFor(q.MatchArg)
 	q.ws()
 	return q.NewArg(arg)
+}
+
+func (q *Query) MatchArg() bool {
+	return q.UtilMatchOpenCloseCount('(', ')', '"') || q.UtilMatchString('"') || q.MatchUntilAnyByte(' ', ')')
 }
 
 func (q Query) NewArg(arg string) Query {
