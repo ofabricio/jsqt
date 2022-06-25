@@ -261,7 +261,7 @@ func funcObj(q *Query, j Json) Json {
 				o.WriteString(",")
 			}
 			o.WriteByte('"')
-			o.WriteString(k.TrimKey())
+			o.WriteString(k.TrimQuote())
 			o.WriteString(`":`)
 			o.WriteString(v.String())
 		}
@@ -572,7 +572,7 @@ func funcReplace(q *Query, j Json) Json {
 	old := q.ParseRaw()
 	new := q.ParseRaw()
 	if j.IsString() {
-		return JSON(strings.ReplaceAll(j.String(), old.TrimKey(), new.TrimKey()))
+		return JSON(strings.ReplaceAll(j.String(), old.TrimQuote(), new.TrimQuote()))
 	}
 	return j
 }
@@ -696,9 +696,9 @@ func (j Json) Str() string {
 	return v
 }
 
-// TrimKey removes the quotes from an object key.
+// TrimQuote removes the quotes from an object key.
 // Example: "name" -> name.
-func (j Json) TrimKey() string {
+func (j Json) TrimQuote() string {
 	v := j.String()
 	if j.IsString() {
 		return v[1 : len(v)-1]
@@ -1014,7 +1014,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 
 func (j Json) Get(keyOrIndex string) (r Json) {
 	f := func(k, v Json) bool {
-		if k.TrimKey() == keyOrIndex {
+		if k.TrimQuote() == keyOrIndex {
 			r = v
 			return true
 		}
