@@ -256,7 +256,7 @@ func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for !q.EqualByte(')') {
-		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); v.IsAnything() {
+		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); v.Exists() {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
@@ -281,7 +281,7 @@ func funcCollect(q *Query, j Json) Json {
 				for !sub.EqualByte(')') {
 					item = sub.ParseFunOrKey(item)
 				}
-				if item.IsAnything() {
+				if item.Exists() {
 					if o.Len() > 1 {
 						o.WriteString(",")
 					}
@@ -345,7 +345,7 @@ func funcIf(q *Query, j Json) Json {
 	cond := q.ParseFunOrKey(j)
 	then := q.GrabArg()
 	elze := q.GrabArg()
-	if cond.IsAnything() {
+	if cond.Exists() {
 		return then.ParseFunOrKey(j)
 	}
 	return elze.ParseFunOrKey(j)
@@ -529,7 +529,7 @@ func funcLT(q *Query, j Json) Json {
 func funcOr(q *Query, j Json) Json {
 	a := q.ParseFun(j)
 	b := q.ParseFun(j)
-	if a.IsAnything() || b.IsAnything() {
+	if a.Exists() || b.Exists() {
 		return j
 	}
 	return JSON("")
@@ -538,7 +538,7 @@ func funcOr(q *Query, j Json) Json {
 func funcAnd(q *Query, j Json) Json {
 	a := q.ParseFun(j)
 	b := q.ParseFun(j)
-	if a.IsAnything() && b.IsAnything() {
+	if a.Exists() && b.Exists() {
 		return j
 	}
 	return JSON("")
@@ -546,14 +546,14 @@ func funcAnd(q *Query, j Json) Json {
 
 func funcNot(q *Query, j Json) Json {
 	a := q.ParseFun(j)
-	if a.IsAnything() {
+	if a.Exists() {
 		return JSON("")
 	}
 	return j
 }
 
 func funcBool(q *Query, j Json) Json {
-	if j.IsAnything() {
+	if j.Exists() {
 		return JSON("true")
 	}
 	return JSON("false")
@@ -785,7 +785,7 @@ func (j Json) IsNully() bool {
 }
 
 func (j Json) IsTruthy() bool {
-	return !j.IsFalsy() && j.IsAnything()
+	return !j.IsFalsy() && j.Exists()
 }
 
 func (j Json) IsFalsy() bool {
@@ -794,10 +794,10 @@ func (j Json) IsFalsy() bool {
 }
 
 func (j Json) IsSome() bool {
-	return !j.IsNull() && j.IsAnything()
+	return !j.IsNull() && j.Exists()
 }
 
-func (j Json) IsAnything() bool {
+func (j Json) Exists() bool {
 	return j.String() != ""
 }
 
