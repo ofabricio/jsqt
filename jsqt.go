@@ -200,6 +200,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return j.Values()
 	case "entries":
 		return j.Entries()
+	case "objectify":
+		return j.Objectify()
 	case "ugly":
 		return j.Uglify()
 	case "pretty":
@@ -1147,6 +1149,22 @@ func (j Json) Entries() Json {
 		return false
 	})
 	o.WriteString("]")
+	return New(o.String())
+}
+
+func (j Json) Objectify() Json {
+	var o strings.Builder
+	o.WriteString("{")
+	j.ForEach(func(i, v Json) bool {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		o.WriteString(v.Get("0").String())
+		o.WriteString(`:`)
+		o.WriteString(v.Get("1").String())
+		return false
+	})
+	o.WriteString("}")
 	return New(o.String())
 }
 
