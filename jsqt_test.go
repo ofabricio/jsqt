@@ -255,7 +255,7 @@ func TestJsonWS(t *testing.T) {
 		when string
 		then string
 	}{
-		{give: ` {  "a"  :	3,  "b"  :  [  {  "c"  :  4  }  ]  }`, when: `(get b 0 c)`, then: `4`},
+		{give: `  {  "a"  :	3,  "b"  :  [  {  "c"  :  4  }  ]  }`, when: `(get b 0 c)`, then: `4`},
 		{give: `[3,4 ]`, when: `(get 1)`, then: `4`},
 		{give: `[3, 4]`, when: `(get 1)`, then: `4`},
 		{give: `[3 ,4]`, when: `(get 1)`, then: `4`},

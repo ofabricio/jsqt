@@ -11,7 +11,6 @@ import (
 
 func Get(jsn, qry string) Json {
 	j := New(jsn)
-	j.ws()
 	q := Query{Scanner: Scanner(qry), Root: j}
 	return q.Parse(j)
 }
@@ -1018,6 +1017,7 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 		}
 		return false
 	}
+	j.ws()
 	if j.IsObject() {
 		j.ForEachKeyVal(f)
 	} else {
