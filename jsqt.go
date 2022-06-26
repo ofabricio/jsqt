@@ -983,7 +983,11 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 					j.s.MatchWhileByteLTE(' ')
 					// Is a key of an object or array? Emit only the key.
 					if j.s.EqualByte('{') || j.s.EqualByte('[') {
-						k, _ := m(JSON(str), JSON(""))
+						v := "{}"
+						if j.s.EqualByte('[') {
+							v = "[]"
+						}
+						k, _ := m(JSON(str), JSON(v))
 						o.WriteString(k.String())
 						o.WriteByte(':')
 						continue
@@ -998,7 +1002,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 					}
 				} else {
 					// Not a key. Emit as a value.
-					_, v := m(JSON(""), JSON(str))
+					_, v := m(JSON("null"), JSON(str))
 					o.WriteString(v.String())
 				}
 				continue
@@ -1009,7 +1013,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 				// Gets anything and emit it as a value.
 				if ini := j.s.Mark(); j.s.MatchUntilAnyByte5(',', ' ', '}', ']', 0) {
 					val := j.s.Token(ini)
-					_, v := m(JSON(""), JSON(val))
+					_, v := m(JSON("null"), JSON(val))
 					o.WriteString(v.String())
 					continue
 				}
