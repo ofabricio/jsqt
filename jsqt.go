@@ -572,7 +572,7 @@ func funcDebug(q *Query, j Json) Json {
 	if q.MoreArgs() {
 		msg = q.ParseRaw().String()
 	}
-	fmt.Printf("[%s] %s\n", msg, j)
+	fmt.Printf("[%s] %s\n", msg, j.String())
 	return j
 }
 
