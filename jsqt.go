@@ -315,37 +315,37 @@ func funcDefault(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
-	keyArg := q.GrabArg()
-	valArg := q.GrabArg()
+	ini := q.s.Mark()
 	return j.Iterate(func(k, v Json) (Json, Json) {
 		arr := JSON(`[` + k.String() + "," + v.String() + `]`)
-		ka := keyArg
-		va := valArg
-		return ka.ParseFunOrKey(arr), va.ParseFunOrKey(arr)
+		q.s.Back(ini)
+		k = q.ParseFunOrKey(arr)
+		v = q.ParseFunOrKey(arr)
+		return k, v
 	})
 }
 
 func funcIterateKeys(q *Query, j Json) Json {
-	keyArg := q.GrabArg()
+	ini := q.s.Mark()
 	return j.IterateKeys(func(k Json) Json {
-		ka := keyArg
-		return ka.ParseFun(k)
+		q.s.Back(ini)
+		return q.ParseFun(k)
 	})
 }
 
 func funcIterateValues(q *Query, j Json) Json {
-	valArg := q.GrabArg()
+	ini := q.s.Mark()
 	return j.IterateValues(func(v Json) Json {
-		va := valArg
-		return va.ParseFun(v)
+		q.s.Back(ini)
+		return q.ParseFun(v)
 	})
 }
 
 func funcIterateKeysValues(q *Query, j Json) Json {
-	keyvalArg := q.GrabArg()
-	return j.IterateKeysValues(func(v Json) Json {
-		kv := keyvalArg
-		return kv.ParseFun(v)
+	ini := q.s.Mark()
+	return j.IterateKeysValues(func(kv Json) Json {
+		q.s.Back(ini)
+		return q.ParseFun(kv)
 	})
 }
 

@@ -783,6 +783,12 @@ func BenchmarkJson_Iterate(b *testing.B) {
 	}
 }
 
+func Benchmark_QueryFunction_Iterate(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`{ "a": 3, "b": 4 }`, `(iterate 0 1)`)
+	}
+}
+
 func ExampleJson_IterateKeysValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)
@@ -835,6 +841,12 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 	}
 }
 
+func Benchmark_QueryFunction_IterateKV(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`{ "a": 3, "b": 4 }`, `(iterate-kv (.) (.))`)
+	}
+}
+
 func ExampleJson_IterateKeys() {
 	m := func(v Json) Json {
 		fmt.Println(v)
@@ -874,6 +886,12 @@ func BenchmarkJson_IterateKeys(b *testing.B) {
 	}
 }
 
+func Benchmark_QueryFunction_IterateK(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`{ "a": 3, "b": 4 }`, `(iterate-k (.))`)
+	}
+}
+
 func ExampleJson_IterateValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)
@@ -909,6 +927,12 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		_ = j.IterateValues(m)
+	}
+}
+
+func Benchmark_QueryFunction_IterateV(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`{ "a": 3, "b": 4 }`, `(iterate-v (.))`)
 	}
 }
 
