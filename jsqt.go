@@ -83,12 +83,10 @@ func (q *Query) SkipArgs() {
 }
 
 func (q *Query) SkipArg() {
-	q.MatchArg()
+	_ = q.s.UtilMatchOpenCloseCount('(', ')', '"') ||
+		q.s.UtilMatchString('"') ||
+		q.s.MatchUntilAnyByte(' ', ')')
 	q.ws()
-}
-
-func (q *Query) MatchArg() bool {
-	return q.s.UtilMatchOpenCloseCount('(', ')', '"') || q.s.UtilMatchString('"') || q.s.MatchUntilAnyByte(' ', ')')
 }
 
 func (q *Query) IsEmpty() bool {
