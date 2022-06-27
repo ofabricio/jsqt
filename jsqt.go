@@ -283,11 +283,11 @@ func funcCollect(q *Query, j Json) Json {
 	o.WriteString("[")
 	for q.MoreArgs() {
 		if j.IsArray() && !j.IsEmptyArray() {
-			ini := *q
+			ini := q.s.Mark()
 			j.ForEach(func(i, item Json) bool {
-				sub := ini
-				for sub.MoreArgs() {
-					item = sub.ParseFunOrKey(item)
+				q.s.Back(ini)
+				for q.MoreArgs() {
+					item = q.ParseFunOrKey(item)
 				}
 				if item.Exists() {
 					if o.Len() > 1 {
@@ -295,7 +295,6 @@ func funcCollect(q *Query, j Json) Json {
 					}
 					o.WriteString(item.String())
 				}
-				*q = sub
 				return false
 			})
 		} else {
