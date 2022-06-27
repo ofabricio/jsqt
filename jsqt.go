@@ -667,6 +667,11 @@ func (j Json) String() string {
 	return j.s.String()
 }
 
+// Bytes returns the raw JSON data.
+func (j Json) Bytes() []byte {
+	return j.s.Bytes()
+}
+
 // Stringify converts a JSON value to a JSON string.
 // Examples:
 //   "Hello" -> "Hello"
