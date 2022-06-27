@@ -87,19 +87,8 @@ func (q *Query) SkipArg() {
 	q.ws()
 }
 
-func (q *Query) GrabArg() Query {
-	arg := q.s.TokenFor(q.MatchArg)
-	q.ws()
-	return q.NewArg(arg)
-}
-
 func (q *Query) MatchArg() bool {
 	return q.s.UtilMatchOpenCloseCount('(', ')', '"') || q.s.UtilMatchString('"') || q.s.MatchUntilAnyByte(' ', ')')
-}
-
-func (q Query) NewArg(arg string) Query {
-	q.s = Scanner(arg)
-	return q
 }
 
 func (q *Query) IsEmpty() bool {
