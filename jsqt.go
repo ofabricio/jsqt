@@ -45,7 +45,9 @@ func (q *Query) ParseFunOrRaw(j Json) Json {
 func (q *Query) ParseFun(j Json) Json {
 	if q.s.MatchByte('(') {
 		fname := q.ParseRaw().String()
-		j, _ = q.CallFun(fname, j), q.s.MatchByte(')')
+		j = q.CallFun(fname, j)
+		q.SkipArgs()
+		q.s.MatchByte(')')
 		q.ws()
 	}
 	return j
@@ -105,7 +107,7 @@ func (q *Query) IsEmpty() bool {
 }
 
 func (q Query) MoreArgs() bool {
-	return !q.s.EqualByte(')')
+	return !q.s.EqualByte(')') && !q.IsEmpty()
 }
 
 func (q Query) String() string {
@@ -363,7 +365,6 @@ func funcEither(q *Query, j Json) Json {
 	for v.IsNully() && q.MoreArgs() {
 		v = q.ParseFunOrKey(j)
 	}
-	q.SkipArgs()
 	return v
 }
 
