@@ -610,7 +610,7 @@ func funcConcat(q *Query, j Json) Json {
 
 func funcSort(q *Query, j Json) Json {
 	asc := q.ParseRaw().String() == "asc"
-	key := q.GrabArg()
+	key := q.MoreArgs()
 
 	if j.IsObject() {
 		if asc {
@@ -626,17 +626,17 @@ func funcSort(q *Query, j Json) Json {
 		items = append(items, v.String())
 		return false
 	})
-	ini := key.s.Mark()
+	ini := q.s.Mark()
 	sort.SliceStable(items, func(i, j int) bool {
 		var a, b string
-		if key.IsEmpty() {
+		if key {
+			q.s.Back(ini)
+			a = q.ParseFunOrKey(JSON(items[i])).String()
+			q.s.Back(ini)
+			b = q.ParseFunOrKey(JSON(items[j])).String()
+		} else {
 			a = items[i]
 			b = items[j]
-		} else {
-			key.s.Back(ini)
-			a = key.ParseFunOrKey(JSON(items[i])).String()
-			key.s.Back(ini)
-			b = key.ParseFunOrKey(JSON(items[j])).String()
 		}
 		if asc {
 			return a < b
