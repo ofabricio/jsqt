@@ -252,6 +252,21 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func Test_Invalid_Query(t *testing.T) {
+
+	tt := []struct {
+		give string
+		when string
+		then string
+	}{
+		{give: `[3,4]`, when: `(collect (.)`, then: `[3,4]`},
+	}
+	for _, tc := range tt {
+		r := Get(tc.give, tc.when)
+		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+	}
+}
+
 func TestJsonWS(t *testing.T) {
 
 	tt := []struct {
