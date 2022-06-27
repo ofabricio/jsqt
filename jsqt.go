@@ -223,6 +223,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcConcat(q, j)
 	case "sort":
 		return funcSort(q, j)
+	case "reverse":
+		return funcReverse(q, j)
 	default:
 		return JSON("")
 	}
@@ -632,6 +634,18 @@ func funcSort(q *Query, j Json) Json {
 		}
 		return a > b
 	})
+	return JSON("[" + strings.Join(items, ",") + "]")
+}
+
+func funcReverse(q *Query, j Json) Json {
+	var items []string
+	j.ForEach(func(i, v Json) bool {
+		items = append(items, v.String())
+		return false
+	})
+	for i, j := 0, len(items)-1; i < j; i, j = i+1, j-1 {
+		items[i], items[j] = items[j], items[i]
+	}
 	return JSON("[" + strings.Join(items, ",") + "]")
 }
 

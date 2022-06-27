@@ -15,6 +15,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// reverse
+		{give: `[{"a":3},{"b":4}]`, when: `(reverse)`, then: `[{"b":4},{"a":3}]`},
+		{give: `[3,4,5,6,2,7]`, when: `(reverse)`, then: `[7,2,6,5,4,3]`},
 		// sort
 		{give: `{"c":5,"b":4,"a":3}`, when: `(sort asc)`, then: `{"a":3,"b":4,"c":5}`},
 		{give: `{"a":5,"b":4,"c":3}`, when: `(sort desc)`, then: `{"c":3,"b":4,"a":5}`},
