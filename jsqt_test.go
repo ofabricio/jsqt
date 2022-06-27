@@ -179,7 +179,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(iterate-k (.))`, then: `3`},
 		// Iterate.
 		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
 		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.))))`, then: `{"a":"3","b":"4"}`},
 		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (.))))`, then: `["3","4"]`},
 		{give: `3`, when: `(iterate 0 (get 1 (stringify)))`, then: `"3"`},
