@@ -1028,5 +1028,11 @@ func BenchmarkJson_Prettify(b *testing.B) {
 	}
 }
 
+func Benchmark_QueryFunction_Sort(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`[{ "a": 5 }, { "a": 4 }, { "a": 3 }]`, `(sort asc a)`)
+	}
+}
+
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
