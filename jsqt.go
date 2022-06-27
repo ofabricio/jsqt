@@ -77,7 +77,7 @@ func (q *Query) ParseRaw() Json {
 }
 
 func (q *Query) SkipArgs() {
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		q.SkipArg()
 	}
 }
@@ -93,7 +93,7 @@ func (q *Query) IsEmpty() bool {
 	return q.s.String() == ""
 }
 
-func (q Query) MoreArgs() bool {
+func (q Query) MoreArg() bool {
 	return !q.s.EqualByte(')') && !q.IsEmpty()
 }
 
@@ -231,7 +231,7 @@ func (q *Query) CallFun(fname string, j Json) Json {
 // #region Functions
 
 func funcGet(q *Query, j Json) Json {
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		j = q.ParseFunOrKey(j)
 	}
 	return j
@@ -240,7 +240,7 @@ func funcGet(q *Query, j Json) Json {
 func funcArr(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
@@ -254,7 +254,7 @@ func funcArr(q *Query, j Json) Json {
 func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); v.Exists() {
 			if o.Len() > 1 {
 				o.WriteString(",")
@@ -272,12 +272,12 @@ func funcObj(q *Query, j Json) Json {
 func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("[")
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		if j.IsArray() && !j.IsEmptyArray() {
 			ini := q.s.Mark()
 			j.ForEach(func(i, item Json) bool {
 				q.s.Back(ini)
-				for q.MoreArgs() {
+				for q.MoreArg() {
 					item = q.ParseFunOrKey(item)
 				}
 				if item.Exists() {
@@ -349,7 +349,7 @@ func funcIf(q *Query, j Json) Json {
 
 func funcEither(q *Query, j Json) Json {
 	v := q.ParseFunOrKey(j)
-	for v.IsNully() && q.MoreArgs() {
+	for v.IsNully() && q.MoreArg() {
 		v = q.ParseFunOrKey(j)
 	}
 	return v
@@ -556,7 +556,7 @@ func funcBool(q *Query, j Json) Json {
 
 func funcDebug(q *Query, j Json) Json {
 	msg := "debug"
-	if q.MoreArgs() {
+	if q.MoreArg() {
 		msg = q.ParseRaw().String()
 	}
 	fmt.Printf("[%s] %s\n", msg, j.String())
@@ -579,7 +579,7 @@ func funcConcat(q *Query, j Json) Json {
 
 	if v.IsString() {
 		o.WriteString(v.Jsonify().String())
-		for q.MoreArgs() {
+		for q.MoreArg() {
 			v := q.ParseFunOrKey(j)
 			o.WriteString(v.Jsonify().String())
 		}
@@ -588,7 +588,7 @@ func funcConcat(q *Query, j Json) Json {
 
 	o.WriteByte('[')
 	o.WriteString(v.Flatten().String())
-	for q.MoreArgs() {
+	for q.MoreArg() {
 		v := q.ParseFunOrKey(j)
 		o.WriteByte(',')
 		o.WriteString(v.Flatten().String())
@@ -599,7 +599,7 @@ func funcConcat(q *Query, j Json) Json {
 
 func funcSort(q *Query, j Json) Json {
 	asc := q.ParseRaw().String() == "asc"
-	key := q.MoreArgs()
+	key := q.MoreArg()
 
 	if j.IsObject() {
 		if asc {
