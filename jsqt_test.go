@@ -17,21 +17,21 @@ func TestGet(t *testing.T) {
 	}{
 		// (this)
 		{give: `[3,4]`, when: `(collect (> (this) 3))`, then: `[4]`},
-		// join
+		// (join)
 		{give: `["a","b","c"]`, when: `(join "_")`, then: `"a_b_c"`},
-		// reverse
+		// (reverse)
 		{give: `[{"a":3},{"b":4}]`, when: `(reverse)`, then: `[{"b":4},{"a":3}]`},
 		{give: `[3,4,5,6,2,7]`, when: `(reverse)`, then: `[7,2,6,5,4,3]`},
-		// sort
+		// (sort)
 		{give: `{"c":5,"b":4,"a":3}`, when: `(sort asc)`, then: `{"a":3,"b":4,"c":5}`},
 		{give: `{"a":5,"b":4,"c":3}`, when: `(sort desc)`, then: `{"c":3,"b":4,"a":5}`},
 		{give: `[5,3,4]`, when: `(sort desc)`, then: `[5,4,3]`},
 		{give: `[5,4,3]`, when: `(sort asc)`, then: `[3,4,5]`},
 		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(sort desc a)`, then: `[{"a":5},{"a":4},{"a":3}]`},
 		{give: `[{"a":5},{"a":4},{"a":3}]`, when: `(sort asc a)`, then: `[{"a":3},{"a":4},{"a":5}]`},
-		// either should skip its arguments.
+		// (either) should skip its arguments.
 		{give: `{"a":"","b":"B","c":""}`, when: `(get (either a b c) (lower))`, then: `"b"`},
-		// either
+		// (either)
 		{give: `{"a":"","b":"","c":""}`, when: `(either a b c)`, then: `""`},
 		{give: `{"a":"A","b":"","c":"C"}`, when: `(either a b c)`, then: `"A"`},
 		{give: `{"a":"A","b":"B","c":""}`, when: `(either a b c)`, then: `"A"`},
@@ -44,71 +44,71 @@ func TestGet(t *testing.T) {
 		{give: `{"a":"","b":"B"}`, when: `(either a b)`, then: `"B"`},
 		{give: `{"a":"A","b":""}`, when: `(either a b)`, then: `"A"`},
 		{give: `{"a":"A","b":"B"}`, when: `(either a b)`, then: `"A"`},
-		// Concat.
+		// (concat)
 		{give: `{ "one": "hello" }`, when: `(concat one (raw " \"world\""))`, then: `"hello \"world\""`},
 		{give: `{ "one": "hello", "two": "world" }`, when: `(concat one (raw " ") two)`, then: `"hello world"`},
-		// Replace.
+		//(replace)
 		{give: `"a b"`, when: `(replace " " "_")`, then: `"a_b"`},
-		// Upper.
+		// (upper)
 		{give: `"a"`, when: `(upper)`, then: `"A"`},
-		// Lower.
+		// (lower)
 		{give: `"A"`, when: `(lower)`, then: `"a"`},
-		// stringify
+		// (stringify)
 		{give: `3`, when: `(stringify)`, then: `"3"`},
 		{give: `-3`, when: `(stringify)`, then: `"-3"`},
 		{give: `[]`, when: `(stringify)`, then: `"[]"`},
 		{give: `{}`, when: `(stringify)`, then: `"{}"`},
 		{give: `""`, when: `(stringify)`, then: `"\"\""`},
 		{give: `{"a":[{"b":3},4,"5"]}`, when: `(stringify)`, then: `"{\"a\":[{\"b\":3},4,\"5\"]}"`},
-		// jsonify
+		// (jsonify)
 		{give: `"{\"a\":[{\"b\":3},4,\"5\"]}"`, when: `(jsonify)`, then: `{"a":[{"b":3},4,"5"]}`},
 		{give: `"3"`, when: `(jsonify)`, then: `3`},
 		{give: `"{}"`, when: `(jsonify)`, then: `{}`},
-		// Bool.
+		// (bool)
 		{give: `3`, when: `(get (is-num) (bool))`, then: `true`},
 		{give: `{}`, when: `(get (is-num) (bool))`, then: `false`},
-		// Or / And / Not.
+		// (or) (and) (not)
 		{give: `[3,"",4,"5"]`, when: `(collect (not (is-str)))`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (and (>= a 4) (<= a 5)) a)`, then: `[4,5]`},
-		// Objectify.
+		// (objectify)
 		{give: `[["a",3],["b",4]]`, when: `(objectify)`, then: `{"a":3,"b":4}`},
-		// Entries.
+		// (entries)
 		{give: `{"a":3,"b":4}`, when: `(collect (entries) (flatten))`, then: `["a",3,"b",4]`},
 		{give: `{"a":3,"b":4}`, when: `(entries)`, then: `[["a",3],["b",4]]`},
-		// Values.
+		//(values)
 		{give: `{"a":3,"b":4}`, when: `(values)`, then: `[3,4]`},
-		// Keys.
+		// (key)
 		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
-		// If.
+		// (if)
 		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},          // Then.
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (this)))`, then: `{"b":3}`}, // Else.
 		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},              // Then.
 		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (this))`, then: `{"b":3}`},                // Else.
-		// is-void
+		// (is-void)
 		{give: `{}`, when: `(is-void)`, then: `{}`},
 		{give: `[]`, when: `(is-void)`, then: `[]`},
 		{give: `""`, when: `(is-void)`, then: ``},
-		// is-blank
+		// (is-blank)
 		{give: `{}`, when: `(is-blank)`, then: `{}`},
 		{give: `[]`, when: `(is-blank)`, then: `[]`},
 		{give: `null`, when: `(is-blank)`, then: `null`},
 		{give: `""`, when: `(is-blank)`, then: ``},
-		// is-nully
+		// (is-nully)
 		{give: `{}`, when: `(is-nully)`, then: `{}`},
 		{give: `[]`, when: `(is-nully)`, then: `[]`},
 		{give: `null`, when: `(is-nully)`, then: `null`},
 		{give: `""`, when: `(is-nully)`, then: `""`},
-		// is-some
+		// (is-some)
 		{give: `3`, when: `(is-some)`, then: `3`},
 		{give: `""`, when: `(is-some)`, then: `""`},
 		{give: `null`, when: `(is-some)`, then: ``},
-		// nothing
+		// (nothing) - Undocumented.
 		{give: `3`, when: `(nothing)`, then: ``},
-		// exists
+		// (exists)
 		{give: `3`, when: `(exists)`, then: `3`},
 		{give: ``, when: `(exists)`, then: ``},
-		// truthy
+		// (truthy)
 		{give: `{}`, when: `(truthy)`, then: ``},
 		{give: `[]`, when: `(truthy)`, then: ``},
 		{give: `0`, when: `(truthy)`, then: ``},
@@ -118,7 +118,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(truthy)`, then: `3`},
 		{give: `{"a":3}`, when: `(truthy)`, then: `{"a":3}`},
 		{give: `true`, when: `(truthy)`, then: `true`},
-		// falsy
+		// (falsy)
 		{give: `{}`, when: `(falsy)`, then: `{}`},
 		{give: `[]`, when: `(falsy)`, then: `[]`},
 		{give: `0`, when: `(falsy)`, then: `0`},
@@ -127,82 +127,82 @@ func TestGet(t *testing.T) {
 		{give: `[0]`, when: `(falsy)`, then: ``},
 		{give: `3`, when: `(falsy)`, then: ``},
 		{give: `null`, when: `(falsy)`, then: `null`},
-		// is-empty-obj
+		// (is-empty-obj)
 		{give: `{}`, when: `(is-empty-obj)`, then: `{}`},
 		{give: `{"a":3}`, when: `(is-empty-obj)`, then: ``},
 		{give: `[]`, when: `(is-empty-obj)`, then: ``},
-		// is-empty-arr
+		// (is-empty-arr)
 		{give: `{}`, when: `(is-empty-arr)`, then: ``},
 		{give: `[0]`, when: `(is-empty-arr)`, then: ``},
 		{give: `[]`, when: `(is-empty-arr)`, then: `[]`},
-		// is-empty-str
+		// (is-empty-str)
 		{give: `3`, when: `(is-empty-str)`, then: ``},
 		{give: `""`, when: `(is-empty-str)`, then: `""`},
-		// is-empty
+		// (is-empty)
 		{give: `3`, when: `(is-empty)`, then: ``},
 		{give: `{}`, when: `(is-empty)`, then: `{}`},
 		{give: `[]`, when: `(is-empty)`, then: `[]`},
 		{give: `""`, when: `(is-empty)`, then: `""`},
-		// is-null
+		// (is-null)
 		{give: `3`, when: `(is-null)`, then: ``},
 		{give: `null`, when: `(is-null)`, then: `null`},
-		// is-bool
+		// (is-bool)
 		{give: `3`, when: `(is-bool)`, then: ``},
 		{give: `true`, when: `(is-bool)`, then: `true`},
 		{give: `false`, when: `(is-bool)`, then: `false`},
-		// is-str
+		// (is-str)
 		{give: `3`, when: `(is-str)`, then: ``},
 		{give: `"3"`, when: `(is-str)`, then: `"3"`},
-		// is-arr
+		// (is-arr)
 		{give: `3`, when: `(is-arr)`, then: ``},
 		{give: `[]`, when: `(is-arr)`, then: `[]`},
-		// is-obj
+		// (is-obj)
 		{give: `3`, when: `(is-obj)`, then: ``},
 		{give: `{}`, when: `(is-obj)`, then: `{}`},
-		// is-num
+		// (is-num)
 		{give: `"3"`, when: `(is-num)`, then: ``},
 		{give: `3`, when: `(is-num)`, then: `3`},
-		// Ugly / Pretty.
+		// (ugly) (pretty)
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5,\n                \"d\": \"e f\"\n            }\n        ],\n        \"c\": [],\n        \"d\": {}\n    }\n]"},
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(ugly)`, then: `[{"a":3,"b":[4,{"c":5,"d":"e f"}],"c":[],"d":{}}]`},
-		// Filters.
+		// (filters)
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (!= b 7) a)`, then: `[3,5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (>= b 7) a)`, then: `[4,5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (<= b 7) a)`, then: `[3,4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
-		// Iterate Keys Values.
+		// (iterate-kv)
 		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
 		{give: `{ "a": "b" }`, when: `(iterate-kv (upper))`, then: `{"A":"B"}`},
 		{give: `3`, when: `(iterate-kv (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-kv (this))`, then: `3`},
-		// Iterate Values.
+		// (iterate-v)
 		{give: `{ "a" : 3, "b": [ 3 , { "a" : 3 } ] }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
 		{give: `{ "a": 3 }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this)))`, then: `{"a":4}`},
 		{give: `3`, when: `(iterate-v (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-v (this))`, then: `3`},
-		// Iterate Keys.
+		// (iterate-k)
 		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
 		{give: `{ "a" : 3 }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this)))`, then: `{"x":3}`},
 		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate-k (this))`, then: `3`},
-		// Iterate.
+		// (iterate)
 		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
 		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
 		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":"4"}`},
 		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `["3","4"]`},
 		{give: `3`, when: `(iterate 0 (get 1 (stringify)))`, then: `"3"`},
 		{give: `3`, when: `(iterate 0 1)`, then: `3`},
-		// Default.
+		// (default)
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
-		// Size.
+		// (size)
 		{give: `{"a":3,"b":4}`, when: `(size)`, then: `2`},
 		{give: `"abc"`, when: `(size)`, then: `3`},
 		{give: `[3,4]`, when: `(size)`, then: `2`},
-		// Merge.
+		// (merge)
 		{give: `[{"a":3},{"b":4}]`, when: `(merge)`, then: `{"a":3,"b":4}`},
-		// Collect.
+		// (collect)
 		{
 			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
 			when: `(collect a b c (obj x d e (collect e f g h i j (flatten) k l)))`,
@@ -215,20 +215,20 @@ func TestGet(t *testing.T) {
 		{give: `{"a":[{"b":{"c":3}},{"b":{}}]}`, when: `(collect a b c)`, then: `[3]`},
 		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(collect a b)`, then: `[3,4]`},
 		{give: `[{"a":3},{"b":4},{"a":5}]`, when: `(collect a)`, then: `[3,5]`},
-		// Array.
+		// (array)
 		{give: `{"a":3,"b":4}`, when: `(arr a b a (raw "hi"))`, then: `[3,4,3,"hi"]`},
 		{give: `{"a":3,"b":4}`, when: `(arr a b a)`, then: `[3,4,3]`},
 		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
 		{give: ``, when: `(arr)`, then: `[]`},
-		// Object.
+		// (object)
 		{give: `{"a":"aaa","b":"bbb"}}`, when: `(obj (get a) (get b))`, then: `{"aaa":"bbb"}`},
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" a y b)`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj "a b" (get a) y (get b))`, then: `{"a b":3,"y":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj x (get a) y (get b))`, then: `{"x":3,"y":4}`},
 		{give: `{"a":{"b":{"c":3}}}`, when: `(get a b (obj x c))`, then: `{"x":3}`},
-		// Get order should not matter.
+		// (get) order should not matter.
 		{give: `{"a":3,"b":4]}`, when: `(obj x b y a z a w b)`, then: `{"x":4,"y":3,"z":3,"w":4}`},
-		// Get.
+		// (get)
 		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 1 c)`, then: `4`},
 		{give: `{"a":[{"b":3},{"c":4}]}`, when: `(get a 0 b)`, then: `3`},
 		{give: `[{"a":3},{"a":4}]`, when: `(get 0 a)`, then: `3`},
@@ -241,10 +241,10 @@ func TestGet(t *testing.T) {
 		{give: `{"a b":3}`, when: `(get "a b")`, then: `3`},
 		{give: `{"a":{"b":3}}`, when: `(get a b)`, then: `3`},
 		{give: `{"a":3}`, when: `(get a)`, then: `3`},
-		// Root.
+		// (root)
 		{give: `3`, when: `(root)`, then: `3`},
 		{give: ``, when: `(root)`, then: ``},
-		// Raw.
+		// (raw)
 		{give: ``, when: `(raw {})`, then: `{}`},
 		{give: ``, when: `(raw [])`, then: `[]`},
 		{give: ``, when: `(raw null)`, then: `null`},
@@ -304,24 +304,24 @@ func TestJsonWS(t *testing.T) {
 func TestJsonGet(t *testing.T) {
 
 	tt := []struct {
-		jsn string
-		qry string
-		exp string
+		give string
+		when string
+		then string
 	}{
-		{jsn: `{"a":2,"b":3}`, qry: `a`, exp: `2`},
-		{jsn: `{"a":2,"b":3}`, qry: `b`, exp: `3`},
-		{jsn: `{"a":2,"b":3}`, qry: `c`, exp: ``},
-		{jsn: `{"a":[2,3]}`, qry: `a`, exp: `[2,3]`},
-		{jsn: `[2,3]`, qry: `0`, exp: `2`},
-		{jsn: `[2,3]`, qry: `1`, exp: `3`},
-		{jsn: `[2,3]`, qry: `2`, exp: ``},
-		{jsn: `{"a":{"b":2}}`, qry: `a`, exp: `{"b":2}`},
+		{give: `{"a":2,"b":3}`, when: `a`, then: `2`},
+		{give: `{"a":2,"b":3}`, when: `b`, then: `3`},
+		{give: `{"a":2,"b":3}`, when: `c`, then: ``},
+		{give: `{"a":[2,3]}`, when: `a`, then: `[2,3]`},
+		{give: `[2,3]`, when: `0`, then: `2`},
+		{give: `[2,3]`, when: `1`, then: `3`},
+		{give: `[2,3]`, when: `2`, then: ``},
+		{give: `{"a":{"b":2}}`, when: `a`, then: `{"b":2}`},
 	}
 
 	for _, tc := range tt {
-		j := JSON(tc.jsn)
-		r := j.Get(tc.qry)
-		assert.Equal(t, tc.exp, r.String(), "TC: %v", tc)
+		j := JSON(tc.give)
+		r := j.Get(tc.when)
+		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
 	}
 }
 
@@ -345,333 +345,333 @@ func TestJsonGet_Order(t *testing.T) {
 
 func TestJsonForEachKeyVal(t *testing.T) {
 	tt := []struct {
-		inp string
-		out []string
+		give string
+		then []string
 	}{
-		{inp: `{}`, out: nil},
-		{inp: `{"a":2}`, out: []string{"a", "2"}},
-		{inp: `{"a":2,"b":3}`, out: []string{"a", "2", "b", "3"}},
-		{inp: `{"a":{"b":2}}`, out: []string{"a", `{"b":2}`}},
-		{inp: `{"a":[2]}`, out: []string{"a", "[2]"}},
+		{give: `{}`, then: nil},
+		{give: `{"a":2}`, then: []string{"a", "2"}},
+		{give: `{"a":2,"b":3}`, then: []string{"a", "2", "b", "3"}},
+		{give: `{"a":{"b":2}}`, then: []string{"a", `{"b":2}`}},
+		{give: `{"a":[2]}`, then: []string{"a", "[2]"}},
 	}
 	for _, tc := range tt {
 		var r []string
-		j := JSON(tc.inp)
+		j := JSON(tc.give)
 		j.ForEachKeyVal(func(k, v Json) bool {
 			r = append(r, k.Str(), v.String())
 			return false
 		})
-		assert.Equal(t, tc.out, r, tc.inp)
+		assert.Equal(t, tc.then, r, tc.give)
 	}
 }
 
 func TestJsonForEach(t *testing.T) {
 	tt := []struct {
-		inp string
-		out []string
+		give string
+		then []string
 	}{
-		{inp: "[]", out: nil},
-		{inp: "[10]", out: []string{"0", "10"}},
-		{inp: "[10,20]", out: []string{"0", "10", "1", "20"}},
-		{inp: "[10,20,30]", out: []string{"0", "10", "1", "20", "2", "30"}},
-		{inp: "[{},{},[10]]", out: []string{"0", "{}", "1", "{}", "2", "[10]"}},
+		{give: "[]", then: nil},
+		{give: "[10]", then: []string{"0", "10"}},
+		{give: "[10,20]", then: []string{"0", "10", "1", "20"}},
+		{give: "[10,20,30]", then: []string{"0", "10", "1", "20", "2", "30"}},
+		{give: "[{},{},[10]]", then: []string{"0", "{}", "1", "{}", "2", "[10]"}},
 	}
 	for _, tc := range tt {
 		var r []string
-		j := JSON(tc.inp)
+		j := JSON(tc.give)
 		j.ForEach(func(i, v Json) bool {
 			r = append(r, i.String(), v.String())
 			return false
 		})
-		assert.Equal(t, tc.out, r, tc.inp)
+		assert.Equal(t, tc.then, r, tc.give)
 	}
 }
 
 func TestJsonStr(t *testing.T) {
 	tt := []struct {
-		inp string
-		out string
+		give string
+		then string
 	}{
-		{inp: ``, out: ``},
-		{inp: `""`, out: ``},
-		{inp: `"a"`, out: `a`},
-		{inp: `"\"a\""`, out: `"a"`},
+		{give: ``, then: ``},
+		{give: `""`, then: ``},
+		{give: `"a"`, then: `a`},
+		{give: `"\"a\""`, then: `"a"`},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Str(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.Str(), tc.give)
 	}
 }
 
 func TestJsonInt(t *testing.T) {
 	tt := []struct {
-		inp string
-		out int
+		give string
+		then int
 	}{
-		{inp: ``, out: 0},
-		{inp: `0`, out: 0},
-		{inp: `1`, out: 1},
-		{inp: `-2`, out: -2},
-		{inp: `100`, out: 100},
+		{give: ``, then: 0},
+		{give: `0`, then: 0},
+		{give: `1`, then: 1},
+		{give: `-2`, then: -2},
+		{give: `100`, then: 100},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Int(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.Int(), tc.give)
 	}
 }
 
 func TestJsonFloat(t *testing.T) {
 	tt := []struct {
-		inp string
-		out float64
+		give string
+		then float64
 	}{
-		{inp: ``, out: 0},
-		{inp: `0`, out: 0},
-		{inp: `1`, out: 1},
-		{inp: `-2.2`, out: -2.2},
-		{inp: `1e2`, out: 100},
+		{give: ``, then: 0},
+		{give: `0`, then: 0},
+		{give: `1`, then: 1},
+		{give: `-2.2`, then: -2.2},
+		{give: `1e2`, then: 100},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Float(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.Float(), tc.give)
 	}
 }
 
 func TestJsonBool(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		when bool
 	}{
-		{inp: ``, out: false},
-		{inp: `false`, out: false},
-		{inp: `true`, out: true},
+		{give: ``, when: false},
+		{give: `false`, when: false},
+		{give: `true`, when: true},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Bool(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.when, j.Bool(), tc.give)
 	}
 }
 
 func TestJsonIsEmpty(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		when bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `[]`, out: true},
-		{inp: `""`, out: true},
-		{inp: `null`, out: false},
-		{inp: `0`, out: false},
-		{inp: `false`, out: false},
-		{inp: `true`, out: false},
+		{give: ``, when: false},
+		{give: `{}`, when: true},
+		{give: `[]`, when: true},
+		{give: `""`, when: true},
+		{give: `null`, when: false},
+		{give: `0`, when: false},
+		{give: `false`, when: false},
+		{give: `true`, when: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsEmpty(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.when, j.IsEmpty(), tc.give)
 	}
 }
 
 func TestJsonIsEmptyString(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `""`, out: true},
-		{inp: `"a"`, out: false},
+		{give: ``, then: false},
+		{give: `""`, then: true},
+		{give: `"a"`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsEmptyString(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsEmptyString(), tc.give)
 	}
 }
 
 func TestJsonIsEmptyObject(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `{   }`, out: true},
-		{inp: `[]`, out: false},
-		{inp: `""`, out: false},
-		{inp: `3`, out: false},
+		{give: ``, then: false},
+		{give: `{}`, then: true},
+		{give: `{   }`, then: true},
+		{give: `[]`, then: false},
+		{give: `""`, then: false},
+		{give: `3`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsEmptyObject(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsEmptyObject(), tc.give)
 	}
 }
 
 func TestJsonIsEmptyArray(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `[]`, out: true},
-		{inp: `[  ]`, out: true},
-		{inp: `{}`, out: false},
-		{inp: `""`, out: false},
-		{inp: `3`, out: false},
+		{give: ``, then: false},
+		{give: `[]`, then: true},
+		{give: `[  ]`, then: true},
+		{give: `{}`, then: false},
+		{give: `""`, then: false},
+		{give: `3`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsEmptyArray(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsEmptyArray(), tc.give)
 	}
 }
 
 func TestJsonIsFalsy(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `[]`, out: true},
-		{inp: `{}`, out: true},
-		{inp: `""`, out: true},
-		{inp: `false`, out: true},
-		{inp: `null`, out: true},
-		{inp: `0`, out: true},
+		{give: ``, then: false},
+		{give: `[]`, then: true},
+		{give: `{}`, then: true},
+		{give: `""`, then: true},
+		{give: `false`, then: true},
+		{give: `null`, then: true},
+		{give: `0`, then: true},
 		//
-		{inp: `3`, out: false},
-		{inp: `[0]`, out: false},
-		{inp: `{"a":0}`, out: false},
-		{inp: `"a"`, out: false},
-		{inp: `true`, out: false},
+		{give: `3`, then: false},
+		{give: `[0]`, then: false},
+		{give: `{"a":0}`, then: false},
+		{give: `"a"`, then: false},
+		{give: `true`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsFalsy(), tc)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsFalsy(), tc)
 	}
 }
 
 func TestJsonIsTruthy(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `[]`, out: false},
-		{inp: `{}`, out: false},
-		{inp: `""`, out: false},
-		{inp: `false`, out: false},
-		{inp: `null`, out: false},
-		{inp: `0`, out: false},
+		{give: ``, then: false},
+		{give: `[]`, then: false},
+		{give: `{}`, then: false},
+		{give: `""`, then: false},
+		{give: `false`, then: false},
+		{give: `null`, then: false},
+		{give: `0`, then: false},
 		//
-		{inp: `3`, out: true},
-		{inp: `[0]`, out: true},
-		{inp: `{"a":0}`, out: true},
-		{inp: `"a"`, out: true},
-		{inp: `true`, out: true},
+		{give: `3`, then: true},
+		{give: `[0]`, then: true},
+		{give: `{"a":0}`, then: true},
+		{give: `"a"`, then: true},
+		{give: `true`, then: true},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsTruthy(), tc)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsTruthy(), tc)
 	}
 }
 
 func TestJsonIsVoid(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `[]`, out: true},
-		{inp: `""`, out: false},
-		{inp: `null`, out: false},
-		{inp: `0`, out: false},
-		{inp: `false`, out: false},
-		{inp: `true`, out: false},
+		{give: ``, then: false},
+		{give: `{}`, then: true},
+		{give: `[]`, then: true},
+		{give: `""`, then: false},
+		{give: `null`, then: false},
+		{give: `0`, then: false},
+		{give: `false`, then: false},
+		{give: `true`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsVoid(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsVoid(), tc.give)
 	}
 }
 
 func TestJsonIsBlank(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `[]`, out: true},
-		{inp: `""`, out: false},
-		{inp: `null`, out: true},
-		{inp: `0`, out: false},
-		{inp: `false`, out: false},
-		{inp: `true`, out: false},
+		{give: ``, then: false},
+		{give: `{}`, then: true},
+		{give: `[]`, then: true},
+		{give: `""`, then: false},
+		{give: `null`, then: true},
+		{give: `0`, then: false},
+		{give: `false`, then: false},
+		{give: `true`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsBlank(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsBlank(), tc.give)
 	}
 }
 
 func TestJsonIsNully(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `[]`, out: true},
-		{inp: `""`, out: true},
-		{inp: `null`, out: true},
-		{inp: `0`, out: false},
-		{inp: `false`, out: false},
-		{inp: `true`, out: false},
+		{give: ``, then: false},
+		{give: `{}`, then: true},
+		{give: `[]`, then: true},
+		{give: `""`, then: true},
+		{give: `null`, then: true},
+		{give: `0`, then: false},
+		{give: `false`, then: false},
+		{give: `true`, then: false},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsNully(), tc.inp)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsNully(), tc.give)
 	}
 }
 
 func TestJsonIsSome(t *testing.T) {
 	tt := []struct {
-		inp string
-		out bool
+		give string
+		then bool
 	}{
-		{inp: ``, out: false},
-		{inp: `{}`, out: true},
-		{inp: `[]`, out: true},
-		{inp: `""`, out: true},
-		{inp: `null`, out: false},
-		{inp: `0`, out: true},
-		{inp: `false`, out: true},
-		{inp: `true`, out: true},
+		{give: ``, then: false},
+		{give: `{}`, then: true},
+		{give: `[]`, then: true},
+		{give: `""`, then: true},
+		{give: `null`, then: false},
+		{give: `0`, then: true},
+		{give: `false`, then: true},
+		{give: `true`, then: true},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.IsSome(), tc)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.IsSome(), tc)
 	}
 }
 
 func TestJsonStringify(t *testing.T) {
 	tt := []struct {
-		inp string
-		out string
+		give string
+		then string
 	}{
-		{inp: ``, out: `""`},
-		{inp: `{}`, out: `"{}"`},
-		{inp: `{ "hello": "wo\"rld" }`, out: `"{ \"hello\": \"wo\\\"rld\" }"`},
-		{inp: `[]`, out: `"[]"`},
-		{inp: `123`, out: `"123"`},
-		{inp: `null`, out: `"null"`},
-		{inp: `false`, out: `"false"`},
-		{inp: `true`, out: `"true"`},
-		{inp: `""`, out: `"\"\""`},
-		{inp: `"a b"`, out: `"\"a b\""`},
+		{give: ``, then: `""`},
+		{give: `{}`, then: `"{}"`},
+		{give: `{ "hello": "wo\"rld" }`, then: `"{ \"hello\": \"wo\\\"rld\" }"`},
+		{give: `[]`, then: `"[]"`},
+		{give: `123`, then: `"123"`},
+		{give: `null`, then: `"null"`},
+		{give: `false`, then: `"false"`},
+		{give: `true`, then: `"true"`},
+		{give: `""`, then: `"\"\""`},
+		{give: `"a b"`, then: `"\"a b\""`},
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Stringify().String(), tc)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.Stringify().String(), tc)
 	}
 }
 
@@ -684,23 +684,23 @@ func BenchmarkJsonToStringify(b *testing.B) {
 
 func TestJsonJsonify(t *testing.T) {
 	tt := []struct {
-		inp string
-		out string
+		give string
+		then string
 	}{
-		{inp: ``, out: ``},
-		{inp: `""`, out: ``},
-		{inp: `"{}"`, out: `{}`},
-		{inp: `"{ \"hello\": \"wo\\\"rld\" }"`, out: `{ "hello": "wo\"rld" }`},
-		{inp: `"[]"`, out: `[]`},
-		{inp: `"123"`, out: `123`},
-		{inp: `"null"`, out: `null`},
-		{inp: `"false"`, out: `false`},
-		{inp: `"true"`, out: `true`},
-		{inp: `"a b"`, out: `a b`}, // Invalid JSON.
+		{give: ``, then: ``},
+		{give: `""`, then: ``},
+		{give: `"{}"`, then: `{}`},
+		{give: `"{ \"hello\": \"wo\\\"rld\" }"`, then: `{ "hello": "wo\"rld" }`},
+		{give: `"[]"`, then: `[]`},
+		{give: `"123"`, then: `123`},
+		{give: `"null"`, then: `null`},
+		{give: `"false"`, then: `false`},
+		{give: `"true"`, then: `true`},
+		{give: `"a b"`, then: `a b`}, // Invalid JSON.
 	}
 	for _, tc := range tt {
-		j := JSON(tc.inp)
-		assert.Equal(t, tc.out, j.Jsonify().String(), tc)
+		j := JSON(tc.give)
+		assert.Equal(t, tc.then, j.Jsonify().String(), tc)
 	}
 }
 
