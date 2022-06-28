@@ -684,33 +684,28 @@ func (j Json) Bytes() []byte {
 	return j.s.Bytes()
 }
 
-// Stringify converts a JSON value to a JSON string.
+// Stringify converts a JSON to a JSON string.
 // Examples:
-//   "Hello" -> "Hello"
+//   "Hello" -> "\"Hello\""
+//   ""      -> "\"\""
 //   3       -> "3"
 //   {}      -> "{}"
-//   "{ \"hello\": \"world\" }" -> { "hello": "world" }
+//   { "hello": "world" } -> "{ \"hello\": \"world\" }"
 // Stringify reverts Jsonify.
 func (j Json) Stringify() Json {
-	if j.IsString() {
-		return j
-	}
 	return JSON(strconv.Quote(j.String()))
 }
 
-// Jsonify converts a JSON string to a JSON value.
+// Jsonify converts a JSON string to a JSON.
 // Examples:
-//   "Hello" -> "Hello"
-//   "3"     -> 3
-//   "{}"    -> {}
+//   "true" -> true
+//   "3"    -> 3
+//   "{}"   -> {}
 //   "{ \"hello\": \"world\"}" -> { "hello": "world" }
 // Jsonify reverts Stringify.
 func (j Json) Jsonify() Json {
-	if j.IsString() && !j.IsEmptyString() {
-		v, _ := strconv.Unquote(j.String())
-		return JSON(v)
-	}
-	return j
+	v, _ := strconv.Unquote(j.String())
+	return JSON(v)
 }
 
 // TrimQuote removes the quotes from an object key.

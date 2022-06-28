@@ -56,9 +56,7 @@ func TestGet(t *testing.T) {
 		{give: `-3`, when: `(stringify)`, then: `"-3"`},
 		{give: `[]`, when: `(stringify)`, then: `"[]"`},
 		{give: `{}`, when: `(stringify)`, then: `"{}"`},
-		{give: `""`, when: `(stringify)`, then: `""`},
-		{give: `"a"`, when: `(get (stringify) (stringify))`, then: `"a"`},
-		{give: `"a\"b\"c"`, when: `(stringify)`, then: `"a\"b\"c"`},
+		{give: `""`, when: `(stringify)`, then: `"\"\""`},
 		{give: `{"a":[{"b":3},4,"5"]}`, when: `(stringify)`, then: `"{\"a\":[{\"b\":3},4,\"5\"]}"`},
 		// jsonify
 		{give: `"{\"a\":[{\"b\":3},4,\"5\"]}"`, when: `(jsonify)`, then: `{"a":[{"b":3},4,"5"]}`},
@@ -169,7 +167,7 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
 		// Iterate Keys Values.
 		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
-		{give: `{ "a": 3 }`, when: `(iterate-kv (stringify))`, then: `{"a":"3"}`},
+		{give: `{ "a": "b" }`, when: `(iterate-kv (upper))`, then: `{"A":"B"}`},
 		{give: `3`, when: `(iterate-kv (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-kv (.))`, then: `3`},
 		// Iterate Values.
@@ -658,8 +656,8 @@ func TestJsonStringify(t *testing.T) {
 		{inp: `null`, out: `"null"`},
 		{inp: `false`, out: `"false"`},
 		{inp: `true`, out: `"true"`},
-		{inp: `""`, out: `""`},
-		{inp: `"a b"`, out: `"a b"`},
+		{inp: `""`, out: `"\"\""`},
+		{inp: `"a b"`, out: `"\"a b\""`},
 	}
 	for _, tc := range tt {
 		j := JSON(tc.inp)
@@ -680,7 +678,7 @@ func TestJsonJsonify(t *testing.T) {
 		out string
 	}{
 		{inp: ``, out: ``},
-		{inp: `""`, out: `""`},
+		{inp: `""`, out: ``},
 		{inp: `"{}"`, out: `{}`},
 		{inp: `"{ \"hello\": \"wo\\\"rld\" }"`, out: `{ "hello": "wo\"rld" }`},
 		{inp: `"[]"`, out: `[]`},
