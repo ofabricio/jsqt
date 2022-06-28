@@ -713,16 +713,6 @@ func (j Json) Jsonify() Json {
 	return j
 }
 
-// Str returns a string value.
-// Example: "Hello" -> Hello.
-func (j Json) Str() string {
-	v := j.String()
-	if j.IsString() {
-		v, _ = strconv.Unquote(v)
-	}
-	return v
-}
-
 // TrimQuote removes the quotes from an object key.
 // Example: "name" -> name.
 func (j Json) TrimQuote() string {
@@ -733,19 +723,28 @@ func (j Json) TrimQuote() string {
 	return v
 }
 
-// Int returns an int value.
+// Str converts a JSON value to string.
+func (j Json) Str() string {
+	v := j.String()
+	if j.IsString() {
+		v, _ = strconv.Unquote(v)
+	}
+	return v
+}
+
+// Int converts a JSON number to int.
 func (j Json) Int() int {
 	v, _ := strconv.ParseInt(j.String(), 10, 0)
 	return int(v)
 }
 
-// Float returns a float value.
+// Float converts a JSON number to float.
 func (j Json) Float() float64 {
 	v, _ := strconv.ParseFloat(j.String(), 64)
 	return v
 }
 
-// Bool returns a bool value.
+// Bool converts a JSON boolean to bool.
 func (j Json) Bool() bool {
 	v, _ := strconv.ParseBool(j.String())
 	return v
