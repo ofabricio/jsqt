@@ -101,6 +101,8 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(is-some)`, then: `3`},
 		{give: `""`, when: `(is-some)`, then: `""`},
 		{give: `null`, when: `(is-some)`, then: ``},
+		// nothing
+		{give: `3`, when: `(nothing)`, then: ``},
 		// exists
 		{give: `3`, when: `(exists)`, then: `3`},
 		{give: ``, when: `(exists)`, then: ``},
