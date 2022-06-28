@@ -299,11 +299,10 @@ func funcCollect(q *Query, j Json) Json {
 }
 
 func funcDefault(q *Query, j Json) Json {
-	v := q.ParseRaw()
-	if j.String() == "" {
-		return v
+	if j.Exists() {
+		return j
 	}
-	return j
+	return q.ParseFunOrRaw(j)
 }
 
 func funcIterate(q *Query, j Json) Json {
