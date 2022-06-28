@@ -15,6 +15,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// join
+		{give: `["a","b","c"]`, when: `(join "_")`, then: `"a_b_c"`},
 		// reverse
 		{give: `[{"a":3},{"b":4}]`, when: `(reverse)`, then: `[{"b":4},{"a":3}]`},
 		{give: `[3,4,5,6,2,7]`, when: `(reverse)`, then: `[7,2,6,5,4,3]`},

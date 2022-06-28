@@ -217,6 +217,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return JSON(strings.ToLower(j.String()))
 	case "replace":
 		return funcReplace(q, j)
+	case "join":
+		return funcJoin(q, j)
 	case "concat":
 		return funcConcat(q, j)
 	case "sort":
@@ -570,6 +572,16 @@ func funcReplace(q *Query, j Json) Json {
 		return JSON(strings.ReplaceAll(j.String(), old.TrimQuote(), new.TrimQuote()))
 	}
 	return j
+}
+
+func funcJoin(q *Query, j Json) Json {
+	sep := q.ParseRaw().Str()
+	var o []string
+	j.ForEach(func(i, v Json) bool {
+		o = append(o, v.Str())
+		return false
+	})
+	return JSON(strings.Join(o, sep)).Stringify()
 }
 
 func funcConcat(q *Query, j Json) Json {
