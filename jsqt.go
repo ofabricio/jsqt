@@ -171,7 +171,7 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcEither(q, j)
 	case "root":
 		return q.Root
-	case ".", "exists":
+	case "this", "exists":
 		return j
 	case "==":
 		return funcEQ(q, j)
