@@ -15,6 +15,12 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// Test empty context input for many functions.
+		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
+		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
+		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (concat 0 1))`, then: `["34","78"]`},
+		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (reverse))`, then: `[[4,3],[8,7]]`},
+		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (sort desc))`, then: `[[4,3],[8,7]]`},
 		// (this)
 		{give: `[3,4]`, when: `(collect (> (this) 3))`, then: `[4]`},
 		// (join)

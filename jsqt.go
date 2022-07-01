@@ -574,20 +574,21 @@ func funcReplace(q *Query, j Json) Json {
 }
 
 func funcJoin(q *Query, j Json) Json {
-	sep := q.ParseRaw().Str()
-	var o []string
-	j.ForEach(func(i, v Json) bool {
-		o = append(o, v.Str())
-		return false
-	})
-	return JSON(strings.Join(o, sep)).Stringify()
+	if j.IsArray() {
+		sep := q.ParseRaw().Str()
+		var o []string
+		j.ForEach(func(i, v Json) bool {
+			o = append(o, v.Str())
+			return false
+		})
+		return JSON(strings.Join(o, sep)).Stringify()
+	}
+	return j
 }
 
 func funcConcat(q *Query, j Json) Json {
 	var o strings.Builder
-
 	v := q.ParseFunOrKey(j)
-
 	if v.IsString() {
 		o.WriteString(v.Jsonify().String())
 		for q.MoreArg() {
@@ -596,66 +597,70 @@ func funcConcat(q *Query, j Json) Json {
 		}
 		return JSON(o.String()).Stringify()
 	}
-
-	o.WriteByte('[')
-	o.WriteString(v.Flatten().String())
-	for q.MoreArg() {
-		v := q.ParseFunOrKey(j)
-		o.WriteByte(',')
+	if v.IsArray() {
+		o.WriteByte('[')
 		o.WriteString(v.Flatten().String())
+		for q.MoreArg() {
+			v := q.ParseFunOrKey(j)
+			o.WriteByte(',')
+			o.WriteString(v.Flatten().String())
+		}
+		o.WriteByte(']')
+		return JSON(o.String())
 	}
-	o.WriteByte(']')
-	return JSON(o.String())
+	return j
 }
 
 func funcSort(q *Query, j Json) Json {
 	asc := q.ParseRaw().String() == "asc"
 	key := q.MoreArg()
-
 	if j.IsObject() {
 		if asc {
 			return j.Query("(get (entries) (sort asc 0) (objectify))")
 		}
 		return j.Query("(get (entries) (sort desc 0) (objectify))")
 	}
-
-	// Sort array.
-
-	var items []string
-	j.ForEach(func(i, v Json) bool {
-		items = append(items, v.String())
-		return false
-	})
-	ini := q.s.Mark()
-	sort.SliceStable(items, func(i, j int) bool {
-		var a, b string
-		if key {
-			q.s.Back(ini)
-			a = q.ParseFunOrKey(JSON(items[i])).String()
-			q.s.Back(ini)
-			b = q.ParseFunOrKey(JSON(items[j])).String()
-		} else {
-			a = items[i]
-			b = items[j]
-		}
-		if asc {
-			return a < b
-		}
-		return a > b
-	})
-	return JSON("[" + strings.Join(items, ",") + "]")
+	if j.IsArray() {
+		var items []string
+		j.ForEach(func(i, v Json) bool {
+			items = append(items, v.String())
+			return false
+		})
+		ini := q.s.Mark()
+		sort.SliceStable(items, func(i, j int) bool {
+			var a, b string
+			if key {
+				q.s.Back(ini)
+				a = q.ParseFunOrKey(JSON(items[i])).String()
+				q.s.Back(ini)
+				b = q.ParseFunOrKey(JSON(items[j])).String()
+			} else {
+				a = items[i]
+				b = items[j]
+			}
+			if asc {
+				return a < b
+			}
+			return a > b
+		})
+		return JSON("[" + strings.Join(items, ",") + "]")
+	}
+	return j
 }
 
 func funcReverse(q *Query, j Json) Json {
-	var items []string
-	j.ForEach(func(i, v Json) bool {
-		items = append(items, v.String())
-		return false
-	})
-	for i, j := 0, len(items)-1; i < j; i, j = i+1, j-1 {
-		items[i], items[j] = items[j], items[i]
+	if j.IsArray() {
+		var items []string
+		j.ForEach(func(i, v Json) bool {
+			items = append(items, v.String())
+			return false
+		})
+		for a, b := 0, len(items)-1; a < b; a, b = a+1, b-1 {
+			items[a], items[b] = items[b], items[a]
+		}
+		return JSON("[" + strings.Join(items, ",") + "]")
 	}
-	return JSON("[" + strings.Join(items, ",") + "]")
+	return j
 }
 
 // #endregion Functions
