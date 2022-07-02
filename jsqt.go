@@ -227,6 +227,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcReverse(q, j)
 	case "pick":
 		return funcPick(q, j)
+	case "pluck":
+		return funcPluck(q, j)
 	default:
 		return JSON("")
 	}
@@ -681,6 +683,32 @@ func funcPick(q *Query, j Json) Json {
 				o.WriteString(v.String())
 			}
 		}
+		o.WriteByte('}')
+		return JSON(o.String())
+	}
+	return j
+}
+
+func funcPluck(q *Query, j Json) Json {
+	if j.IsObject() {
+		var o strings.Builder
+		o.WriteByte('{')
+		ini := q.s.Mark()
+		j.ForEachKeyVal(func(k, v Json) bool {
+			for q.s.Back(ini); q.MoreArg(); {
+				key := q.ParseRaw()
+				if key.TrimQuote() == k.TrimQuote() {
+					return false
+				}
+			}
+			if o.Len() > 1 {
+				o.WriteByte(',')
+			}
+			o.WriteString(k.String())
+			o.WriteString(`:`)
+			o.WriteString(v.String())
+			return false
+		})
 		o.WriteByte('}')
 		return JSON(o.String())
 	}
