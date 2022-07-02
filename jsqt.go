@@ -927,7 +927,7 @@ func (j Json) IterateValues(m func(Json) Json) Json {
 						o.WriteByte(j.s[i])
 						break
 					}
-					if j.s[i] == ' ' {
+					if j.s[i] <= ' ' {
 						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						break
 					}
@@ -969,7 +969,7 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 						o.WriteByte(j.s[i])
 						break
 					}
-					if j.s[i] == ' ' {
+					if j.s[i] <= ' ' {
 						o.WriteString(m(JSON(j.s[ini:i].String())).String())
 						break
 					}
@@ -1010,7 +1010,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 						continue
 					}
 					// Is a key of a value (string or anything else)? Emit both key and value.
-					if ini := j.s.Mark(); j.s.UtilMatchString('"') || j.s.MatchUntilAnyByte4(',', '}', ']', ' ') {
+					if ini := j.s.Mark(); j.s.UtilMatchString('"') || j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) {
 						val := j.s.Token(ini)
 						k, v := m(JSON(str), JSON(val))
 						o.WriteString(k.String())
@@ -1028,7 +1028,7 @@ func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
 				o.WriteByte(c)
 			} else {
 				// Gets anything and emit it as a value.
-				if ini := j.s.Mark(); j.s.MatchUntilAnyByte5(',', ' ', '}', ']', 0) {
+				if ini := j.s.Mark(); j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) {
 					val := j.s.Token(ini)
 					_, v := m(JSON("null"), JSON(val))
 					o.WriteString(v.String())

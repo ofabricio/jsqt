@@ -179,21 +179,25 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (< b 7) a)`, then: `[3]`},
 		// (iterate-kv)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-kv (this))`, then: `{"a":3}`},
 		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
 		{give: `{ "a": "b" }`, when: `(iterate-kv (upper))`, then: `{"A":"B"}`},
 		{give: `3`, when: `(iterate-kv (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-kv (this))`, then: `3`},
 		// (iterate-v)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-v (this))`, then: `{"a":3}`},
 		{give: `{ "a" : 3, "b": [ 3 , { "a" : 3 } ] }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
 		{give: `{ "a": 3 }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this)))`, then: `{"a":4}`},
 		{give: `3`, when: `(iterate-v (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate-v (this))`, then: `3`},
 		// (iterate-k)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-k (this))`, then: `{"a":3}`},
 		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
 		{give: `{ "a" : 3 }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this)))`, then: `{"x":3}`},
 		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate-k (this))`, then: `3`},
 		// (iterate)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate 0 1)`, then: `{"a":3}`},
 		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
 		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
 		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":"4"}`},
