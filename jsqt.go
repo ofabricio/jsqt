@@ -225,6 +225,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcSort(q, j)
 	case "reverse":
 		return funcReverse(q, j)
+	case "pick":
+		return funcPick(q, j)
 	default:
 		return JSON("")
 	}
@@ -659,6 +661,28 @@ func funcReverse(q *Query, j Json) Json {
 			items[a], items[b] = items[b], items[a]
 		}
 		return JSON("[" + strings.Join(items, ",") + "]")
+	}
+	return j
+}
+
+func funcPick(q *Query, j Json) Json {
+	if j.IsObject() {
+		var o strings.Builder
+		o.WriteByte('{')
+		for q.MoreArg() {
+			key := q.ParseRaw().TrimQuote()
+			if v := j.Get(key); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteByte(',')
+				}
+				o.WriteByte('"')
+				o.WriteString(key)
+				o.WriteString(`":`)
+				o.WriteString(v.String())
+			}
+		}
+		o.WriteByte('}')
+		return JSON(o.String())
 	}
 	return j
 }
