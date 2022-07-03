@@ -1308,8 +1308,8 @@ func (j Json) Merge() Json {
 				o.WriteString(k.String())
 				o.WriteString(`:`)
 				o.WriteString(v.String())
+				done[k.String()] = true
 			}
-			done[k.String()] = true
 			return false
 		})
 		return false
