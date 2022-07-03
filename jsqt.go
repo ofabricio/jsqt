@@ -60,7 +60,7 @@ func (q *Query) ParseKey(j Json) Json {
 	if m := q.s.Mark(); q.s.UtilMatchString('"') {
 		key = q.s.Token(m)
 		key = key[1 : len(key)-1]
-	} else if q.s.MatchUntilAnyByte3(' ', ')', 0) { // Anything.
+	} else if q.MatchAnything() {
 		key = q.s.Token(m)
 	}
 	q.ws()
@@ -71,7 +71,7 @@ func (q *Query) ParseRaw() Json {
 	raw := ""
 	if m := q.s.Mark(); q.s.UtilMatchString('"') {
 		raw = q.s.Token(m)
-	} else if q.s.MatchUntilAnyByte3(' ', ')', 0) { // Anything.
+	} else if q.MatchAnything() {
 		raw = q.s.Token(m)
 	}
 	q.ws()
@@ -87,7 +87,7 @@ func (q *Query) SkipArgs() {
 func (q *Query) SkipArg() {
 	_ = q.s.UtilMatchOpenCloseCount('(', ')', '"') ||
 		q.s.UtilMatchString('"') ||
-		q.s.MatchUntilAnyByte(' ', ')')
+		q.MatchAnything()
 	q.ws()
 }
 
@@ -107,8 +107,12 @@ func (q Query) String() string {
 	return q.s.String()
 }
 
+func (q *Query) MatchAnything() bool {
+	return q.s.MatchUntilLTEOr2(' ', ')', 0)
+}
+
 func (q *Query) ws() {
-	q.s.MatchByte(' ')
+	q.s.MatchWhileByteLTE(' ')
 }
 
 func (q *Query) CallFun(fname string, j Json) Json {
