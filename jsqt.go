@@ -22,10 +22,12 @@ func JSON(jsn string) Json {
 type Query struct {
 	s    Scanner
 	Root Json
+	defs map[string]string
 }
 
 func (q *Query) Parse(j Json) Json {
-	return q.ParseFun(j)
+	q.ws()
+	return funcGet(q, j)
 }
 
 func (q *Query) ParseFunOrKey(j Json) Json {
@@ -95,6 +97,10 @@ func (q *Query) IsEmpty() bool {
 
 func (q Query) MoreArg() bool {
 	return !q.s.EqualByte(')') && !q.IsEmpty()
+}
+
+func (q Query) Copy(qry string) Query {
+	return Query{s: Scanner(qry), Root: q.Root, defs: q.defs}
 }
 
 func (q Query) String() string {
@@ -231,12 +237,30 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcPick(q, j)
 	case "pluck":
 		return funcPluck(q, j)
+	case "def":
+		return funcDef(q, j)
 	default:
-		return JSON("")
+		if val, ok := q.defs[fname]; ok {
+			qq := q.Copy(val)
+			return qq.ParseFun(j)
+		}
 	}
+	return JSON("")
 }
 
 // #region Functions
+
+func funcDef(q *Query, j Json) Json {
+	fname := q.ParseRaw().String()
+	if m := q.s.Mark(); q.s.UtilMatchOpenCloseCount('(', ')', '"') {
+		fun := q.s.Token(m)
+		if q.defs == nil {
+			q.defs = make(map[string]string)
+		}
+		q.defs[fname] = fun
+	}
+	return j
+}
 
 func funcGet(q *Query, j Json) Json {
 	for q.MoreArg() {
