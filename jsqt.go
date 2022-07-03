@@ -119,6 +119,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcCollect(q, j)
 	case "flatten":
 		return j.Flatten()
+	case "set":
+		return funcSet(q, j)
 	case "size":
 		return j.Size()
 	case "default":
@@ -300,6 +302,42 @@ func funcCollect(q *Query, j Json) Json {
 	}
 	o.WriteString("]")
 	return JSON(o.String())
+}
+
+func funcSet(q *Query, j Json) Json {
+	if j.IsObject() {
+		done := make(map[string]bool)
+		var o strings.Builder
+		o.WriteString("{")
+		for q.MoreArg() {
+			if k, v := q.ParseFunOrRaw(j).TrimQuote(), q.ParseFunOrRaw(j); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteByte('"')
+				o.WriteString(k)
+				o.WriteString(`":`)
+				o.WriteString(v.String())
+				done[k] = true
+			}
+		}
+		j.ForEachKeyVal(func(k, v Json) bool {
+			key := k.TrimQuote()
+			if !done[key] {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteByte('"')
+				o.WriteString(key)
+				o.WriteString(`":`)
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		o.WriteString("}")
+		return JSON(o.String())
+	}
+	return j
 }
 
 func funcDefault(q *Query, j Json) Json {

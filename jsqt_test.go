@@ -21,6 +21,9 @@ func TestGet(t *testing.T) {
 		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (concat 0 1))`, then: `["34","78"]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (reverse))`, then: `[[4,3],[8,7]]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (sort desc))`, then: `[[4,3],[8,7]]`},
+		// (set)
+		{give: `{"a":3,"b":4}`, when: `(set x 5 y (get a))`, then: `{"x":5,"y":3,"a":3,"b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(set b 5)`, then: `{"b":5,"a":3}`},
 		// (pluck)
 		{give: `{"a":3,"b":4,"c":5}`, when: `(pluck b c)`, then: `{"a":3}`},
 		// (pick)
