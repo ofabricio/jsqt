@@ -541,7 +541,13 @@ func funcIsBlank(q *Query, j Json) Json {
 func funcEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() == b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na == nb {
+			return j
+		}
+	} else if a.String() == b.String() {
 		return j
 	}
 	return JSON("")
@@ -550,7 +556,13 @@ func funcEQ(q *Query, j Json) Json {
 func funcNEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() != b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na != nb {
+			return j
+		}
+	} else if a.String() != b.String() {
 		return j
 	}
 	return JSON("")
@@ -559,7 +571,13 @@ func funcNEQ(q *Query, j Json) Json {
 func funcGTE(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() >= b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na >= nb {
+			return j
+		}
+	} else if a.String() >= b.String() {
 		return j
 	}
 	return JSON("")
@@ -568,7 +586,13 @@ func funcGTE(q *Query, j Json) Json {
 func funcLTE(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() <= b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na <= nb {
+			return j
+		}
+	} else if a.String() <= b.String() {
 		return j
 	}
 	return JSON("")
@@ -577,7 +601,13 @@ func funcLTE(q *Query, j Json) Json {
 func funcGT(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() > b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na > nb {
+			return j
+		}
+	} else if a.String() > b.String() {
 		return j
 	}
 	return JSON("")
@@ -586,7 +616,13 @@ func funcGT(q *Query, j Json) Json {
 func funcLT(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.String() < b.String() {
+	if a.IsNumber() {
+		na, _ := strconv.ParseFloat(a.String(), 64)
+		nb, _ := strconv.ParseFloat(b.String(), 64)
+		if na < nb {
+			return j
+		}
+	} else if a.String() < b.String() {
 		return j
 	}
 	return JSON("")
