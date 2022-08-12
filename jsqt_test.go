@@ -96,6 +96,8 @@ func TestGet(t *testing.T) {
 		// (key)
 		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
 		// (if)
+		{give: `[33,44]`, when: `(if (is-arr) (raw 4))`, then: `4`},                             // Can omit Else.
+		{give: `{"b":3}`, when: `(if (is-num) (raw 4))`, then: `{"b":3}`},                       // Can omit Else.
 		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},          // Then.
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (this)))`, then: `{"b":3}`}, // Else.
 		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},              // Then.

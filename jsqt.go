@@ -414,8 +414,10 @@ func funcIf(q *Query, j Json) Json {
 	if cond := q.ParseFunOrKey(j); cond.Exists() {
 		return q.ParseFunOrKey(j)
 	}
-	q.SkipArg()
-	return q.ParseFunOrKey(j)
+	if q.SkipArg(); q.MoreArg() {
+		return q.ParseFunOrKey(j)
+	}
+	return j
 }
 
 func funcEither(q *Query, j Json) Json {
