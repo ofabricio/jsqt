@@ -1,9 +1,7 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/ofabricio/scanner v0.0.0-20220702115629-78f75c05831d h1:+DxlO64AS+OFmEDdW2Q1OVZAgvCXpvOQQh+jOd+8wLY=
-github.com/ofabricio/scanner v0.0.0-20220702115629-78f75c05831d/go.mod h1:y+awMVGqU/P+gCWKVHBy5f1M8EQlaTJLMniRC68Ad8I=
-github.com/ofabricio/scanner v0.0.0-20220703225045-09d0fe2c2e7d h1:k5kn9XNMeMuXrEAHQhHuD7cnbGH13RK7dB7ofNBRkj0=
-github.com/ofabricio/scanner v0.0.0-20220703225045-09d0fe2c2e7d/go.mod h1:y+awMVGqU/P+gCWKVHBy5f1M8EQlaTJLMniRC68Ad8I=
+github.com/ofabricio/scanner v0.0.0-20220812180536-e8c7e2ceff98 h1:ghPr1+7esdU/k6gbcNWJYBQdoUsq59fUDOvP9KrjUyk=
+github.com/ofabricio/scanner v0.0.0-20220812180536-e8c7e2ceff98/go.mod h1:y+awMVGqU/P+gCWKVHBy5f1M8EQlaTJLMniRC68Ad8I=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
