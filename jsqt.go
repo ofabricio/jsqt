@@ -830,6 +830,7 @@ type Json struct {
 }
 
 func (j Json) Query(qry string) Json {
+	j.ws()
 	q := Query{s: Scanner(qry), Root: j}
 	return q.Parse(j)
 }
