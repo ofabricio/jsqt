@@ -847,11 +847,13 @@ func (j Json) Bytes() []byte {
 
 // Stringify converts a JSON to a JSON string.
 // Examples:
-//   "Hello" -> "\"Hello\""
-//   ""      -> "\"\""
-//   3       -> "3"
-//   {}      -> "{}"
-//   { "hello": "world" } -> "{ \"hello\": \"world\" }"
+//
+//	"Hello" -> "\"Hello\""
+//	""      -> "\"\""
+//	3       -> "3"
+//	{}      -> "{}"
+//	{ "hello": "world" } -> "{ \"hello\": \"world\" }"
+//
 // Stringify reverts Jsonify.
 func (j Json) Stringify() Json {
 	return JSON(strconv.Quote(j.String()))
@@ -859,10 +861,12 @@ func (j Json) Stringify() Json {
 
 // Jsonify converts a JSON string to a JSON.
 // Examples:
-//   "true" -> true
-//   "3"    -> 3
-//   "{}"   -> {}
-//   "{ \"hello\": \"world\"}" -> { "hello": "world" }
+//
+//	"true" -> true
+//	"3"    -> 3
+//	"{}"   -> {}
+//	"{ \"hello\": \"world\"}" -> { "hello": "world" }
+//
 // Jsonify reverts Stringify.
 func (j Json) Jsonify() Json {
 	v, _ := strconv.Unquote(j.String())
