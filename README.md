@@ -182,12 +182,12 @@ a := jsqt.Get(j, `(arr message (raw "World"))`)
 fmt.Println(a) // ["Hello","World"]
 ```
 
-## (set)
+## (upsert)
 
 This function creates a new object field or updates an existing one.
 
 ```clj
-(set field value ...)
+(upsert field value ...)
 ```
 
 The arguments are pairs of JSON keys and values.
@@ -198,8 +198,8 @@ Both `field` and `value` can be a function or a raw value.
 ```go
 j := `{ "message": "Hello" }`
 
-a := jsqt.Get(j, `(set message "World")`)
-b := jsqt.Get(j, `(set id 123)`)
+a := jsqt.Get(j, `(upsert message "World")`)
+b := jsqt.Get(j, `(upsert id 123)`)
 
 fmt.Println(a) // {"message":"World"}
 fmt.Println(b) // {"id":123,"message":"Hello"}

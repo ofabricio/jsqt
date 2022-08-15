@@ -129,8 +129,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcCollect(q, j)
 	case "flatten":
 		return j.Flatten()
-	case "set":
-		return funcSet(q, j)
+	case "upsert":
+		return funcUpsert(q, j)
 	case "size":
 		return j.Size()
 	case "default":
@@ -332,7 +332,7 @@ func funcCollect(q *Query, j Json) Json {
 	return JSON(o.String())
 }
 
-func funcSet(q *Query, j Json) Json {
+func funcUpsert(q *Query, j Json) Json {
 	if j.IsObject() {
 		done := make(map[string]bool)
 		var o strings.Builder
