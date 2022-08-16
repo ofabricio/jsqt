@@ -145,6 +145,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcIterateKeys(q, j)
 	case "iterate-kv":
 		return funcIterateKeysValues(q, j)
+	case "iterate-all":
+		return funcIterateAll(q, j)
 	case "is-num":
 		return funcIsNum(q, j)
 	case "is-obj":
@@ -373,6 +375,16 @@ func funcDefault(q *Query, j Json) Json {
 		return j
 	}
 	return q.ParseFunOrRaw(j)
+}
+
+func funcIterateAll(q *Query, j Json) Json {
+	ini := q.s.Mark()
+	return j.IterateAll(func(k, v Json) (Json, Json) {
+		q.s.Back(ini)
+		k = q.ParseFun(k)
+		v = q.ParseFun(v)
+		return k, v
+	})
 }
 
 func funcIterate(q *Query, j Json) Json {
@@ -985,6 +997,47 @@ func (j Json) IsSome() bool {
 
 func (j Json) Exists() bool {
 	return j.String() != ""
+}
+
+func (j Json) IterateAll(m func(k, v Json) (Json, Json)) Json {
+	_, v := j.iterateAll(JSON("null"), m)
+	return v
+}
+
+func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
+	if j.IsObject() {
+		var o strings.Builder
+		o.WriteString("{")
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(k.String())
+				o.WriteString(":")
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		o.WriteString("}")
+		return m(k, JSON(o.String()))
+	}
+	if j.IsArray() {
+		var o strings.Builder
+		o.WriteString("[")
+		j.ForEach(func(k, v Json) bool {
+			if _, v = v.iterateAll(k, m); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		o.WriteString("]")
+		return m(k, JSON(o.String()))
+	}
+	return m(k, j)
 }
 
 func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k, v Json)) {

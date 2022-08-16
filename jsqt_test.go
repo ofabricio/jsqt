@@ -15,6 +15,10 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (iterate-all)
+		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
+		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
+		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
 		// Test empty context input for many functions.
 		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
 		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
@@ -983,6 +987,40 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 func Benchmark_QueryFunction_IterateV(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`{ "a": 3, "b": 4 }`, `(iterate-v (this))`)
+	}
+}
+
+func ExampleJson_IterateAll() {
+
+	m := func(k, v Json) (Json, Json) {
+		fmt.Println(k, v)
+		return k, v
+	}
+
+	j := JSON(`{ "a": 3, "b": { "c": 4 }, "d": [5, { "e": 6}] }`)
+	v := j.IterateAll(m)
+
+	fmt.Println("Final:", v)
+
+	// Output:
+	// "a" 3
+	// "c" 4
+	// "b" {"c":4}
+	// 0 5
+	// "e" 6
+	// 1 {"e":6}
+	// "d" [5,{"e":6}]
+	// null {"a":3,"b":{"c":4},"d":[5,{"e":6}]}
+	// Final: {"a":3,"b":{"c":4},"d":[5,{"e":6}]}
+}
+
+func BenchmarkJson_IterateAll(b *testing.B) {
+	m := func(k, v Json) (Json, Json) {
+		return k, v
+	}
+	j := JSON(TestData1)
+	for i := 0; i < b.N; i++ {
+		j.IterateAll(m)
 	}
 }
 

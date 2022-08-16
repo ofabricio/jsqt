@@ -708,6 +708,8 @@ and apply a map function to transform them.
 (iterate-k key)
 (iterate-v val)
 (iterate-kv keyval)
+
+(iterate-all key val)
 ```
 
 In `iterate`, the `key` and `val` arguments must be a function or a key.
@@ -735,6 +737,20 @@ fmt.Println(a) // {"one":"TWO","three":"FOUR"}
 fmt.Println(b) // {"ONE":"Two","THREE":"Four"}
 fmt.Println(c) // {"One":"TWO","Three":"FOUR"}
 fmt.Println(d) // {"ONE":"TWO","THREE":"FOUR"}
+```
+
+The `iterate-all` iterates over all keys and values, but values also include objects and arrays.
+They `key` and `val` arguments must be functions.
+If either key or val functions return an empty context the field is removed from the result.
+
+**Example**
+
+```go
+j := `{ "a": 3, "b": {}, "c": { "d": {} }, "e": { "f": 4 } }`
+
+a := jsqt.Get(j, `(iterate-all (upper) (not (is-empty)))`)
+
+fmt.Println(a) // {"A":3,"E":{"F":4}}
 ```
 
 ## (debug)
