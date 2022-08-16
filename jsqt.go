@@ -147,6 +147,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcIterateKeysValues(q, j)
 	case "iterate-all":
 		return funcIterateAll(q, j)
+	case "iterate-all-pair":
+		return funcIterateAllPair(q, j)
 	case "is-num":
 		return funcIsNum(q, j)
 	case "is-obj":
@@ -375,6 +377,17 @@ func funcDefault(q *Query, j Json) Json {
 		return j
 	}
 	return q.ParseFunOrRaw(j)
+}
+
+func funcIterateAllPair(q *Query, j Json) Json {
+	ini := q.s.Mark()
+	return j.IterateAll(func(k, v Json) (Json, Json) {
+		arr := JSON("[" + k.String() + "," + v.String() + "]")
+		q.s.Back(ini)
+		k = q.ParseFunOrKey(arr)
+		v = q.ParseFunOrKey(arr)
+		return k, v
+	})
 }
 
 func funcIterateAll(q *Query, j Json) Json {

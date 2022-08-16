@@ -710,6 +710,7 @@ and apply a map function to transform them.
 (iterate-kv keyval)
 
 (iterate-all key val)
+(iterate-all-pair key val)
 ```
 
 In `iterate`, the `key` and `val` arguments must be a function or a key.
@@ -743,14 +744,20 @@ The `iterate-all` iterates over all keys and values, but values also include obj
 They `key` and `val` arguments must be functions.
 If either key or val functions return an empty context the field is removed from the result.
 
+The `iterate-all-pair` iterates over all keys and values, but values also include objects and arrays.
+Both `key` and `val` arguments can be a function or an index key and they receive an array in the format `[key, val]`.
+If either key or val functions return an empty context the field is removed from the result.
+
 **Example**
 
 ```go
 j := `{ "a": 3, "b": {}, "c": { "d": {} }, "e": { "f": 4 } }`
 
 a := jsqt.Get(j, `(iterate-all (upper) (not (is-empty)))`)
+b := jsqt.Get(j, `(iterate-all-pair (get 0 (upper)) (get 1 (not (is-empty))))`)
 
 fmt.Println(a) // {"A":3,"E":{"F":4}}
+fmt.Println(b) // {"A":3,"E":{"F":4}}
 ```
 
 ## (debug)

@@ -15,6 +15,8 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (iterate-all-pair)
+		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all-pair (get 0 (upper)) (get 1 (not (is-empty))))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		// (iterate-all)
 		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
@@ -839,7 +841,7 @@ func BenchmarkJson_Iterate(b *testing.B) {
 
 func Benchmark_QueryFunction_Iterate(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(`{ "a": 3, "b": 4 }`, `(iterate 0 1)`)
+		Get(TestData1, `(iterate 0 1)`)
 	}
 }
 
@@ -897,7 +899,7 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateKV(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(`{ "a": 3, "b": 4 }`, `(iterate-kv (this) (this))`)
+		Get(TestData1, `(iterate-kv (this) (this))`)
 	}
 }
 
@@ -942,7 +944,7 @@ func BenchmarkJson_IterateKeys(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateK(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(`{ "a": 3, "b": 4 }`, `(iterate-k (this))`)
+		Get(TestData1, `(iterate-k (this))`)
 	}
 }
 
@@ -986,7 +988,7 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateV(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(`{ "a": 3, "b": 4 }`, `(iterate-v (this))`)
+		Get(TestData1, `(iterate-v (this))`)
 	}
 }
 
@@ -1021,6 +1023,18 @@ func BenchmarkJson_IterateAll(b *testing.B) {
 	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
 		j.IterateAll(m)
+	}
+}
+
+func Benchmark_QueryFunction_IterateAll(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(iterate-all (this) (this))`)
+	}
+}
+
+func Benchmark_QueryFunction_IterateAllPair(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(iterate-all-pair 0 1)`)
 	}
 }
 
