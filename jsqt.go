@@ -139,6 +139,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return j.Merge()
 	case "iterate":
 		return funcIterate(q, j)
+	case "iterate-pair":
+		return funcIteratePair(q, j)
 	case "iterate-v":
 		return funcIterateValues(q, j)
 	case "iterate-k":
@@ -401,6 +403,16 @@ func funcIterateAll(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
+	ini := q.s.Mark()
+	return j.Iterate(func(k, v Json) (Json, Json) {
+		q.s.Back(ini)
+		k = q.ParseFun(k)
+		v = q.ParseFun(v)
+		return k, v
+	})
+}
+
+func funcIteratePair(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.Iterate(func(k, v Json) (Json, Json) {
 		arr := JSON(`[` + k.String() + "," + v.String() + `]`)

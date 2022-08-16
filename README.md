@@ -698,13 +698,14 @@ fmt.Println(b)
 */
 ```
 
-## (iterate) (iterate-v) (iterate-k) (iterate-kv)
+## (iterate)
 
 These functions iterate over keys and values of a valid JSON
 and apply a map function to transform them.
 
 ```clj
 (iterate key val)
+(iterate-pair key val)
 (iterate-k key)
 (iterate-v val)
 (iterate-kv keyval)
@@ -713,39 +714,44 @@ and apply a map function to transform them.
 (iterate-all-pair key val)
 ```
 
-In `iterate`, the `key` and `val` arguments must be a function or a key.
-Both arguments receive an array in which the first index is the key and the second index is the value.
-This allows accessing both key and value in both mapping functions.
+The `iterate` iterates over all keys and values, but values do not include objects and arrays.
+Both `key` and `val` arguments must be a function.
 
-The `iterate-k` iterates over all keys. The `key` argument receives the key string.
+The `iterate-pair` iterates over all keys and values, but values do not include objects and arrays.
+Both `key` and `val` arguments can be a function or an index key as they receive an array in the format `[key, val]`.
 
-The `iterate-v` iterates over all values. The `val` argument receives the value.
+The `iterate-k` iterates over all keys. The `key` argument must be a function and receives the key string.
 
-The `iterate-kv` iterates over all keys and values consecutively.
-The `keyval` argument receives the key or the value.
+The `iterate-v` iterates over all values, but values do not include objects and arrays.
+The `val` argument must be a function and receives the value.
+
+The `iterate-kv` iterates over all keys and values consecutively, but values do not include objects and arrays.
+The `keyval` argument must be a function and receives a key or a value consecutively.
 
 **Example**
 
 ```go
 j := `{ "One": "Two", "Three": "Four" }`
 
-a := jsqt.Get(j, `(iterate (get 0 (lower)) (get 1 (upper))`)
-b := jsqt.Get(j, `(iterate-k (upper))`)
-c := jsqt.Get(j, `(iterate-v (upper))`)
-d := jsqt.Get(j, `(iterate-kv (upper))`)
+a := jsqt.Get(j, `(iterate (lower) (upper))`)
+b := jsqt.Get(j, `(iterate-pair (concat 0 (raw "-") 1) (concat 1 (raw "-") 0))`)
+c := jsqt.Get(j, `(iterate-k (upper))`)
+d := jsqt.Get(j, `(iterate-v (upper))`)
+e := jsqt.Get(j, `(iterate-kv (upper))`)
 
 fmt.Println(a) // {"one":"TWO","three":"FOUR"}
-fmt.Println(b) // {"ONE":"Two","THREE":"Four"}
-fmt.Println(c) // {"One":"TWO","Three":"FOUR"}
-fmt.Println(d) // {"ONE":"TWO","THREE":"FOUR"}
+fmt.Println(b) // {"One-Two":"Two-One","Three-Four":"Four-Three"}
+fmt.Println(c) // {"ONE":"Two","THREE":"Four"}
+fmt.Println(d) // {"One":"TWO","Three":"FOUR"}
+fmt.Println(e) // {"ONE":"TWO","THREE":"FOUR"}
 ```
 
 The `iterate-all` iterates over all keys and values, but values also include objects and arrays.
-They `key` and `val` arguments must be functions.
+Both `key` and `val` arguments must be functions.
 If either key or val functions return an empty context the field is removed from the result.
 
 The `iterate-all-pair` iterates over all keys and values, but values also include objects and arrays.
-Both `key` and `val` arguments can be a function or an index key and they receive an array in the format `[key, val]`.
+Both `key` and `val` arguments can be a function or an index key as they receive an array in the format `[key, val]`.
 If either key or val functions return an empty context the field is removed from the result.
 
 **Example**

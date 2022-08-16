@@ -214,13 +214,20 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate-k (this))`, then: `3`},
 		// (iterate)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate 0 1)`, then: `{"a":3}`},
-		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
-		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":"4"}`},
-		{give: `[3,4]`, when: `(iterate 0 (get 1 (if (is-num) (stringify) (this))))`, then: `["3","4"]`},
-		{give: `3`, when: `(iterate 0 (get 1 (stringify)))`, then: `"3"`},
-		{give: `3`, when: `(iterate 0 1)`, then: `3`},
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate (this) (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate (this) (stringify))`, then: `"3"`},
+		{give: `3`, when: `(iterate (this) (this))`, then: `3`},
+		// (iterate-pair)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-pair 0 1)`, then: `{"a":3}`},
+		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate-pair (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate-pair 0 (get 1 (stringify)))`, then: `"3"`},
+		{give: `3`, when: `(iterate-pair 0 1)`, then: `3`},
 		// (default)
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
 		// (size)
@@ -841,7 +848,13 @@ func BenchmarkJson_Iterate(b *testing.B) {
 
 func Benchmark_QueryFunction_Iterate(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate 0 1)`)
+		Get(TestData1, `(iterate (this) (this))`)
+	}
+}
+
+func Benchmark_QueryFunction_IteratePair(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(iterate-pair 0 1)`)
 	}
 }
 
