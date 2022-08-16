@@ -367,6 +367,7 @@ fmt.Println(b) // false
 ## (or) (and) (not)
 
 These functions apply OR, AND, NOT logic to its arguments.
+They return the current context when true or an empty context otherwise.
 
 ```clj
 (or a b)
