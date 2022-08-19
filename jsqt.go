@@ -733,27 +733,14 @@ func funcJoin(q *Query, j Json) Json {
 
 func funcConcat(q *Query, j Json) Json {
 	var o strings.Builder
-	v := q.ParseFunOrKey(j)
-	if v.IsString() {
-		o.WriteString(v.Jsonify().String())
-		for q.MoreArg() {
-			v := q.ParseFunOrKey(j)
+	for q.MoreArg() {
+		if v := q.ParseFunOrKey(j); v.IsString() {
 			o.WriteString(v.Jsonify().String())
+		} else if v.IsNumber() || v.IsBool() || v.IsNull() {
+			o.WriteString(v.String())
 		}
-		return JSON(o.String()).Stringify()
 	}
-	if v.IsArray() {
-		o.WriteByte('[')
-		o.WriteString(v.Flatten().String())
-		for q.MoreArg() {
-			v := q.ParseFunOrKey(j)
-			o.WriteByte(',')
-			o.WriteString(v.Flatten().String())
-		}
-		o.WriteByte(']')
-		return JSON(o.String())
-	}
-	return j
+	return JSON(o.String()).Stringify()
 }
 
 func funcSort(q *Query, j Json) Json {

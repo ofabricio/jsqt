@@ -24,7 +24,6 @@ func TestGet(t *testing.T) {
 		// Test empty context input for many functions.
 		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
 		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
-		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (concat 0 1))`, then: `["34","78"]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (reverse))`, then: `[[4,3],[8,7]]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (sort desc))`, then: `[[4,3],[8,7]]`},
 		// (def)
@@ -66,8 +65,9 @@ func TestGet(t *testing.T) {
 		{give: `{"a":"A","b":""}`, when: `(either a b)`, then: `"A"`},
 		{give: `{"a":"A","b":"B"}`, when: `(either a b)`, then: `"A"`},
 		// (concat)
-		{give: `{ "one": "hello" }`, when: `(concat one (raw " \"world\""))`, then: `"hello \"world\""`},
-		{give: `{ "one": "hello", "two": "world" }`, when: `(concat one (raw " ") two)`, then: `"hello world"`},
+		{give: `{"a":"x","b":3,"c":true,"d":null,"e":{},"f":[],"g":{"h": 4},"i":false}`, when: `(concat a b c d e f g i)`, then: `"x3truenullfalse"`},
+		{give: `{ "a": "hello" }`, when: `(concat a (raw " \"world\""))`, then: `"hello \"world\""`},
+		{give: `{ "a": "hello", "b": "world" }`, when: `(concat a (raw " ") b)`, then: `"hello world"`},
 		//(replace)
 		{give: `"a b"`, when: `(replace " " "_")`, then: `"a_b"`},
 		// (upper)

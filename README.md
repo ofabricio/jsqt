@@ -571,22 +571,20 @@ fmt.Println(a) // "a_b_c"
 
 ## (concat)
 
-This function concats strings or arrays.
+This function concats values into a string.
 
 ```clj
 (concat a b ...)
 ```
 
-The argument list must be keys or functions that return strings or arrays.
+The argument list must be keys or functions that return strings, numbers, booleans or nulls.
 
 **Example**
 
 ```go
 a := jsqt.Get(`{ "one": "Hello", "two": "World" }`, `(concat one (raw " ") two)`)
-b := jsqt.Get(`{ "a": [3,4], "b": [5,6] }`, `(concat a b)`)
 
 fmt.Println(a) // "Hello World"
-fmt.Println(b) // [3,4,5,6]
 ```
 
 ## (sort)
