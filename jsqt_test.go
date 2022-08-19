@@ -1012,7 +1012,7 @@ func ExampleJson_IterateAll() {
 		return k, v
 	}
 
-	j := JSON(`{ "a": 3, "b": { "c": 4 }, "d": [5, { "e": 6}] }`)
+	j := JSON(`{ "a": 3, "b": { "c": 4 }, "d": [ 5, { "e": 6 } ] }`)
 	v := j.IterateAll(m)
 
 	fmt.Println("Final:", v)

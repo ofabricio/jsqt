@@ -1051,7 +1051,7 @@ func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 		var o strings.Builder
 		o.WriteString("[")
 		j.ForEach(func(k, v Json) bool {
-			if _, v = v.iterateAll(k, m); v.Exists() {
+			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
