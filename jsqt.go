@@ -102,7 +102,9 @@ func (q Query) MoreArg() bool {
 }
 
 func (q Query) Copy(qry string) Query {
-	return Query{s: Scanner(qry), Root: q.Root, defs: q.defs}
+	qq := q
+	qq.s = Scanner(qry)
+	return qq
 }
 
 func (q Query) String() string {

@@ -36,6 +36,7 @@ func TestGet(t *testing.T) {
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (reverse))`, then: `[[4,3],[8,7]]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (sort desc))`, then: `[[4,3],[8,7]]`},
 		// (def)
+		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (load)) (save (raw 5)) (arr (a) (b))`, then: `[3,5]`},
 		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (get b)) (arr (a) (b))`, then: `[3,4]`},
 		// (upsert)
 		{give: `{"a":3,"b":4}`, when: `(upsert x 5 y (get a))`, then: `{"x":5,"y":3,"a":3,"b":4}`},
