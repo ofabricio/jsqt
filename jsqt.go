@@ -349,8 +349,9 @@ func funcCollect(q *Query, j Json) Json {
 
 func funcUpsert(q *Query, j Json) Json {
 	if j.IsObject() {
-		done := make(map[string]bool)
+		done := make(map[string]bool, 1)
 		var o strings.Builder
+		o.Grow(len(j.s))
 		o.WriteString("{")
 		for q.MoreArg() {
 			if k, v := q.ParseFunOrRaw(j), q.ParseFunOrRaw(j); k.Exists() && v.Exists() {
