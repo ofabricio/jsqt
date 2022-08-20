@@ -38,6 +38,8 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (load)) (save (raw 5)) (arr (a) (b))`, then: `[3,5]`},
 		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (get b)) (arr (a) (b))`, then: `[3,4]`},
 		// (upsert)
+		{give: `{"a":3}`, when: `(upsert (nothing) a)`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(upsert x (nothing))`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `(upsert x 5 y (get a))`, then: `{"x":5,"y":3,"a":3,"b":4}`},
 		{give: `{"a":3,"b":4}`, when: `(upsert b 5)`, then: `{"b":5,"a":3}`},
 		// (pluck)

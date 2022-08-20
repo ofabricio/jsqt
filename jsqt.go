@@ -353,20 +353,20 @@ func funcUpsert(q *Query, j Json) Json {
 		var o strings.Builder
 		o.WriteString("{")
 		for q.MoreArg() {
-			if k, v := q.ParseFunOrRaw(j).TrimQuote(), q.ParseFunOrRaw(j); v.Exists() {
+			if k, v := q.ParseFunOrRaw(j), q.ParseFunOrRaw(j); k.Exists() && v.Exists() {
+				key := k.TrimQuote()
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
 				o.WriteByte('"')
-				o.WriteString(k)
+				o.WriteString(key)
 				o.WriteString(`":`)
 				o.WriteString(v.String())
-				done[k] = true
+				done[key] = true
 			}
 		}
 		j.ForEachKeyVal(func(k, v Json) bool {
-			key := k.TrimQuote()
-			if !done[key] {
+			if key := k.TrimQuote(); !done[key] {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
