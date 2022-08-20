@@ -22,6 +22,7 @@ func JSON(jsn string) Json {
 type Query struct {
 	s    Scanner
 	Root Json
+	k, v Json
 	save Json
 	defs map[string]string
 }
@@ -254,6 +255,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcSave(q, j)
 	case "load":
 		return funcLoad(q, j)
+	case "key":
+		return q.k
+	case "val":
+		return q.v
 	default:
 		if val, ok := q.defs[fname]; ok {
 			qq := q.Copy(val)
@@ -323,6 +328,7 @@ func funcCollect(q *Query, j Json) Json {
 		if j.IsArray() && !j.IsEmptyArray() {
 			ini := q.s.Mark()
 			j.ForEach(func(i, item Json) bool {
+				q.k, q.v = i, item
 				q.s.Back(ini)
 				for q.MoreArg() {
 					item = q.ParseFunOrKey(item)
@@ -400,6 +406,7 @@ func funcIterateAllPair(q *Query, j Json) Json {
 func funcIterateAll(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.IterateAll(func(k, v Json) (Json, Json) {
+		q.k, q.v = k, v
 		q.s.Back(ini)
 		k = q.ParseFun(k)
 		v = q.ParseFun(v)
@@ -410,6 +417,7 @@ func funcIterateAll(q *Query, j Json) Json {
 func funcIterate(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.Iterate(func(k, v Json) (Json, Json) {
+		q.k, q.v = k, v
 		q.s.Back(ini)
 		k = q.ParseFun(k)
 		v = q.ParseFun(v)
@@ -431,6 +439,7 @@ func funcIteratePair(q *Query, j Json) Json {
 func funcIterateKeys(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.IterateKeys(func(k Json) Json {
+		q.k = k
 		q.s.Back(ini)
 		return q.ParseFun(k)
 	})
@@ -439,6 +448,7 @@ func funcIterateKeys(q *Query, j Json) Json {
 func funcIterateValues(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.IterateValues(func(v Json) Json {
+		q.v = v
 		q.s.Back(ini)
 		return q.ParseFun(v)
 	})
@@ -447,6 +457,7 @@ func funcIterateValues(q *Query, j Json) Json {
 func funcIterateKeysValues(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.IterateKeysValues(func(kv Json) Json {
+		q.k, q.v = kv, kv
 		q.s.Back(ini)
 		return q.ParseFun(kv)
 	})

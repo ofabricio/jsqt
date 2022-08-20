@@ -118,6 +118,32 @@ fmt.Println(a) // [3, 4]
 fmt.Println(b) // [5, 6]
 ```
 
+When a collect is used, two other functions become available.
+[(key)](#key-val) that returns the array index.
+[(val)](#key-val) that returns the index value.
+
+**Example**
+
+```go
+j := `[ 3, 4 ]`
+
+a := jsqt.Get(j, `(collect (obj (key) (val))`)
+
+fmt.Println(a) // [{"0":3},{"1":4}]
+```
+
+It is possible to nest collects and still access both indexes with the help of the [(save)](#save-load) function.
+
+**Example**
+
+```go
+j := `[ [ 3, 4 ], [ 5 ] ]`
+
+a := jsqt.Get(j, `(collect (save (key)) (collect (concat (load) (raw "-") (key) (raw "-") (val))))`)
+
+fmt.Println(a) // [["0-0-3","0-1-4"],["1-0-5"]]
+```
+
 ## (obj)
 
 This function creates a JSON object.
@@ -765,6 +791,8 @@ fmt.Println(a) // {"A":3,"E":{"F":4}}
 fmt.Println(b) // {"A":3,"E":{"F":4}}
 ```
 
+It is also possible to use [(key)](#key-val) and [(val)](#key-val) functions with the iterate family.
+
 ## (debug)
 
 This function prints JSON values to the stdout for debugging.
@@ -843,6 +871,31 @@ b := jsqt.Get(j, `(save (get a)) (arr (load))`)
 fmt.Println(a) // [3]
 fmt.Println(b) // [3]
 fmt.Println(c) // [3]
+```
+
+## (key) (val)
+
+These functions are available only inside a few functions.
+
+```clj
+(key)
+(val)
+```
+
+Inside a [(collect)](#collect), `(key)` is the array index and `(val)` is the array item value.
+
+Inside a [(iterate)](#iterate), `(key)` is the field key or an array index and `(val)` is the key value or an array value.
+
+**Example**
+
+```go
+a := jsqt.Get(`[ 33, 44 ]`, `(collect (key))`)
+b := jsqt.Get(`[ 33, 44 ]`, `(collect (val))`)
+c := jsqt.Get(`{ "a": 3 }`, `(iterate (concat (key) (val)) (concat (val) (key)))`)
+
+fmt.Println(a) // [0,1]
+fmt.Println(b) // [33,44]
+fmt.Println(c) // {"a3":"3a"}
 ```
 
 # Truth Table

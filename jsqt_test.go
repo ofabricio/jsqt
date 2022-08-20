@@ -15,6 +15,13 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (key) (val)
+		{give: `[3,4]`, when: `(collect (arr (key) (val)))`, then: `[[0,3],[1,4]]`},
+		{give: `{"a":3,"c":4}`, when: `(iterate (concat (key) (val)) (arr (key) (val)))`, then: `{"a3":["a",3],"c4":["c",4]}`},
+		{give: `{"a":3,"c":4}`, when: `(iterate-all (key) (arr (key) (val)))`, then: `[null,{"a":["a",3],"c":["c",4]}]`},
+		{give: `{"a":3}`, when: `(iterate-k (key))`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(iterate-v (val))`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(iterate-kv (concat (key) (val)))`, then: `{"aa":"33"}`},
 		// (save) (load)
 		{give: `{"a":3}`, when: `(save (get a)) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `(save a) (arr (load))`, then: `[3]`},
