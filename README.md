@@ -730,20 +730,15 @@ and apply a map function to transform them.
 
 ```clj
 (iterate key val)
-(iterate-pair key val)
 (iterate-k key)
 (iterate-v val)
 (iterate-kv keyval)
 
 (iterate-all key val)
-(iterate-all-pair key val)
 ```
 
 The `iterate` iterates over all keys and values, but values do not include objects and arrays.
 Both `key` and `val` arguments must be a function.
-
-The `iterate-pair` iterates over all keys and values, but values do not include objects and arrays.
-Both `key` and `val` arguments can be a function or an index key as they receive an array in the format `[key, val]`.
 
 The `iterate-k` iterates over all keys. The `key` argument must be a function and receives the key string.
 
@@ -759,24 +754,18 @@ The `keyval` argument must be a function and receives a key or a value consecuti
 j := `{ "One": "Two", "Three": "Four" }`
 
 a := jsqt.Get(j, `(iterate (lower) (upper))`)
-b := jsqt.Get(j, `(iterate-pair (concat 0 (raw "-") 1) (concat 1 (raw "-") 0))`)
-c := jsqt.Get(j, `(iterate-k (upper))`)
-d := jsqt.Get(j, `(iterate-v (upper))`)
-e := jsqt.Get(j, `(iterate-kv (upper))`)
+b := jsqt.Get(j, `(iterate-k (upper))`)
+c := jsqt.Get(j, `(iterate-v (upper))`)
+d := jsqt.Get(j, `(iterate-kv (upper))`)
 
 fmt.Println(a) // {"one":"TWO","three":"FOUR"}
-fmt.Println(b) // {"One-Two":"Two-One","Three-Four":"Four-Three"}
-fmt.Println(c) // {"ONE":"Two","THREE":"Four"}
-fmt.Println(d) // {"One":"TWO","Three":"FOUR"}
-fmt.Println(e) // {"ONE":"TWO","THREE":"FOUR"}
+fmt.Println(b) // {"ONE":"Two","THREE":"Four"}
+fmt.Println(c) // {"One":"TWO","Three":"FOUR"}
+fmt.Println(d) // {"ONE":"TWO","THREE":"FOUR"}
 ```
 
 The `iterate-all` iterates over all keys and values, but values also include objects and arrays.
 Both `key` and `val` arguments must be functions.
-If either key or val functions return an empty context the field is removed from the result.
-
-The `iterate-all-pair` iterates over all keys and values, but values also include objects and arrays.
-Both `key` and `val` arguments can be a function or an index key as they receive an array in the format `[key, val]`.
 If either key or val functions return an empty context the field is removed from the result.
 
 **Example**
@@ -785,10 +774,8 @@ If either key or val functions return an empty context the field is removed from
 j := `{ "a": 3, "b": {}, "c": { "d": {} }, "e": { "f": 4 } }`
 
 a := jsqt.Get(j, `(iterate-all (upper) (not (is-empty)))`)
-b := jsqt.Get(j, `(iterate-all-pair (get 0 (upper)) (get 1 (not (is-empty))))`)
 
 fmt.Println(a) // {"A":3,"E":{"F":4}}
-fmt.Println(b) // {"A":3,"E":{"F":4}}
 ```
 
 It is also possible to use [(key)](#key-val) and [(val)](#key-val) functions with the iterate family.

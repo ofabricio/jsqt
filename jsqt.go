@@ -141,8 +141,6 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return j.Merge()
 	case "iterate":
 		return funcIterate(q, j)
-	case "iterate-pair":
-		return funcIteratePair(q, j)
 	case "iterate-v":
 		return funcIterateValues(q, j)
 	case "iterate-k":
@@ -151,8 +149,6 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcIterateKeysValues(q, j)
 	case "iterate-all":
 		return funcIterateAll(q, j)
-	case "iterate-all-pair":
-		return funcIterateAllPair(q, j)
 	case "is-num":
 		return funcIsNum(q, j)
 	case "is-obj":
@@ -392,17 +388,6 @@ func funcDefault(q *Query, j Json) Json {
 	return q.ParseFunOrRaw(j)
 }
 
-func funcIterateAllPair(q *Query, j Json) Json {
-	ini := q.s.Mark()
-	return j.IterateAll(func(k, v Json) (Json, Json) {
-		arr := JSON("[" + k.String() + "," + v.String() + "]")
-		q.s.Back(ini)
-		k = q.ParseFunOrKey(arr)
-		v = q.ParseFunOrKey(arr)
-		return k, v
-	})
-}
-
 func funcIterateAll(q *Query, j Json) Json {
 	ini := q.s.Mark()
 	return j.IterateAll(func(k, v Json) (Json, Json) {
@@ -421,17 +406,6 @@ func funcIterate(q *Query, j Json) Json {
 		q.s.Back(ini)
 		k = q.ParseFun(k)
 		v = q.ParseFun(v)
-		return k, v
-	})
-}
-
-func funcIteratePair(q *Query, j Json) Json {
-	ini := q.s.Mark()
-	return j.Iterate(func(k, v Json) (Json, Json) {
-		arr := JSON(`[` + k.String() + "," + v.String() + `]`)
-		q.s.Back(ini)
-		k = q.ParseFunOrKey(arr)
-		v = q.ParseFunOrKey(arr)
 		return k, v
 	})
 }
@@ -1079,34 +1053,6 @@ func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 		return m(k, JSON(o.String()))
 	}
 	return m(k, j)
-}
-
-func (j Json) Iterator(o *strings.Builder, k Json, m func(o *strings.Builder, k, v Json)) {
-	m(o, k, j)
-	i := 0
-	if j.IsObject() {
-		o.WriteString("{")
-		j.ForEachKeyVal(func(k, v Json) bool {
-			if i > 0 {
-				o.WriteString(",")
-			}
-			i++
-			v.Iterator(o, k, m)
-			return false
-		})
-		o.WriteString("}")
-	} else if j.IsArray() {
-		o.WriteString("[")
-		j.ForEach(func(k, v Json) bool {
-			if i > 0 {
-				o.WriteString(",")
-			}
-			i++
-			v.Iterator(o, JSON(""), m)
-			return false
-		})
-		o.WriteString("]")
-	}
 }
 
 // IterateKeys iterates over the keys (excluding values)

@@ -26,8 +26,6 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3}`, when: `(save (get a)) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `(save a) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `a (save) (arr (load))`, then: `[3]`},
-		// (iterate-all-pair)
-		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all-pair (get 0 (upper)) (get 1 (not (is-empty))))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		// (iterate-all)
 		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
@@ -225,20 +223,16 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate-k (this))`, then: `3`},
 		// (iterate)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate (key) (val))`, then: `{"a":3}`},
 		{give: "{ \"a\"\t:\t3\t}", when: `(iterate (this) (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate (key) (if (is-num) (stringify) (val)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
 		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
 		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate (key) (if (is-num) (stringify) (val)))`, then: `["3","4"]`},
 		{give: `[3,4]`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `["3","4"]`},
 		{give: `3`, when: `(iterate (this) (stringify))`, then: `"3"`},
+		{give: `3`, when: `(iterate (key) (val))`, then: `3`},
 		{give: `3`, when: `(iterate (this) (this))`, then: `3`},
-		// (iterate-pair)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-pair 0 1)`, then: `{"a":3}`},
-		{give: `{ "a": "aaa", "b" : "bbb" }`, when: `(iterate-pair (if (get 1 (is-str)) (get 1) (get 0)) (if (get 0 (is-str)) (get 0) (get 1)))`, then: `{"aaa":"a","bbb":"b"}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
-		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `{"a":"3","b":"4"}`},
-		{give: `[3,4]`, when: `(iterate-pair 0 (get 1 (if (is-num) (stringify) (this))))`, then: `["3","4"]`},
-		{give: `3`, when: `(iterate-pair 0 (get 1 (stringify)))`, then: `"3"`},
-		{give: `3`, when: `(iterate-pair 0 1)`, then: `3`},
 		// (default)
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
 		// (size)
@@ -863,12 +857,6 @@ func Benchmark_QueryFunction_Iterate(b *testing.B) {
 	}
 }
 
-func Benchmark_QueryFunction_IteratePair(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-pair 0 1)`)
-	}
-}
-
 func ExampleJson_IterateKeysValues() {
 	m := func(v Json) Json {
 		fmt.Println(v)
@@ -1053,66 +1041,6 @@ func BenchmarkJson_IterateAll(b *testing.B) {
 func Benchmark_QueryFunction_IterateAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(iterate-all (this) (this))`)
-	}
-}
-
-func Benchmark_QueryFunction_IterateAllPair(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-all-pair 0 1)`)
-	}
-}
-
-func ExampleJson_Iterator() {
-
-	m := func(o *strings.Builder, k, v Json) {
-		if k.String() == "" {
-			if !v.IsObject() && !v.IsArray() {
-				o.WriteString(v.String())
-			}
-			return
-		}
-		o.WriteString(k.String())
-		o.WriteString(":")
-		if !v.IsObject() && !v.IsArray() {
-			fmt.Println(k, v)
-			o.WriteString(v.String())
-		}
-	}
-
-	var o strings.Builder
-
-	j := JSON(TestData1)
-	j.Iterator(&o, JSON(""), m)
-
-	fmt.Println(o.String())
-
-	// Output:
-	// "name" "Mary"
-	// "last" "Jane"
-	// "token" null
-	// "city" "Place"
-	// "country" "USA"
-	// "name" "Karen"
-	// "name" "Michelle"
-	// "last" "Jane"
-	// "age" 33
-	// {"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}
-}
-
-func BenchmarkJson_Iterator(b *testing.B) {
-	m := func(o *strings.Builder, k, v Json) {
-		o.WriteString(k.String())
-		o.WriteString(":")
-		if !v.IsObject() && !v.IsArray() {
-			o.WriteString(v.String())
-		}
-	}
-	var o strings.Builder
-	o.Grow(2550)
-	j := JSON(TestData1)
-	for i := 0; i < b.N; i++ {
-		o.Reset()
-		j.Iterator(&o, JSON(""), m)
 	}
 }
 
