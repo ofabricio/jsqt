@@ -2,10 +2,9 @@ package jsqt
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGet(t *testing.T) {
@@ -298,7 +297,7 @@ func TestGet(t *testing.T) {
 	}
 	for _, tc := range tt {
 		r := Get(tc.give, tc.when)
-		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+		assertEqual(t, tc.then, r.String(), tc)
 	}
 }
 
@@ -313,7 +312,7 @@ func Test_Invalid_Query(t *testing.T) {
 	}
 	for _, tc := range tt {
 		r := Get(tc.give, tc.when)
-		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+		assertEqual(t, tc.then, r.String(), tc)
 	}
 }
 
@@ -338,7 +337,7 @@ func TestJsonWS(t *testing.T) {
 	}
 	for _, tc := range tt {
 		r := Get(tc.give, tc.when)
-		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+		assertEqual(t, tc.then, r.String(), tc)
 	}
 }
 
@@ -362,7 +361,7 @@ func TestJsonGet(t *testing.T) {
 	for _, tc := range tt {
 		j := JSON(tc.give)
 		r := j.Get(tc.when)
-		assert.Equal(t, tc.then, r.String(), "TC: %v", tc)
+		assertEqual(t, tc.then, r.String(), tc)
 	}
 }
 
@@ -376,12 +375,12 @@ func BenchmarkJson_Get(b *testing.B) {
 func TestJsonGet_Order(t *testing.T) {
 
 	j := JSON(`{"a":3,"b":4}`)
-	assert.Equal(t, "4", j.Get("b").String())
-	assert.Equal(t, "3", j.Get("a").String())
+	assertEqual(t, "4", j.Get("b").String())
+	assertEqual(t, "3", j.Get("a").String())
 
 	j = JSON(`[3,4]`)
-	assert.Equal(t, "4", j.Get("1").String())
-	assert.Equal(t, "3", j.Get("0").String())
+	assertEqual(t, "4", j.Get("1").String())
+	assertEqual(t, "3", j.Get("0").String())
 }
 
 func TestJsonForEachKeyVal(t *testing.T) {
@@ -402,7 +401,7 @@ func TestJsonForEachKeyVal(t *testing.T) {
 			r = append(r, k.Str(), v.String())
 			return false
 		})
-		assert.Equal(t, tc.then, r, tc.give)
+		assertEqual(t, tc.then, r, tc.give)
 	}
 }
 
@@ -424,7 +423,7 @@ func TestJsonForEach(t *testing.T) {
 			r = append(r, i.String(), v.String())
 			return false
 		})
-		assert.Equal(t, tc.then, r, tc.give)
+		assertEqual(t, tc.then, r, tc.give)
 	}
 }
 
@@ -440,7 +439,7 @@ func TestJsonStr(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.Str(), tc.give)
+		assertEqual(t, tc.then, j.Str(), tc.give)
 	}
 }
 
@@ -457,7 +456,7 @@ func TestJsonInt(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.Int(), tc.give)
+		assertEqual(t, tc.then, j.Int(), tc.give)
 	}
 }
 
@@ -474,7 +473,7 @@ func TestJsonFloat(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.Float(), tc.give)
+		assertEqual(t, tc.then, j.Float(), tc.give)
 	}
 }
 
@@ -489,7 +488,7 @@ func TestJsonBool(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.when, j.Bool(), tc.give)
+		assertEqual(t, tc.when, j.Bool(), tc.give)
 	}
 }
 
@@ -509,7 +508,7 @@ func TestJsonIsEmpty(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.when, j.IsEmpty(), tc.give)
+		assertEqual(t, tc.when, j.IsEmpty(), tc.give)
 	}
 }
 
@@ -524,7 +523,7 @@ func TestJsonIsEmptyString(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsEmptyString(), tc.give)
+		assertEqual(t, tc.then, j.IsEmptyString(), tc.give)
 	}
 }
 
@@ -542,7 +541,7 @@ func TestJsonIsEmptyObject(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsEmptyObject(), tc.give)
+		assertEqual(t, tc.then, j.IsEmptyObject(), tc.give)
 	}
 }
 
@@ -560,7 +559,7 @@ func TestJsonIsEmptyArray(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsEmptyArray(), tc.give)
+		assertEqual(t, tc.then, j.IsEmptyArray(), tc.give)
 	}
 }
 
@@ -585,7 +584,7 @@ func TestJsonIsFalsy(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsFalsy(), tc)
+		assertEqual(t, tc.then, j.IsFalsy(), tc)
 	}
 }
 
@@ -610,7 +609,7 @@ func TestJsonIsTruthy(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsTruthy(), tc)
+		assertEqual(t, tc.then, j.IsTruthy(), tc)
 	}
 }
 
@@ -630,7 +629,7 @@ func TestJsonIsVoid(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsVoid(), tc.give)
+		assertEqual(t, tc.then, j.IsVoid(), tc.give)
 	}
 }
 
@@ -650,7 +649,7 @@ func TestJsonIsBlank(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsBlank(), tc.give)
+		assertEqual(t, tc.then, j.IsBlank(), tc.give)
 	}
 }
 
@@ -670,7 +669,7 @@ func TestJsonIsNully(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsNully(), tc.give)
+		assertEqual(t, tc.then, j.IsNully(), tc.give)
 	}
 }
 
@@ -690,7 +689,7 @@ func TestJsonIsSome(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.IsSome(), tc)
+		assertEqual(t, tc.then, j.IsSome(), tc)
 	}
 }
 
@@ -712,7 +711,7 @@ func TestJsonStringify(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.Stringify().String(), tc)
+		assertEqual(t, tc.then, j.Stringify().String(), tc)
 	}
 }
 
@@ -741,7 +740,7 @@ func TestJsonJsonify(t *testing.T) {
 	}
 	for _, tc := range tt {
 		j := JSON(tc.give)
-		assert.Equal(t, tc.then, j.Jsonify().String(), tc)
+		assertEqual(t, tc.then, j.Jsonify().String(), tc)
 	}
 }
 
@@ -1091,3 +1090,10 @@ func Benchmark_QueryFunction_Sort(b *testing.B) {
 
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
+
+func assertEqual(t *testing.T, exp, got any, msgs ...any) {
+	t.Helper()
+	if !reflect.DeepEqual(exp, got) {
+		t.Errorf("\nExp:\n%v\nGot:\n%v\nMsg: %v", exp, got, fmt.Sprint(msgs...))
+	}
+}
