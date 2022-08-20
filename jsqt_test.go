@@ -15,6 +15,10 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (save) (load)
+		{give: `{"a":3}`, when: `(save (get a)) (arr (load))`, then: `[3]`},
+		{give: `{"a":3}`, when: `(save a) (arr (load))`, then: `[3]`},
+		{give: `{"a":3}`, when: `a (save) (arr (load))`, then: `[3]`},
 		// (iterate-all-pair)
 		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all-pair (get 0 (upper)) (get 1 (not (is-empty))))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		// (iterate-all)

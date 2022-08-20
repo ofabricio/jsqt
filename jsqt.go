@@ -22,6 +22,7 @@ func JSON(jsn string) Json {
 type Query struct {
 	s    Scanner
 	Root Json
+	save Json
 	defs map[string]string
 }
 
@@ -249,6 +250,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcPluck(q, j)
 	case "def":
 		return funcDef(q, j)
+	case "save":
+		return funcSave(q, j)
+	case "load":
+		return funcLoad(q, j)
 	default:
 		if val, ok := q.defs[fname]; ok {
 			qq := q.Copy(val)
@@ -841,6 +846,19 @@ func funcPluck(q *Query, j Json) Json {
 		return JSON(o.String())
 	}
 	return j
+}
+
+func funcSave(q *Query, j Json) Json {
+	if q.MoreArg() {
+		q.save = q.ParseFunOrKey(j)
+	} else {
+		q.save = j
+	}
+	return j
+}
+
+func funcLoad(q *Query, j Json) Json {
+	return q.save
 }
 
 // #endregion Functions

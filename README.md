@@ -818,6 +818,33 @@ a := jsqt.Get(j, `(def num2str (collect (stringify))) (obj a (num2str) b (num2st
 fmt.Println(a) // {"a":["3","4"],"b":["3","4"]}
 ```
 
+## (save) (load)
+
+These functions save and load a context.
+
+```clj
+(save)
+(save arg)
+
+(load)
+```
+
+The `arg` argument is optional and can be a function or a key.
+
+**Example**
+
+```go
+j := `{ "a": 3 }`
+
+a := jsqt.Get(j, `a (save) (arr (load))`)
+c := jsqt.Get(j, `(save a) (arr (load))`)
+b := jsqt.Get(j, `(save (get a)) (arr (load))`)
+
+fmt.Println(a) // [3]
+fmt.Println(b) // [3]
+fmt.Println(c) // [3]
+```
+
 # Truth Table
 
 |       | void | empty | blank | nully | some | falsy | truthy |
