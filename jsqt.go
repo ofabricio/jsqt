@@ -1250,7 +1250,6 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 		}
 		return false
 	}
-	j.ws()
 	if j.IsObject() {
 		j.ForEachKeyVal(f)
 	} else {
