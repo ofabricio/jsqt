@@ -305,7 +305,7 @@ func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
 	o.WriteString("{")
 	for q.MoreArg() {
-		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); v.Exists() {
+		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); k.Exists() && v.Exists() {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
