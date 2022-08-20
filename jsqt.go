@@ -1030,8 +1030,9 @@ func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
-				o.WriteString(k.String())
-				o.WriteString(":")
+				o.WriteString(`"`)
+				o.WriteString(k.TrimQuote())
+				o.WriteString(`":`)
 				o.WriteString(v.String())
 			}
 			return false

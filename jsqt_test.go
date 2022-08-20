@@ -29,6 +29,9 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
 		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
 		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
+		{give: `{"a":3}`, when: `(iterate-all (raw "a b") (this))`, then: `{"a b":3}`},
+		{give: `{"a":3}`, when: `(iterate-all (if (== (key) "a") (nothing)) (this))`, then: `{}`},
+		{give: `[4,5]`, when: `(iterate-all (this) (if (is-num) (nothing)))`, then: `[]`},
 		// Test empty context input for many functions.
 		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
 		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
