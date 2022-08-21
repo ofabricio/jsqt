@@ -1264,8 +1264,7 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 
 func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
-		for !j.s.MatchByte('}') {
-			j.ws()
+		for j.ws() && !j.s.MatchByte('}') {
 
 			ini := j.s.Mark()
 			j.s.UtilMatchString('"')
@@ -1277,10 +1276,12 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 
 			ini = j.s.Mark()
 
-			if c := j.s.Curr(); c == '{' || c == '[' {
-				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
-			} else if c == '"' {
+			if c := j.s.Curr(); c == '"' {
 				j.s.UtilMatchString('"')
+			} else if c == '{' {
+				j.s.UtilMatchOpenCloseCount('{', '}', '"')
+			} else if c == '[' {
+				j.s.UtilMatchOpenCloseCount('[', ']', '"')
 			} else {
 				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TOOD: no need for 0. Create MatchUntilLTEOr3.
 			}
