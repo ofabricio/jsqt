@@ -1282,7 +1282,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 			} else if c == '"' {
 				j.s.UtilMatchString('"')
 			} else {
-				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
+				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TOOD: no need for 0. Create MatchUntilLTEOr3.
 			}
 
 			if f(JSON(key), JSON(j.s.Token(ini))) {
@@ -1304,7 +1304,7 @@ func (j Json) ForEach(f func(i, v Json) bool) {
 			} else if c == '"' {
 				j.s.UtilMatchString('"')
 			} else {
-				j.s.MatchUntilAnyByte4(',', '}', ']', ' ')
+				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TOOD: no need for 0. Create MatchUntilLTEOr3.
 			}
 			if f(JSON(strconv.Itoa(i)), JSON(j.s.Token(ini))) {
 				return
