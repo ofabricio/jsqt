@@ -926,6 +926,22 @@ fmt.Println(b) // [33,44]
 fmt.Println(c) // {"a3":"3a"}
 ```
 
+## (arg)
+
+This function returns the value of an argument provided with `GetWith(jsn, qry, args)`.
+
+```clj
+(arg index)
+```
+
+**Example**
+
+```go
+a := jsqt.GetWith(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
+
+fmt.Println(a) // {"msg":"hello","val":3}
+```
+
 # Truth Table
 
 |       | void | empty | blank | nully | some | falsy | truthy |

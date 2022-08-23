@@ -376,6 +376,34 @@ func Test_Invalid_Query(t *testing.T) {
 	}
 }
 
+func TestGetWith(t *testing.T) {
+
+	tt := []struct {
+		give string
+		when string
+		args []any
+		then string
+	}{
+		{
+			give: ``,
+			when: `(obj a (arg 0) b (arg 1) c (arg 2) d (arg 3) e (arg 4))`,
+			args: []any{"Hello \"World\"", 4, float32(1.2), float64(1.5), []any{3, "4"}},
+			then: `{"a":"Hello \"World\"","b":4,"c":1.2,"d":1.5,"e":[3,"4"]}`,
+		},
+	}
+	for _, tc := range tt {
+		r := GetWith(tc.give, tc.when, tc.args)
+		assertEqual(t, tc.then, r.String(), tc)
+	}
+}
+
+func BenchmarkGetWith(b *testing.B) {
+	a := []any{3}
+	for i := 0; i < b.N; i++ {
+		_ = GetWith("", "(arg 0)", a)
+	}
+}
+
 func TestJsonWS(t *testing.T) {
 
 	tt := []struct {

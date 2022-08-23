@@ -1,6 +1,7 @@
 package jsqt
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -11,6 +12,10 @@ import (
 
 func Get(jsn, qry string) Json {
 	return JSON(jsn).Query(qry)
+}
+
+func GetWith(jsn, qry string, args []any) Json {
+	return JSON(jsn).QueryWith(qry, args)
 }
 
 func JSON(jsn string) Json {
@@ -24,6 +29,7 @@ type Query struct {
 	Root Json
 	k, v Json
 	save Json
+	args []any
 	defs map[string]string
 }
 
@@ -259,6 +265,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return q.k
 	case "val":
 		return q.v
+	case "arg":
+		return funcArg(q, j)
 	default:
 		if val, ok := q.defs[fname]; ok {
 			qq := q.Copy(val)
@@ -630,6 +638,13 @@ func funcEither(q *Query, j Json) Json {
 		v = q.ParseFunOrKey(j)
 	}
 	return v
+}
+
+func funcArg(q *Query, j Json) Json {
+	arg := q.ParseRaw()
+	val := q.args[arg.Int()]
+	jsn, _ := json.Marshal(val) // I think this is cheating.
+	return JSON(string(jsn))
 }
 
 func funcIsNum(q *Query, j Json) Json {
@@ -1036,6 +1051,12 @@ type Json struct {
 func (j Json) Query(qry string) Json {
 	j.ws()
 	q := Query{s: Scanner(qry), Root: j}
+	return q.Parse(j)
+}
+
+func (j Json) QueryWith(qry string, args []any) Json {
+	j.ws()
+	q := Query{s: Scanner(qry), Root: j, args: args}
 	return q.Parse(j)
 }
 
