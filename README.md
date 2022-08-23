@@ -208,6 +208,48 @@ a := jsqt.Get(j, `(arr message (raw "World"))`)
 fmt.Println(a) // ["Hello","World"]
 ```
 
+## (set)
+
+This function sets or removes a value.
+
+```clj
+(set val arg ...)
+(set -i val arg ...)
+```
+
+The `val`  argument is the value to set and can be a function or a raw value.
+
+The `arg` is a list of object keys or array indexes.
+Note that object keys need to be between quotes.
+Also note that the max number of arguments is 32.
+
+By default `(set)` does not insert a field it does not find.
+If you want it to insert add the `-i` flag.
+
+The `*` symbol is also available to iterate on each array item.
+
+**Example**
+
+```go
+j := `{"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"grape"}]}`
+
+a := jsqt.Get(j, `(set "Grocery" "data" "name")`)
+b := jsqt.Get(j, `(set (nothing) "fruits")`)
+c := jsqt.Get(j, `(set (nothing) "fruits" 1)`)
+d := jsqt.Get(j, `(set (raw "banana") "fruits" 0 "name")`)
+e := jsqt.Get(j, `(set "banana" "fruits" * "name")`)
+f := jsqt.Get(j, `(set -i true "data" "open")`)
+g := jsqt.Get(j, `(set true "data" "open")`)
+
+fmt.Println(a) // {"data":{"name":"Grocery"},"fruits":[{"name":"apple"},{"name":"grape"}]}
+fmt.Println(b) // {"data":{"name":"Market"}}
+fmt.Println(c) // {"data":{"name":"Market"},"fruits":[{"name":"apple"}]}
+fmt.Println(d) // {"data":{"name":"Market"},"fruits":[{"name":"banana"},{"name":"grape"}]}
+fmt.Println(e) // {"data":{"name":"Market"},"fruits":[{"name":"banana"},{"name":"banana"}]}
+fmt.Println(f) // {"data":{"name":"Market","open":true},"fruits":[{"name":"apple"},{"name":"grape"}]}
+fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"grape"}]}
+```
+
 ## (upsert)
 
 This function creates a new object field or updates an existing one.

@@ -123,6 +123,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	switch fname {
 	case "get":
 		return funcGet(q, j)
+	case "set":
+		return funcSet(q, j)
 	case "obj":
 		return funcObj(q, j)
 	case "arr":
@@ -283,6 +285,97 @@ func funcDef(q *Query, j Json) Json {
 func funcGet(q *Query, j Json) Json {
 	for q.MoreArg() {
 		j = q.ParseFunOrKey(j)
+	}
+	return j
+}
+
+func funcSet(q *Query, j Json) Json {
+	insert := q.s.Match("-i")
+	q.ws()
+	v := q.ParseFunOrRaw(j)
+	var args [32]string
+	var argc int
+	for ; q.MoreArg() && argc < len(args); argc++ {
+		key := q.ParseRaw()
+		args[argc] = key.String()
+	}
+	return j.Set(insert, v, args[:argc]...)
+}
+
+func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
+	if len(keysOrIndexes) == 0 {
+		return val
+	}
+	if j.IsObject() {
+		var o strings.Builder
+		o.Grow(len(j.s) + 32)
+		o.WriteString("{")
+		found := !insert
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if k.String() == keysOrIndexes[0] {
+				found = true
+				v = v.Set(insert, val, keysOrIndexes[1:]...)
+				if v.Exists() {
+					if o.Len() > 1 {
+						o.WriteString(",")
+					}
+					o.WriteString(k.String())
+					o.WriteString(":")
+					o.WriteString(v.String())
+				}
+			} else {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(k.String())
+				o.WriteString(":")
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		if !found && val.Exists() {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(keysOrIndexes[0])
+			o.WriteString(":")
+			o.WriteString(val.String())
+		}
+		o.WriteString("}")
+		return JSON(o.String())
+	}
+	if j.IsArray() {
+		var o strings.Builder
+		o.Grow(len(j.s) + 32)
+		o.WriteString("[")
+		found := !insert
+		j.ForEach(func(i, v Json) bool {
+			if len(keysOrIndexes) > 0 {
+				if i.String() == keysOrIndexes[0] {
+					found = true
+					v = v.Set(insert, val, keysOrIndexes[1:]...)
+					keysOrIndexes = nil
+				} else if keysOrIndexes[0][0] == '*' {
+					found = true
+					v = v.Set(insert, val, keysOrIndexes[1:]...)
+				}
+			}
+			if v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		if !found && val.Exists() {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(val.String())
+		}
+		o.WriteString("]")
+		return JSON(o.String())
 	}
 	return j
 }

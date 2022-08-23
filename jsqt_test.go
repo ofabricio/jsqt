@@ -14,6 +14,50 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (set)
+		{give: `[3]`, when: `(set -i (raw 7) 1)`, then: `[3,7]`},
+		{give: `{}`, when: `(set -i 5 "x")`, then: `{"x":5}`},
+		{give: `[{"a":[3,4]},{"a":[3,4]},{"b":[3,4]}]`, when: `(set (raw 7) * "a" 1)`, then: `[{"a":[3,7]},{"a":[3,7]},{"b":[3,4]}]`},
+		{give: `{"a":[{"b":3,"a":[{"b":4},{"b":5}]},{"b":6}]}`, when: `(set (raw 7) "a" 0 "a" * "b")`, then: `{"a":[{"b":3,"a":[{"b":7},{"b":7}]},{"b":6}]}`},
+		{give: `{"a":[{"b":3,"a":[{"b":4},{"b":5}]},{"b":6}]}`, when: `(set (raw 7) "a" 0 "a" 1 "b")`, then: `{"a":[{"b":3,"a":[{"b":4},{"b":7}]},{"b":6}]}`},
+		{give: `{"a":[{"b":3,"a":[{"b":4},{"b":5}]},{"b":6}]}`, when: `(set (raw 7) "a" 0 "a" 0 "b")`, then: `{"a":[{"b":3,"a":[{"b":7},{"b":5}]},{"b":6}]}`},
+		{give: `{"e":3,"a":{"b":{"c":[{"d":4},{"d":5}],"f":6},"f":8},"f":9}`, when: `(set (raw 7) "a" "b" "c" * "d")`, then: `{"e":3,"a":{"b":{"c":[{"d":7},{"d":7}],"f":6},"f":8},"f":9}`},
+		{give: `[{"a":3},{"a":4},{"b":5}]`, when: `(set (raw 7) * "a")`, then: `[{"a":7},{"a":7},{"b":5}]`},
+		{give: `{"a":[{"b":3},{"b":4}],"b":5}`, when: `(set (raw 7) "a" 1 "b")`, then: `{"a":[{"b":3},{"b":7}],"b":5}`},
+		{give: `{"a":[{"b":3},{"b":4}],"b":5}`, when: `(set (raw 7) "a" 0 "b")`, then: `{"a":[{"b":7},{"b":4}],"b":5}`},
+		{give: `{"a":{"0":[3,4]}}`, when: `(set (raw 5) "a" "0" 1)`, then: `{"a":{"0":[3,5]}}`},
+		{give: `{"a":{"b":[3,4]}}`, when: `(set (raw 5) "a" "b" 1)`, then: `{"a":{"b":[3,5]}}`},
+		{give: `[[3],[4,5],[[8]]]`, when: `(set (nothing) * 0)`, then: `[[],[5],[]]`},
+		{give: `[[3],[4,5],[[8]]]`, when: `(set (nothing) 0)`, then: `[[4,5],[[8]]]`},
+		{give: `[[3],[4,5]]`, when: `(set (nothing) 1)`, then: `[[3]]`},
+		{give: `[[3],[4,5]]`, when: `(set (nothing) 0)`, then: `[[4,5]]`},
+		{give: `[[3],[4,5]]`, when: `(set (raw 7) 0)`, then: `[7,[4,5]]`},
+		{give: `[[3],[4,5]]`, when: `(set (raw 7) 1)`, then: `[[3],7]`},
+		{give: `[[3],[4,5]]`, when: `(set (raw 7) 1 1)`, then: `[[3],[4,7]]`},
+		{give: `[[3],[4,5]]`, when: `(set (raw 7) 1 0)`, then: `[[3],[7,5]]`},
+		{give: `[[3],[4,5]]`, when: `(set (raw 7) 0 0)`, then: `[[7],[4,5]]`},
+		{give: `[3,4,5]`, when: `(set (nothing) 3)`, then: `[3,4,5]`},
+		{give: `[3,4,5]`, when: `(set (nothing) 2)`, then: `[3,4]`},
+		{give: `[3,4,5]`, when: `(set (nothing) 1)`, then: `[3,5]`},
+		{give: `[3,4,5]`, when: `(set (nothing) 0)`, then: `[4,5]`},
+		{give: `[3,4,5]`, when: `(set (raw 7) 3)`, then: `[3,4,5]`},
+		{give: `[3,4,5]`, when: `(set (raw 7) 2)`, then: `[3,4,7]`},
+		{give: `[3,4,5]`, when: `(set (raw 7) 1)`, then: `[3,7,5]`},
+		{give: `[3,4,5]`, when: `(set (raw 7) 0)`, then: `[7,4,5]`},
+		{give: `{"0":3}`, when: `(set (raw 7) "0")`, then: `{"0":7}`},
+		{give: `[[[3]]]`, when: `(set (raw 7) 0)`, then: `[7]`},
+		{give: `[[3]]`, when: `(set (raw 7) 0)`, then: `[7]`},
+		{give: `[3]`, when: `(set (raw 7) 0)`, then: `[7]`},
+		{give: `{"a":{"b":"c"},"d":3}`, when: `(set (nothing) "a")`, then: `{"d":3}`},
+		{give: `{"a":3,"b":{"c":4,"d":5,"e":{}},"f":6}`, when: `(set (nothing) "b" "e")`, then: `{"a":3,"b":{"c":4,"d":5},"f":6}`},
+		{give: `{"a":{"b":"c"},"d":3}`, when: `(set (raw 4) "d")`, then: `{"a":{"b":"c"},"d":4}`},
+		{give: `{"a":{"b":"bb","c":"cc"}}`, when: `(set (raw 4) "a" "c")`, then: `{"a":{"b":"bb","c":4}}`},
+		{give: `{"a":3,"b":{"c":4,"d":5},"e":6}`, when: `(set (raw 7) "b" "d")`, then: `{"a":3,"b":{"c":4,"d":7},"e":6}`},
+		{give: `{"a":3,"b":4}`, when: `(set (nothing) "a")`, then: `{"b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(set (nothing) "b")`, then: `{"a":3}`},
+		{give: `{"a":3,"b":4}`, when: `(set (raw 5) "b")`, then: `{"a":3,"b":5}`},
+		{give: `{"a":3,"b":4}`, when: `(set (raw 5) "a")`, then: `{"a":5,"b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(set 5 "a")`, then: `{"a":5,"b":4}`},
 		// (key) (val)
 		{give: `[3,4]`, when: `(collect (arr (key) (val)))`, then: `[[0,3],[1,4]]`},
 		{give: `{"a":3,"c":4}`, when: `(iterate (concat (key) (val)) (arr (key) (val)))`, then: `{"a3":["a",3],"c4":["c",4]}`},
@@ -1095,6 +1139,12 @@ func BenchmarkJson_Prettify(b *testing.B) {
 func Benchmark_QueryFunction_Sort(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`[{ "a": 5 }, { "a": 4 }, { "a": 3 }]`, `(sort asc a)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Set(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(set "xxx" "address" "city")`)
 	}
 }
 
