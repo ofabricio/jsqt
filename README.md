@@ -118,9 +118,9 @@ fmt.Println(a) // [3, 4]
 fmt.Println(b) // [5, 6]
 ```
 
-When a collect is used, two other functions become available.
-[(key)](#key-val) that returns the array index.
-[(val)](#key-val) that returns the index value.
+When collect is used, two other functions become available:
+[(key)](#key-val) that returns the current index and
+[(val)](#key-val) that returns the current value.
 
 **Example**
 
