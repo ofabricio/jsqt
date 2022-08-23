@@ -292,19 +292,13 @@ func funcGet(q *Query, j Json) Json {
 func funcSet(q *Query, j Json) Json {
 	insert := q.s.Match("-i")
 	q.ws()
-	v := q.ParseFunOrRaw(j)
-	var args [32]string
-	var argc int
-	for ; q.MoreArg() && argc < len(args); argc++ {
-		key := q.ParseRaw()
-		args[argc] = key.String()
-	}
-	return j.Set(insert, v, args[:argc]...)
+	return funcSetInternal(q, j, insert)
 }
 
-func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
-	if len(keysOrIndexes) == 0 {
-		return val
+func funcSetInternal(q *Query, j Json, insert bool) Json {
+	keysOrIndexes := q.ParseFunOrRaw(j)
+	if !q.MoreArg() {
+		return keysOrIndexes
 	}
 	if j.IsObject() {
 		var o strings.Builder
@@ -312,9 +306,9 @@ func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
 		o.WriteString("{")
 		found := !insert
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if k.String() == keysOrIndexes[0] {
+			if k.String() == keysOrIndexes.String() {
 				found = true
-				v = v.Set(insert, val, keysOrIndexes[1:]...)
+				v = funcSetInternal(q, v, insert)
 				if v.Exists() {
 					if o.Len() > 1 {
 						o.WriteString(",")
@@ -333,13 +327,15 @@ func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
 			}
 			return false
 		})
-		if !found && val.Exists() {
-			if o.Len() > 1 {
-				o.WriteString(",")
+		if !found {
+			if v := funcSetInternal(q, JSON("{}"), insert); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(keysOrIndexes.String())
+				o.WriteString(":")
+				o.WriteString(v.String())
 			}
-			o.WriteString(keysOrIndexes[0])
-			o.WriteString(":")
-			o.WriteString(val.String())
 		}
 		o.WriteString("}")
 		return JSON(o.String())
@@ -350,14 +346,15 @@ func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
 		o.WriteString("[")
 		found := !insert
 		j.ForEach(func(i, v Json) bool {
-			if len(keysOrIndexes) > 0 {
-				if i.String() == keysOrIndexes[0] {
+			if q.MoreArg() {
+				if i.String() == keysOrIndexes.String() {
 					found = true
-					v = v.Set(insert, val, keysOrIndexes[1:]...)
-					keysOrIndexes = nil
-				} else if keysOrIndexes[0][0] == '*' {
+					v = funcSetInternal(q, v, insert)
+				} else if keysOrIndexes.String()[0] == '*' {
 					found = true
-					v = v.Set(insert, val, keysOrIndexes[1:]...)
+					i := q.s.Mark()
+					v = funcSetInternal(q, v, insert)
+					q.s.Back(i)
 				}
 			}
 			if v.Exists() {
@@ -368,11 +365,95 @@ func (j Json) Set(insert bool, val Json, keysOrIndexes ...string) Json {
 			}
 			return false
 		})
-		if !found && val.Exists() {
-			if o.Len() > 1 {
-				o.WriteString(",")
+		if !found {
+			if v := q.ParseFunOrRaw(j); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
 			}
-			o.WriteString(val.String())
+		}
+		o.WriteString("]")
+		return JSON(o.String())
+	}
+	return j
+}
+
+func (j Json) Set(insert bool, keysOrIndexesOrValue ...string) Json {
+	if len(keysOrIndexesOrValue) == 1 {
+		return JSON(keysOrIndexesOrValue[0])
+	}
+	if j.IsObject() {
+		var o strings.Builder
+		o.Grow(len(j.s) + 32)
+		o.WriteString("{")
+		found := false
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if k.String() == keysOrIndexesOrValue[0] {
+				found = true
+				v = v.Set(insert, keysOrIndexesOrValue[1:]...)
+				if v.Exists() {
+					if o.Len() > 1 {
+						o.WriteString(",")
+					}
+					o.WriteString(k.String())
+					o.WriteString(":")
+					o.WriteString(v.String())
+				}
+			} else {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(k.String())
+				o.WriteString(":")
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		if !found && insert {
+			if v := JSON("{}").Set(insert, keysOrIndexesOrValue[1:]...); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(keysOrIndexesOrValue[0])
+				o.WriteString(":")
+				o.WriteString(v.String())
+			}
+		}
+		o.WriteString("}")
+		return JSON(o.String())
+	}
+	if j.IsArray() {
+		var o strings.Builder
+		o.Grow(len(j.s) + 32)
+		o.WriteString("[")
+		found := false
+		j.ForEach(func(i, v Json) bool {
+			if len(keysOrIndexesOrValue) > 0 {
+				if i.String() == keysOrIndexesOrValue[0] {
+					found = true
+					v = v.Set(insert, keysOrIndexesOrValue[1:]...)
+					keysOrIndexesOrValue = nil
+				} else if keysOrIndexesOrValue[0][0] == '*' {
+					found = true
+					v = v.Set(insert, keysOrIndexesOrValue[1:]...)
+				}
+			}
+			if v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			return false
+		})
+		if !found && insert {
+			if v := JSON("[]").Set(insert, keysOrIndexesOrValue[1:]...); v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
 		}
 		o.WriteString("]")
 		return JSON(o.String())

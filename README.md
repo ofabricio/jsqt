@@ -213,15 +213,14 @@ fmt.Println(a) // ["Hello","World"]
 This function sets or removes a value.
 
 ```clj
-(set val arg ...)
-(set -i val arg ...)
+(set arg ... val)
+(set -i arg ... val)
 ```
-
-The `val`  argument is the value to set and can be a function or a raw value.
 
 The `arg` is a list of object keys or array indexes.
 Note that object keys need to be between quotes.
-Also note that the max number of arguments is 32.
+
+The `val` argument (the last argument of the list) is the value to set and can be a function or a raw value.
 
 By default `(set)` does not insert a field it does not find.
 If you want it to insert add the `-i` flag.
@@ -233,13 +232,13 @@ The `*` symbol is also available to iterate on each array item.
 ```go
 j := `{"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"grape"}]}`
 
-a := jsqt.Get(j, `(set "Grocery" "data" "name")`)
-b := jsqt.Get(j, `(set (nothing) "fruits")`)
-c := jsqt.Get(j, `(set (nothing) "fruits" 1)`)
-d := jsqt.Get(j, `(set (raw "banana") "fruits" 0 "name")`)
-e := jsqt.Get(j, `(set "banana" "fruits" * "name")`)
-f := jsqt.Get(j, `(set -i true "data" "open")`)
-g := jsqt.Get(j, `(set true "data" "open")`)
+a := jsqt.Get(j, `(set "data" "name" "Grocery")`)
+b := jsqt.Get(j, `(set "fruits" (nothing))`)
+c := jsqt.Get(j, `(set "fruits" 1 (nothing))`)
+d := jsqt.Get(j, `(set "fruits" 0 "name" (raw "banana"))`)
+e := jsqt.Get(j, `(set "fruits" * "name" "banana")`)
+f := jsqt.Get(j, `(set -i "data" "open" true)`)
+g := jsqt.Get(j, `(set "data" "open" true)`)
 
 fmt.Println(a) // {"data":{"name":"Grocery"},"fruits":[{"name":"apple"},{"name":"grape"}]}
 fmt.Println(b) // {"data":{"name":"Market"}}
