@@ -344,6 +344,8 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(root)`, then: `3`},
 		{give: ``, when: `(root)`, then: ``},
 		// (raw)
+		{give: ``, when: `(raw [ 3, 4 ])`, then: `[ 3, 4 ]`},
+		{give: ``, when: `(raw { "a b": "c d" })`, then: `{ "a b": "c d" }`},
 		{give: ``, when: `(raw {})`, then: `{}`},
 		{give: ``, when: `(raw [])`, then: `[]`},
 		{give: ``, when: `(raw null)`, then: `null`},
@@ -351,6 +353,7 @@ func TestGet(t *testing.T) {
 		{give: ``, when: `(raw false)`, then: `false`},
 		{give: ``, when: `(raw 3e2)`, then: `3e2`},
 		{give: ``, when: `(raw 3)`, then: `3`},
+		{give: ``, when: `(raw "a b")`, then: `"a b"`},
 		{give: ``, when: `(raw "a")`, then: `"a"`},
 		{give: ``, when: `(raw -3)`, then: `-3`},
 		{give: ``, when: `(raw 1.2)`, then: `1.2`},

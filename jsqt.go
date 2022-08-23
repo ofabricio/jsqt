@@ -76,12 +76,12 @@ func (q *Query) ParseKey(j Json) Json {
 }
 
 func (q *Query) ParseRaw() Json {
-	raw := ""
-	if m := q.s.Mark(); q.s.UtilMatchString('"') {
-		raw = q.s.Token(m)
-	} else if q.MatchAnything() {
-		raw = q.s.Token(m)
-	}
+	m := q.s.Mark()
+	_ = q.s.UtilMatchString('"') ||
+		q.s.UtilMatchOpenCloseCount('{', '}', '"') ||
+		q.s.UtilMatchOpenCloseCount('[', ']', '"') ||
+		q.MatchAnything()
+	raw := q.s.Token(m)
 	q.ws()
 	return JSON(raw)
 }
