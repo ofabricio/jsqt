@@ -1252,6 +1252,72 @@ func Benchmark_QueryFuncion_Set(b *testing.B) {
 	}
 }
 
+func Benchmark_QueryFuncion_Pick(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(pick name age)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Pluck(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(pluck address contacts)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Keys(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(keys)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Values(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(values)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Entries(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(TestData1, `(entries)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Objectify(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`[["a","Hello"],["b","World"],["count",123]]`, `(objectify)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Merge(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`[{"a","Hello"},{"b","World"},{"count",123}]`, `(merge)`)
+	}
+}
+
+func Benchmark_QueryFuncion_Arr(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(``, `(arr (raw 3) (raw 4) (raw 5))`)
+	}
+}
+
+func Benchmark_QueryFuncion_Obj(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(``, `(obj a (raw 3) b (raw 4) c (raw 5))`)
+	}
+}
+
+func Benchmark_QueryFuncion_Collect(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`[0,1,2,3,4,5,6,7,8,9]`, `(collect (this))`)
+	}
+}
+
+func Benchmark_QueryFuncion_Concat(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(``, `(concat (raw "Hello") (raw "World"))`)
+	}
+}
+
 const TestData1 = `{"name":"Mary","last":"Jane","token":null,"settings":{},"posts":[],"address":{"city":"Place","country":"USA"},"contacts":[{"name":"Karen"},{"name":"Michelle","last":"Jane"}],"age":33,"random":[3,null,{},[],"",false]}`
 const TestData2 = `[{"name":"Karen"},{"name":"Michelle","last":"Jane"}]`
 

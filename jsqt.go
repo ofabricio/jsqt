@@ -471,6 +471,7 @@ func (j Json) Set(insert bool, keysOrIndexesOrValue ...string) Json {
 
 func funcArr(q *Query, j Json) Json {
 	var o strings.Builder
+	o.Grow(64)
 	o.WriteString("[")
 	for q.MoreArg() {
 		if o.Len() > 1 {
@@ -485,6 +486,7 @@ func funcArr(q *Query, j Json) Json {
 
 func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
+	o.Grow(64)
 	o.WriteString("{")
 	for q.MoreArg() {
 		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); k.Exists() && v.Exists() {
@@ -503,6 +505,7 @@ func funcObj(q *Query, j Json) Json {
 
 func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
+	o.Grow(256)
 	o.WriteString("[")
 	for q.MoreArg() {
 		if j.IsArray() && !j.IsEmptyArray() {
@@ -915,6 +918,7 @@ func funcJoin(q *Query, j Json) Json {
 
 func funcConcat(q *Query, j Json) Json {
 	var o strings.Builder
+	o.Grow(32)
 	for q.MoreArg() {
 		if v := q.ParseFunOrKey(j); v.IsString() {
 			o.WriteString(v.Jsonify().String())
@@ -980,6 +984,7 @@ func funcReverse(q *Query, j Json) Json {
 func funcPick(q *Query, j Json) Json {
 	if j.IsObject() {
 		var o strings.Builder
+		o.Grow(len(j.s) >> 1)
 		o.WriteByte('{')
 		for q.MoreArg() {
 			key := q.ParseRaw().TrimQuote()
@@ -1002,6 +1007,7 @@ func funcPick(q *Query, j Json) Json {
 func funcPluck(q *Query, j Json) Json {
 	if j.IsObject() {
 		var o strings.Builder
+		o.Grow(len(j.s))
 		o.WriteByte('{')
 		ini := q.s.Mark()
 		j.ForEachKeyVal(func(k, v Json) bool {
@@ -1220,6 +1226,7 @@ func (j Json) IterateAll(m func(k, v Json) (Json, Json)) Json {
 func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 	if j.IsObject() {
 		var o strings.Builder
+		o.Grow(len(j.s))
 		o.WriteString("{")
 		j.ForEachKeyVal(func(k, v Json) bool {
 			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
@@ -1238,6 +1245,7 @@ func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 	}
 	if j.IsArray() {
 		var o strings.Builder
+		o.Grow(len(j.s))
 		o.WriteString("[")
 		j.ForEach(func(k, v Json) bool {
 			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
@@ -1545,6 +1553,7 @@ func (j Json) Size() Json {
 
 func (j Json) Keys() Json {
 	var o strings.Builder
+	o.Grow(len(j.s) >> 1)
 	o.WriteString("[")
 	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
@@ -1559,6 +1568,7 @@ func (j Json) Keys() Json {
 
 func (j Json) Values() Json {
 	var o strings.Builder
+	o.Grow(len(j.s))
 	o.WriteString("[")
 	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
@@ -1573,6 +1583,7 @@ func (j Json) Values() Json {
 
 func (j Json) Entries() Json {
 	var o strings.Builder
+	o.Grow(len(j.s) + 64)
 	o.WriteString("[")
 	j.ForEachKeyVal(func(k, v Json) bool {
 		if o.Len() > 1 {
@@ -1591,6 +1602,7 @@ func (j Json) Entries() Json {
 
 func (j Json) Objectify() Json {
 	var o strings.Builder
+	o.Grow(len(j.s) + 128)
 	o.WriteString("{")
 	j.ForEach(func(i, v Json) bool {
 		if o.Len() > 1 {
@@ -1608,6 +1620,7 @@ func (j Json) Objectify() Json {
 func (j Json) Merge() Json {
 	done := make(map[string]bool)
 	var o strings.Builder
+	o.Grow(len(j.s))
 	o.WriteString("{")
 	j.ForEach(func(i, v Json) bool {
 		v.ForEachKeyVal(func(k, v Json) bool {
