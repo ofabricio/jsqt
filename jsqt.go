@@ -34,7 +34,7 @@ type Query struct {
 }
 
 func (q *Query) Parse(j Json) Json {
-	q.ws()
+	q.s.WS()
 	return funcGet(q, j)
 }
 
@@ -58,7 +58,7 @@ func (q *Query) ParseFun(j Json) Json {
 		j = q.CallFun(fname, j)
 		q.SkipArgs()
 		q.s.MatchByte(')')
-		q.ws()
+		q.s.WS()
 	}
 	return j
 }
@@ -71,7 +71,7 @@ func (q *Query) ParseKey(j Json) Json {
 	} else if q.MatchAnything() {
 		key = q.s.Token(m)
 	}
-	q.ws()
+	q.s.WS()
 	return j.Get(key)
 }
 
@@ -82,7 +82,7 @@ func (q *Query) ParseRaw() Json {
 		q.s.UtilMatchOpenCloseCount('[', ']', '"') ||
 		q.MatchAnything()
 	raw := q.s.Token(m)
-	q.ws()
+	q.s.WS()
 	return JSON(raw)
 }
 
@@ -96,7 +96,7 @@ func (q *Query) SkipArg() {
 	_ = q.s.UtilMatchOpenCloseCount('(', ')', '"') ||
 		q.s.UtilMatchString('"') ||
 		q.MatchAnything()
-	q.ws()
+	q.s.WS()
 }
 
 func (q *Query) IsEmpty() bool {
@@ -119,10 +119,6 @@ func (q Query) String() string {
 
 func (q *Query) MatchAnything() bool {
 	return q.s.MatchUntilLTEOr2(' ', ')', 0)
-}
-
-func (q *Query) ws() {
-	q.s.MatchWhileByteLTE(' ')
 }
 
 func (q *Query) CallFun(fname string, j Json) Json {
@@ -299,7 +295,7 @@ func funcGet(q *Query, j Json) Json {
 
 func funcSet(q *Query, j Json) Json {
 	insert := q.s.Match("-i")
-	q.ws()
+	q.s.WS()
 	return funcSetInternal(q, j, insert)
 }
 
@@ -1063,13 +1059,13 @@ type Json struct {
 }
 
 func (j Json) Query(qry string) Json {
-	j.ws()
+	j.s.WS()
 	q := Query{s: Scanner(qry), Root: j}
 	return q.Parse(j)
 }
 
 func (j Json) QueryWith(qry string, args []any) Json {
-	j.ws()
+	j.s.WS()
 	q := Query{s: Scanner(qry), Root: j, args: args}
 	return q.Parse(j)
 }
@@ -1186,11 +1182,11 @@ func (j Json) IsEmptyString() bool {
 }
 
 func (j Json) IsEmptyObject() bool {
-	return j.s.MatchByte('{') && j.ws() && j.s.EqualByte('}')
+	return j.s.MatchByte('{') && j.s.WS() && j.s.EqualByte('}')
 }
 
 func (j Json) IsEmptyArray() bool {
-	return j.s.MatchByte('[') && j.ws() && j.s.EqualByte(']')
+	return j.s.MatchByte('[') && j.s.WS() && j.s.EqualByte(']')
 }
 
 func (j Json) IsVoid() bool {
@@ -1475,15 +1471,15 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 
 func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
-		for j.ws() && !j.s.MatchByte('}') {
+		for j.s.WS() && !j.s.MatchByte('}') {
 
 			ini := j.s.Mark()
 			j.s.UtilMatchString('"')
 			key := j.s.Token(ini)
 
-			j.ws()
+			j.s.WS()
 			j.s.Next() // Skip ':' character.
-			j.ws()
+			j.s.WS()
 
 			ini = j.s.Mark()
 
@@ -1501,7 +1497,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 				return
 			}
 
-			j.ws()
+			j.s.WS()
 			j.s.MatchByte(',')
 		}
 	}
@@ -1509,7 +1505,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 
 func (j Json) ForEach(f func(i, v Json) bool) {
 	if j.s.MatchByte('[') {
-		for i := 0; j.ws() && !j.s.MatchByte(']'); i++ {
+		for i := 0; j.s.WS() && !j.s.MatchByte(']'); i++ {
 			ini := j.s.Mark()
 			if c := j.s.Curr(); c == '{' || c == '[' {
 				j.s.UtilMatchOpenCloseCount(c, c+2, '"')
@@ -1521,15 +1517,10 @@ func (j Json) ForEach(f func(i, v Json) bool) {
 			if f(JSON(strconv.Itoa(i)), JSON(j.s.Token(ini))) {
 				return
 			}
-			j.ws()
+			j.s.WS()
 			j.s.MatchByte(',')
 		}
 	}
-}
-
-func (j *Json) ws() bool {
-	j.s.MatchWhileByteLTE(' ')
-	return true
 }
 
 func (j *Json) matchValue() bool {
@@ -1554,7 +1545,7 @@ func (j Json) Flatten(depth int) Json {
 		o.Grow(len(j.s))
 		o.WriteString("[")
 		d := 0
-		for j.ws() && j.s.More() {
+		for j.s.WS() && j.s.More() {
 			if (d < depth || depth == 1) && j.s.MatchByte('[') {
 				d++
 				continue
@@ -1563,7 +1554,7 @@ func (j Json) Flatten(depth int) Json {
 			j.matchValue()
 			v := j.s.Token(m)
 			if len(v) > 0 {
-				for j.ws() && j.s.MatchByte(']') {
+				for j.s.WS() && j.s.MatchByte(']') {
 					d--
 				}
 				o.WriteString(v)
