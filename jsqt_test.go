@@ -297,6 +297,16 @@ func TestGet(t *testing.T) {
 		{give: `[3,4]`, when: `(size)`, then: `2`},
 		// (merge)
 		{give: `[{"a":3},{"b":4}]`, when: `(merge)`, then: `{"a":3,"b":4}`},
+		// (flatten)
+		{give: `[ 3 , [ 4 , [ [ 5 ] ] ] , [ [ { "a" : [ [ 7 ] ] } ] ] , { "a" : [ [ 8 ] ] } ]`, when: `(flatten 0)`, then: `[3,4,5,{ "a" : [ [ 7 ] ] },{ "a" : [ [ 8 ] ] }]`},
+		{give: `[3,[4,[5]],[[[6]],7],8]`, when: `(flatten 3)`, then: `[3,4,5,6,7,8]`},
+		{give: `[3,[4,[5]],[[[6]],7],8]`, when: `(flatten 2)`, then: `[3,4,5,[6],7,8]`},
+		{give: `[3,[4,[5]],[[[6]],7],8]`, when: `(flatten 1)`, then: `[3,4,[5],[[6]],7,8]`},
+		{give: `[3,[4,[5]],[[[6]],7],8]`, when: `(flatten 0)`, then: `[3,4,5,6,7,8]`},
+		{give: `[3,[4,[5]],[[[6]],7],8]`, when: `(flatten 0)`, then: `[3,4,5,6,7,8]`},
+		{give: `[3,4]`, when: `(flatten 0)`, then: `[3,4]`},
+		{give: `[[3]]`, when: `(flatten)`, then: `[3]`},
+		{give: `[3]`, when: `(flatten)`, then: `3`},
 		// (collect)
 		{
 			give: `{"a":{"b":{"c":[{"d":"one","e":{"f":[{"g":{"h":{"i":{"j":[{"k":{"l":"hi"}}]}}}}]}},{"d":"two","e":{"f":[{"g":{"h":{"i":{"j":[]}}}}]}}]}}}`,
@@ -1204,6 +1214,17 @@ func Benchmark_QueryFunction_IterateAll(b *testing.B) {
 	}
 }
 
+func ExampleJson_Flatten() {
+
+	j := JSON(`[3,[4,[[5]]],[[{"a":6},{"a":[7,[8]]}]],{"a":[[9]]}]`)
+	j = j.Flatten(0)
+
+	fmt.Println(j)
+
+	// Output:
+	// [3,4,5,{"a":6},{"a":[7,[8]]},{"a":[[9]]}]
+}
+
 func ExampleJson_Uglify() {
 
 	j := JSON(`{ "a": "b" }`)
@@ -1317,6 +1338,12 @@ func Benchmark_QueryFuncion_Collect(b *testing.B) {
 func Benchmark_QueryFuncion_Concat(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(``, `(concat (raw "Hello") (raw "World"))`)
+	}
+}
+
+func Benchmark_QueryFuncion_FlattenDeep(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Get(`[3,[4],[[5]]]`, `(flatten 0)`)
 	}
 }
 

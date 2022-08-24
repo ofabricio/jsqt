@@ -140,7 +140,7 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	case "collect":
 		return funcCollect(q, j)
 	case "flatten":
-		return j.Flatten()
+		return funcFlatten(q, j)
 	case "upsert":
 		return funcUpsert(q, j)
 	case "size":
@@ -530,6 +530,14 @@ func funcCollect(q *Query, j Json) Json {
 	}
 	o.WriteString("]")
 	return JSON(o.String())
+}
+
+func funcFlatten(q *Query, j Json) Json {
+	depth := -1
+	if v := q.ParseRaw(); v.Exists() {
+		depth = v.Int()
+	}
+	return j.Flatten(depth)
 }
 
 func funcUpsert(q *Query, j Json) Json {
@@ -1524,10 +1532,48 @@ func (j *Json) ws() bool {
 	return true
 }
 
-func (j Json) Flatten() Json {
+func (j *Json) matchValue() bool {
+	return j.s.UtilMatchString('"') ||
+		j.s.UtilMatchOpenCloseCount('{', '}', '"') ||
+		j.s.UtilMatchOpenCloseCount('[', ']', '"') ||
+		j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0)
+}
+
+// Flatten flattens a JSON array. Depth is the depth
+// level to flatten. Use depth == 0 to deep flatten.
+// If depth == -1 the array value is simply trimmed:
+// `[3, 4]` becomes `3, 4`.
+func (j Json) Flatten(depth int) Json {
 	if j.IsArray() {
-		v := j.String()
-		return JSON(v[1 : len(v)-1])
+		if depth == -1 {
+			v := j.String()
+			return JSON(v[1 : len(v)-1])
+		}
+		depth++
+		var o strings.Builder
+		o.Grow(len(j.s))
+		o.WriteString("[")
+		d := 0
+		for j.ws() && j.s.More() {
+			if (d < depth || depth == 1) && j.s.MatchByte('[') {
+				d++
+				continue
+			}
+			m := j.s.Mark()
+			j.matchValue()
+			v := j.s.Token(m)
+			if len(v) > 0 {
+				for j.ws() && j.s.MatchByte(']') {
+					d--
+				}
+				o.WriteString(v)
+			} else {
+				o.WriteByte(j.s.Curr())
+				j.s.Next()
+			}
+		}
+		o.WriteString("]")
+		return JSON(o.String())
 	}
 	return j
 }

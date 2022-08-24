@@ -278,16 +278,27 @@ This function flattens a JSON array.
 
 ```clj
 (flatten)
+(flatten depth)
 ```
+
+`(flatten)` is meant to be used inside a `(collect)` to avoid allocation,
+as it just trims the `[]` out of a value.
+
+`(flatten depth)` can be used anywhere (including inside a collect).
+The `depth` argument is the depth level to flatten. Use `0` for a deep flatten.
 
 **Example**
 
 ```go
-a := jsqt.Get(`[ [3], [4] ]`, `(collect (flatten))`)
-b := jsqt.Get(`{ "a": [ [{ "b": 3 }], [{ "b": 4 }] ]`, `(collect a (flatten) b)`)
+a := jsqt.Get(`[[3], [4], [5]]`, `(collect (flatten))`)
+b := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 1)`)
+c := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 2)`)
+d := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 0)`)
 
-fmt.Println(a) // [3,4]
-fmt.Println(b) // [3,4]
+fmt.Println(a) // [3,4,5]
+fmt.Println(b) // [3,4,[5]]
+fmt.Println(c) // [3,4,5]
+fmt.Println(d) // [3,4,5]
 ```
 
 ## (size)
