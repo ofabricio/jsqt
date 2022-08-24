@@ -304,9 +304,9 @@ func funcSet(q *Query, j Json) Json {
 }
 
 func funcSetInternal(q *Query, j Json, insert bool) Json {
-	keysOrIndexes := q.ParseFunOrRaw(j)
+	keyOrIndex := q.ParseFunOrRaw(j)
 	if !q.MoreArg() {
-		return keysOrIndexes
+		return keyOrIndex
 	}
 	if j.IsObject() {
 		var o strings.Builder
@@ -314,7 +314,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		o.WriteString("{")
 		found := false
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if k.String() == keysOrIndexes.String() {
+			if k.String() == keyOrIndex.String() {
 				found = true
 				v = funcSetInternal(q, v, insert)
 				if v.Exists() {
@@ -340,7 +340,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
-				o.WriteString(keysOrIndexes.String())
+				o.WriteString(keyOrIndex.String())
 				o.WriteString(":")
 				o.WriteString(v.String())
 			}
@@ -355,14 +355,14 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		found := false
 		j.ForEach(func(i, v Json) bool {
 			if q.MoreArg() {
-				if i.String() == keysOrIndexes.String() {
+				if i.String() == keyOrIndex.String() {
 					found = true
 					v = funcSetInternal(q, v, insert)
-				} else if keysOrIndexes.String()[0] == '*' {
+				} else if keyOrIndex.String()[0] == '*' {
 					found = true
-					i := q.s.Mark()
+					m := q.s.Mark()
 					v = funcSetInternal(q, v, insert)
-					q.s.Back(i)
+					q.s.Back(m)
 				}
 			}
 			if v.Exists() {
