@@ -117,6 +117,7 @@ func TestGet(t *testing.T) {
 		// (either) should skip its arguments.
 		{give: `{"a":"","b":"B","c":""}`, when: `(get (either a b c) (lower))`, then: `"b"`},
 		// (either)
+		{give: `{"b":"B"}`, when: `(either a b c)`, then: `"B"`},
 		{give: `{"a":"","b":"","c":""}`, when: `(either a b c)`, then: `""`},
 		{give: `{"a":"A","b":"","c":"C"}`, when: `(either a b c)`, then: `"A"`},
 		{give: `{"a":"A","b":"B","c":""}`, when: `(either a b c)`, then: `"A"`},

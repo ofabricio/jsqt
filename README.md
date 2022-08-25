@@ -493,7 +493,7 @@ fmt.Println(a) // "It's an object!"
 
 ## (either)
 
-This function returns the first argument value that is not [nully](#truth-table).
+This function returns the first argument value that is not [nully](#truth-table) nor empty context.
 
 ```clj
 (either a b ...)

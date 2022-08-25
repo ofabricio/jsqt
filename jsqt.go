@@ -641,7 +641,7 @@ func funcIf(q *Query, j Json) Json {
 
 func funcEither(q *Query, j Json) Json {
 	v := q.ParseFunOrKey(j)
-	for v.IsNully() && q.MoreArg() {
+	for (v.IsNully() || !v.Exists()) && q.MoreArg() {
 		v = q.ParseFunOrKey(j)
 	}
 	return v
