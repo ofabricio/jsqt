@@ -844,6 +844,44 @@ func TestJsonIsNully(t *testing.T) {
 	}
 }
 
+func TestJsonIsWithExists(t *testing.T) {
+	j := JSON("")
+	tt := []struct {
+		name string
+		when func() bool
+		then bool
+	}{
+		{name: "IsArray", when: j.IsArray},
+		{name: "IsObject", when: j.IsObject},
+		{name: "IsEmptyArray", when: j.IsEmptyArray},
+		{name: "IsEmptyObject", when: j.IsEmptyObject},
+		{name: "IsEmptyString", when: j.IsEmptyString},
+		{name: "IsEmpty", when: j.IsEmpty},
+		{name: "IsBlank", when: j.IsBlank},
+		{name: "IsNull", when: j.IsNull},
+		{name: "IsNully", when: j.IsNully},
+		{name: "IsBool", when: j.IsBool},
+		{name: "IsTrue", when: j.IsTrue},
+		{name: "IsTruthy", when: j.IsTruthy},
+		{name: "IsFalse", when: j.IsFalse},
+		{name: "IsFalsy", when: j.IsFalsy},
+		{name: "IsNumber", when: j.IsNumber},
+		{name: "IsString", when: j.IsString},
+		{name: "IsSome", when: j.IsSome},
+		{name: "IsVoid", when: j.IsVoid},
+	}
+	for _, tc := range tt {
+		assertEqual(t, false, tc.when(), tc.name)
+	}
+}
+
+func BenchmarkJsonExists(b *testing.B) {
+	j := JSON("")
+	for i := 0; i < b.N; i++ {
+		j.Exists()
+	}
+}
+
 func TestJsonIsSome(t *testing.T) {
 	tt := []struct {
 		give string
