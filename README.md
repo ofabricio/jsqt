@@ -1,6 +1,6 @@
 # JSQT
 
-This Go package provides a closure-like syntax to query and transform JSON documents.
+This Go package provides a language to query and transform JSON documents.
 
 [![build](https://github.com/ofabricio/jsqt/actions/workflows/go.yml/badge.svg)](https://github.com/ofabricio/jsqt/actions/workflows/go.yml)
 
