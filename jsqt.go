@@ -470,11 +470,12 @@ func funcArr(q *Query, j Json) Json {
 	o.Grow(64)
 	o.WriteString("[")
 	for q.MoreArg() {
-		if o.Len() > 1 {
-			o.WriteString(",")
+		if v := q.ParseFunOrKey(j); v.Exists() {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(v.String())
 		}
-		v := q.ParseFunOrKey(j)
-		o.WriteString(v.String())
 	}
 	o.WriteString("]")
 	return JSON(o.String())

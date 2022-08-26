@@ -321,8 +321,9 @@ func TestGet(t *testing.T) {
 		{give: `{"a":[{"b":{"c":3}},{"b":{}}]}`, when: `(collect a b c)`, then: `[3]`},
 		{give: `{"a":[{"b":3},{"b":4}]}`, when: `(collect a b)`, then: `[3,4]`},
 		{give: `[{"a":3},{"b":4},{"a":5}]`, when: `(collect a)`, then: `[3,5]`},
-		// (array)
+		// (arr)
 		{give: `{"a":3,"b":4}`, when: `(arr a b a (raw "hi"))`, then: `[3,4,3,"hi"]`},
+		{give: `{"a":3,"b":4}`, when: `(arr a b c)`, then: `[3,4]`},
 		{give: `{"a":3,"b":4}`, when: `(arr a b a)`, then: `[3,4,3]`},
 		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
 		{give: ``, when: `(arr)`, then: `[]`},
