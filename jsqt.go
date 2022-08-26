@@ -309,8 +309,9 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		o.Grow(len(j.s) + 32)
 		o.WriteString("{")
 		found := false
+		keyOrIdx := keyOrIndex.TrimQuote()
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if k.String() == keyOrIndex.String() {
+			if k.TrimQuote() == keyOrIdx {
 				found = true
 				v = funcSetInternal(q, v, insert)
 				if v.Exists() {
@@ -336,8 +337,9 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
+				o.WriteString(`"`)
 				o.WriteString(keyOrIndex.String())
-				o.WriteString(":")
+				o.WriteString(`":`)
 				o.WriteString(v.String())
 			}
 		}
@@ -393,7 +395,7 @@ func (j Json) Set(insert bool, keysOrIndexesOrValue ...string) Json {
 		o.WriteString("{")
 		found := false
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if k.String() == keysOrIndexesOrValue[0] {
+			if k.TrimQuote() == keysOrIndexesOrValue[0] {
 				found = true
 				v = v.Set(insert, keysOrIndexesOrValue[1:]...)
 				if v.Exists() {
@@ -419,8 +421,9 @@ func (j Json) Set(insert bool, keysOrIndexesOrValue ...string) Json {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
+				o.WriteString(`"`)
 				o.WriteString(keysOrIndexesOrValue[0])
-				o.WriteString(":")
+				o.WriteString(`":`)
 				o.WriteString(v.String())
 			}
 		}
