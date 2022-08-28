@@ -28,7 +28,6 @@ Note that it only works on a valid JSON.
 
 - ⚠ In the current state of development many functions are not consolidated yet.
   Watch for updates if you are using them, because they can change anytime as there is no official release yet.
-  To name a few ones that especially bother me: `iterateX`, `is-X` and filters `==, !=, etc`.
 - Don't open PR.
 
 # Install
@@ -142,39 +141,6 @@ you can replace it by `(get ... (collect ...) ...)` if you think it reads better
 
 ```clj
 (collect arg ...)
-```
-
-## (first) (last)
-
-These functions return the first or last item of a JSON array.
-
-```clj
-(first)
-(first arg ...)
-(last)
-(last arg ...)
-```
-
-The arguments are optional and can be keys or functions and they work like `(get)`, but without `*`.
-
-**Example**
-
-```go
-j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b": 5 }]`
-
-a := jsqt.Get(j, `(first)`)
-b := jsqt.Get(j, `(last)`)
-c := jsqt.Get(j, `(first (== b 4))`)
-d := jsqt.Get(j, `(last  (== b 4))`)
-e := jsqt.Get(j, `(first (== b 4) a)`)
-f := jsqt.Get(j, `(last  (== b 4) a)`)
-
-fmt.Println(a) // { "a": 1, "b": 3 }
-fmt.Println(b) // { "a": 4, "b": 5 }
-fmt.Println(c) // { "a": 2, "b": 4 }
-fmt.Println(d) // { "a": 3, "b": 4 }
-fmt.Println(e) // 2
-fmt.Println(f) // 3
 ```
 
 ## (obj)
@@ -313,10 +279,9 @@ This function flattens a JSON array.
 (flatten depth)
 ```
 
-`(flatten)` is meant to be used inside a `(collect)` to avoid allocation,
-as it just trims the `[]` out of a value.
+`(flatten)` just trims the `[]` out of a value. In some contexts this void allocations. Use with care.
 
-`(flatten depth)` can be used anywhere (including inside a collect).
+`(flatten depth)` is safe and applies a proper flatten.
 The `depth` argument is the depth level to flatten. Use `0` for a deep flatten.
 
 **Example**
@@ -351,6 +316,39 @@ c := jsqt.Get(`"Wisdom"`, `(size)`)
 fmt.Println(a) // 2
 fmt.Println(b) // 1
 fmt.Println(c) // 6
+```
+
+## (first) (last)
+
+These functions return the first or last item of a JSON array.
+
+```clj
+(first)
+(first arg ...)
+(last)
+(last arg ...)
+```
+
+The arguments are optional and can be keys or functions and they work like `(get)`, but without `*`.
+
+**Example**
+
+```go
+j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b": 5 }]`
+
+a := jsqt.Get(j, `(first)`)
+b := jsqt.Get(j, `(last)`)
+c := jsqt.Get(j, `(first (== b 4))`)
+d := jsqt.Get(j, `(last  (== b 4))`)
+e := jsqt.Get(j, `(first (== b 4) a)`)
+f := jsqt.Get(j, `(last  (== b 4) a)`)
+
+fmt.Println(a) // { "a": 1, "b": 3 }
+fmt.Println(b) // { "a": 4, "b": 5 }
+fmt.Println(c) // { "a": 2, "b": 4 }
+fmt.Println(d) // { "a": 3, "b": 4 }
+fmt.Println(e) // 2
+fmt.Println(f) // 3
 ```
 
 ## (root)
@@ -391,22 +389,22 @@ a := jsqt.Get(j, `(collect (obj value (this)))`)
 fmt.Println(a) // [{"value":3},{"value":4}]
 ```
 
-## (filters)
+## (operators)
 
-These are filter functions.
+These are operators functions.
 They return the current context if true or an empty context if false.
 
 ```clj
-(== field value)
-(!= field value)
-(>= field value)
-(<= field value)
-(> field value)
-(< field value)
+(== a b)
+(!= a b)
+(>= a b)
+(<= a b)
+(> a b)
+(< a b)
 ```
 
-The `field` argument is the field to filter on, and can be a key or a function.
-The `value` argument is the expected value, and can be a raw value or a function.
+The `a` argument can be a key or a function.
+The `b` argument can be a raw value or a function.
 
 **Example**
 
