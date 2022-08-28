@@ -135,6 +135,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return q.ParseRaw()
 	case "collect":
 		return funcCollect(q, j)
+	case "first":
+		return funcFirst(q, j)
+	case "last":
+		return funcLast(q, j)
 	case "flatten":
 		return funcFlatten(q, j)
 	case "upsert":
@@ -530,6 +534,57 @@ func funcCollect(q *Query, j Json) Json {
 	}
 	o.WriteString("]")
 	return JSON(o.String())
+}
+
+func funcFirst(q *Query, j Json) Json {
+	for {
+		if j.IsArray() {
+			var first Json
+			ini := q.s.Mark()
+			j.ForEach(func(i, item Json) bool {
+				q.k, q.v = i, item
+				q.s.Back(ini)
+				for q.MoreArg() && item.Exists() {
+					item = q.ParseFunOrKey(item)
+				}
+				if item.Exists() {
+					first = item
+					return true
+				}
+				return false
+			})
+			return first
+		} else if q.MoreArg() {
+			j = q.ParseFunOrKey(j)
+		} else {
+			return j
+		}
+	}
+}
+
+func funcLast(q *Query, j Json) Json {
+	for {
+		if j.IsArray() {
+			var last Json
+			ini := q.s.Mark()
+			j.ForEach(func(i, item Json) bool {
+				q.k, q.v = i, item
+				q.s.Back(ini)
+				for q.MoreArg() && item.Exists() {
+					item = q.ParseFunOrKey(item)
+				}
+				if item.Exists() {
+					last = item
+				}
+				return false
+			})
+			return last
+		} else if q.MoreArg() {
+			j = q.ParseFunOrKey(j)
+		} else {
+			return j
+		}
+	}
 }
 
 func funcFlatten(q *Query, j Json) Json {

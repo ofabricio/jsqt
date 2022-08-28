@@ -144,6 +144,34 @@ a := jsqt.Get(j, `(collect (save (key)) (collect (concat (load) (raw "-") (key) 
 fmt.Println(a) // [["0-0-3","0-1-4"],["1-0-5"]]
 ```
 
+## (first) (last)
+
+These functions return the first or last item of a JSON array.
+
+```clj
+(first arg ...)
+(last arg ...)
+```
+
+The list of arguments can be keys or functions and they work like in `(collect)`,
+but instead of collecting values they return the first or last item matched.
+
+**Example**
+
+```go
+j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b": 5 }]`
+
+a := jsqt.Get(j, `(first)`)
+b := jsqt.Get(j, `(last)`)
+c := jsqt.Get(j, `(first (== b 4))`)
+d := jsqt.Get(j, `(last (== b 4))`)
+
+fmt.Println(a) // { "a": 1, "b": 3 }
+fmt.Println(b) // { "a": 4, "b": 5 }
+fmt.Println(c) // { "a": 2, "b": 4 }
+fmt.Println(d) // { "a": 3, "b": 4 }
+```
+
 ## (obj)
 
 This function creates a JSON object.
