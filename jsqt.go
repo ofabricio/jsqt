@@ -86,6 +86,10 @@ func (q *Query) ParseRaw() Json {
 	return JSON(raw)
 }
 
+func (q *Query) MatchFlag(flag string) bool {
+	return q.s.Match(flag) && q.s.WS()
+}
+
 func (q *Query) SkipArgs() {
 	for q.MoreArg() {
 		q.SkipArg()
@@ -304,8 +308,7 @@ func funcGet(q *Query, j Json) Json {
 }
 
 func funcSet(q *Query, j Json) Json {
-	insert := q.s.Match("-i")
-	q.s.WS()
+	insert := q.MatchFlag("-i")
 	return funcSetInternal(q, j, insert)
 }
 
