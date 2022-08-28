@@ -511,80 +511,62 @@ func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.Grow(256)
 	o.WriteString("[")
-	for q.MoreArg() {
-		if j.IsArray() && !j.IsEmptyArray() {
-			ini := q.s.Mark()
-			j.ForEach(func(i, item Json) bool {
-				q.k, q.v = i, item
-				q.s.Back(ini)
-				for q.MoreArg() {
-					item = q.ParseFunOrKey(item)
+	if j.IsArray() {
+		ini := q.s.Mark()
+		j.ForEach(func(i, item Json) bool {
+			q.k, q.v = i, item
+			q.s.Back(ini)
+			for q.MoreArg() {
+				item = q.ParseFunOrKey(item)
+			}
+			if item.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
 				}
-				if item.Exists() {
-					if o.Len() > 1 {
-						o.WriteString(",")
-					}
-					o.WriteString(item.String())
-				}
-				return false
-			})
-		} else {
-			j = q.ParseFunOrKey(j)
-		}
+				o.WriteString(item.String())
+			}
+			return false
+		})
+	} else {
+		o.WriteString(j.String())
 	}
 	o.WriteString("]")
 	return JSON(o.String())
 }
 
 func funcFirst(q *Query, j Json) Json {
-	for {
-		if j.IsArray() {
-			var first Json
-			ini := q.s.Mark()
-			j.ForEach(func(i, item Json) bool {
-				q.k, q.v = i, item
-				q.s.Back(ini)
-				for q.MoreArg() && item.Exists() {
-					item = q.ParseFunOrKey(item)
-				}
-				if item.Exists() {
-					first = item
-					return true
-				}
-				return false
-			})
-			return first
-		} else if q.MoreArg() {
-			j = q.ParseFunOrKey(j)
-		} else {
-			return j
+	var first Json
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		for q.MoreArg() {
+			item = q.ParseFunOrKey(item)
 		}
-	}
+		if item.Exists() {
+			first = item
+			return true
+		}
+		return false
+	})
+	return first
 }
 
 func funcLast(q *Query, j Json) Json {
-	for {
-		if j.IsArray() {
-			var last Json
-			ini := q.s.Mark()
-			j.ForEach(func(i, item Json) bool {
-				q.k, q.v = i, item
-				q.s.Back(ini)
-				for q.MoreArg() && item.Exists() {
-					item = q.ParseFunOrKey(item)
-				}
-				if item.Exists() {
-					last = item
-				}
-				return false
-			})
-			return last
-		} else if q.MoreArg() {
-			j = q.ParseFunOrKey(j)
-		} else {
-			return j
+	var last Json
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		for q.MoreArg() {
+			item = q.ParseFunOrKey(item)
 		}
-	}
+		if item.Exists() {
+			last = item
+		}
+		return false
+	})
+	return last
 }
 
 func funcFlatten(q *Query, j Json) Json {

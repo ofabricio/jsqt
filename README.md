@@ -99,23 +99,19 @@ This function collects values into a JSON array.
 
 The list of arguments can be keys or functions.
 
-The `(collect)` function arguments works like `(get)` function, but if some argument is an array,
-each individual array item is emitted to the next argument and collected into an array.
-This allows to filter and change each item.
-
-Individual items must be handled or an empty array is returned.
-For example `(collect myarr)` returns nothing, but `(collect myarr (this))` returns an identity array.
+The `(collect)` function emits each array item to the next argument and collect the result into an array,
+The arguments work like in the `(get)` function. This allows to filter and change each array item.
 
 **Example**
 
 ```go
-j := `{ "a": [{ "b": 3, "c": [5] }, { "b": 4, "c": [6] }] }`
+j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b": 5 }]`
 
-a := jsqt.Get(j, `(collect a b)`)
-b := jsqt.Get(j, `(collect a c (flatten))`)
+a := jsqt.Get(j, `(collect (== b 4))`)
+b := jsqt.Get(j, `(collect (== b 4) a)`)
 
-fmt.Println(a) // [3, 4]
-fmt.Println(b) // [5, 6]
+fmt.Println(a) // [{ "a": 2, "b": 4 },{ "a": 3, "b": 4 }]
+fmt.Println(b) // [2,3]
 ```
 
 When collect is used, two other functions become available:
@@ -165,11 +161,15 @@ a := jsqt.Get(j, `(first)`)
 b := jsqt.Get(j, `(last)`)
 c := jsqt.Get(j, `(first (== b 4))`)
 d := jsqt.Get(j, `(last (== b 4))`)
+e := jsqt.Get(j, `(first (== b 4) a)`)
+f := jsqt.Get(j, `(last (== b 4) a)`)
 
 fmt.Println(a) // { "a": 1, "b": 3 }
 fmt.Println(b) // { "a": 4, "b": 5 }
 fmt.Println(c) // { "a": 2, "b": 4 }
 fmt.Println(d) // { "a": 3, "b": 4 }
+fmt.Println(e) // 2
+fmt.Println(f) // 3
 ```
 
 ## (obj)
