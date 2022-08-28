@@ -292,7 +292,13 @@ func funcDef(q *Query, j Json) Json {
 
 func funcGet(q *Query, j Json) Json {
 	for q.MoreArg() {
-		j = q.ParseFunOrKey(j)
+		if q.s.EqualByte('*') && j.IsArray() {
+			q.s.Next()
+			q.s.WS()
+			j = funcCollect(q, j)
+		} else {
+			j = q.ParseFunOrKey(j)
+		}
 	}
 	return j
 }
@@ -509,17 +515,16 @@ func funcObj(q *Query, j Json) Json {
 
 func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
-	o.Grow(256)
+	o.Grow(len(j.s))
 	o.WriteString("[")
-	if j.IsArray() {
+	if j.IsEmptyArray() {
+		q.SkipArgs()
+	} else {
 		ini := q.s.Mark()
 		j.ForEach(func(i, item Json) bool {
 			q.k, q.v = i, item
 			q.s.Back(ini)
-			for q.MoreArg() {
-				item = q.ParseFunOrKey(item)
-			}
-			if item.Exists() {
+			if item = funcGet(q, item); item.Exists() {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
@@ -527,8 +532,6 @@ func funcCollect(q *Query, j Json) Json {
 			}
 			return false
 		})
-	} else {
-		o.WriteString(j.String())
 	}
 	o.WriteString("]")
 	return JSON(o.String())

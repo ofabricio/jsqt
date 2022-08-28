@@ -65,8 +65,12 @@ This function gets values from a JSON.
 (get arg ...)
 ```
 
-The list of arguments can be keys or functions.
+The argument list can be keys, functions or the `*` symbol.
+
 The arguments work like a pipeline: the output of the first one is the input of the next one and so on.
+
+The `*` symbol is to iterate over array; it makes `(get)` emit each array item to the next argument
+and collect the results into an array.
 
 This is one of the most important functions as its pipeline behavior is what allows passing
 a context to other functions. Because of that the root function is also a get function.
@@ -74,47 +78,37 @@ a context to other functions. Because of that the root function is also a get fu
 **Example**
 
 ```go
-j := `{ "a": { "b c": 3 }, "d": [4, 5] }`
+j := `{
+    "data": { "store name": "Grocery" },
+    "tags": [
+        { "name": "Fruit", "items": [{ "name": "Apple" }] },
+        { "name": "Snack", "items": [{ "name": "Chips" }] },
+        { "name": "Drink", "items": [{ "name": "Beers" }, { "name": "Wine" }] }
+    ]
+}`
 
-a := jsqt.Get(j, `(get a)`)
-b := jsqt.Get(j, `(get a "b c")`)
-c := jsqt.Get(j, `(get d 1)`)
-d := jsqt.Get(j, `(get d (size))`)
-e := jsqt.Get(j, `d (size)`) // The root function is a (get) so you can omit it.
+a := jsqt.Get(j, `(get data)`)
+b := jsqt.Get(j, `(get data "store name")`)
+c := jsqt.Get(j, `(get tags 1)`)
+d := jsqt.Get(j, `(get tags 1 name)`)
+e := jsqt.Get(j, `(get tags * name)`)
+f := jsqt.Get(j, `(get tags (size))`)
+g := jsqt.Get(j, `(get tags * items * name)`)
+h := jsqt.Get(j, `(get tags * items (get * name) (flatten))`)
+i := jsqt.Get(j, `tags * (== name "Drink") items 0 name`) // Can omit root (get).
 
-fmt.Println(a) // { "b c": 3 }
-fmt.Println(b) // 3
-fmt.Println(c) // 5
-fmt.Println(d) // 2
-fmt.Println(e) // 2
+fmt.Println(a) // { "store name": "Grocery" }
+fmt.Println(b) // "Grocery"
+fmt.Println(c) // { "name": "Snack", "items": [{ "name": "Chips" }] }
+fmt.Println(d) // "Snack"
+fmt.Println(e) // ["Fruit","Snack","Drink"]
+fmt.Println(f) // 3
+fmt.Println(g) // [["Apple"],["Chips"],["Beers","Wine"]]
+fmt.Println(h) // ["Apple","Chips","Beers","Wine"]
+fmt.Println(i) // ["Beers"]
 ```
 
-## (collect)
-
-This function collects values into a JSON array.
-
-```clj
-(collect arg ...)
-```
-
-The list of arguments can be keys or functions.
-
-The `(collect)` function emits each array item to the next argument and collect the result into an array,
-The arguments work like in the `(get)` function. This allows to filter and change each array item.
-
-**Example**
-
-```go
-j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b": 5 }]`
-
-a := jsqt.Get(j, `(collect (== b 4))`)
-b := jsqt.Get(j, `(collect (== b 4) a)`)
-
-fmt.Println(a) // [{ "a": 2, "b": 4 },{ "a": 3, "b": 4 }]
-fmt.Println(b) // [2,3]
-```
-
-When collect is used, two other functions become available:
+When `*` is used, two other functions become available:
 [(key)](#key-val) that returns the current index and
 [(val)](#key-val) that returns the current value.
 
@@ -123,21 +117,31 @@ When collect is used, two other functions become available:
 ```go
 j := `[ 3, 4 ]`
 
-a := jsqt.Get(j, `(collect (obj (key) (val))`)
+a := jsqt.Get(j, `(get * (obj (key) (val)))`)
 
 fmt.Println(a) // [{"0":3},{"1":4}]
 ```
 
-It is possible to nest collects and still access both indexes with the help of the [(save)](#save-load) function.
+It is possible to nest `*` and still access both indexes with the help of the [(save)](#save-load) function.
 
 **Example**
 
 ```go
 j := `[ [ 3, 4 ], [ 5 ] ]`
 
-a := jsqt.Get(j, `(collect (save (key)) (collect (concat (load) (raw "-") (key) (raw "-") (val))))`)
+a := jsqt.Get(j, `(get * (save (key)) * (concat (load) (raw "-") (key) (raw "-") (val)))`)
 
 fmt.Println(a) // [["0-0-3","0-1-4"],["1-0-5"]]
+```
+
+## (collect)
+
+This function is the same as `(get *)`.
+Because some patterns require `(get ... (get * ...) ...)`,
+you can replace it by `(get ... (collect ...) ...)` if you think it reads better.
+
+```clj
+(collect arg ...)
 ```
 
 ## (first) (last)
@@ -145,12 +149,13 @@ fmt.Println(a) // [["0-0-3","0-1-4"],["1-0-5"]]
 These functions return the first or last item of a JSON array.
 
 ```clj
+(first)
 (first arg ...)
+(last)
 (last arg ...)
 ```
 
-The list of arguments can be keys or functions and they work like in `(collect)`,
-but instead of collecting values they return the first or last item matched.
+The arguments are optional and can be keys or functions and they work like `(get)`, but without `*`.
 
 **Example**
 
@@ -160,9 +165,9 @@ j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b"
 a := jsqt.Get(j, `(first)`)
 b := jsqt.Get(j, `(last)`)
 c := jsqt.Get(j, `(first (== b 4))`)
-d := jsqt.Get(j, `(last (== b 4))`)
+d := jsqt.Get(j, `(last  (== b 4))`)
 e := jsqt.Get(j, `(first (== b 4) a)`)
-f := jsqt.Get(j, `(last (== b 4) a)`)
+f := jsqt.Get(j, `(last  (== b 4) a)`)
 
 fmt.Println(a) // { "a": 1, "b": 3 }
 fmt.Println(b) // { "a": 4, "b": 5 }
