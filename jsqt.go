@@ -1073,7 +1073,11 @@ func funcPick(q *Query, j Json) Json {
 		o.WriteByte('{')
 		for q.MoreArg() {
 			key := q.ParseRaw().TrimQuote()
-			if v := j.Get(key); v.Exists() {
+			v := j.Get(key)
+			if q.MatchFlag("-m") {
+				v = q.ParseFun(v)
+			}
+			if v.Exists() {
 				if o.Len() > 1 {
 					o.WriteByte(',')
 				}

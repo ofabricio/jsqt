@@ -568,21 +568,25 @@ These functions pick or pluck fields from a JSON object.
 
 ```clj
 (pick key ...)
+(pick key -m map ...)
 (pluck key ...)
 ```
 
 The arguments are a list of object keys.
+Use `-m` to enable a map function for a key, it can be used to deep pick fields.
 
 **Example**
 
 ```go
-j := `{ "a": 3, "b": 4, "c": 5 }`
+j := `{ "a": 3, "b": 4, "c": 5, "d": { "e": 6, "f": 7 } }`
 
 a := jsqt.Get(j, `(pick a c)`)
-b := jsqt.Get(j, `(pluck a c)`)
+b := jsqt.Get(j, `(pluck a c d)`)
+c := jsqt.Get(j, `(pick a d -m (pick f))`)
 
-fmt.Println(a) // {"a":3,"c":5} 
-fmt.Println(b) // {"b":4} 
+fmt.Println(a) // {"a":3,"c":5}
+fmt.Println(b) // {"b":4}
+fmt.Println(c) // {"a":3,"d":{"f":7}}
 ```
 
 ## (merge)
