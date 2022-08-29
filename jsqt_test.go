@@ -1350,7 +1350,7 @@ func Benchmark_QueryFunction_Sort(b *testing.B) {
 
 func Benchmark_QueryFuncion_Set(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(set "address" "city" "xxx")`)
+		Get(TestData1, `(set address city "xxx")`)
 	}
 }
 
