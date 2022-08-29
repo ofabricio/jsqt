@@ -984,6 +984,34 @@ a := jsqt.GetWith(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
 fmt.Println(a) // {"msg":"hello","val":3}
 ```
 
+## (match)
+
+This function matches a value against a prefix, suffix or regular expression
+and returns the value if true or an empty context otherwise.
+
+```clj
+(match pattern)
+(match pattern -p)
+(match pattern -s)
+```
+
+The `pattern` argument can be a function or a raw value.
+Use `-p` to match a prefix; `-s` to match a suffix; and no flag to match a regular expression.
+
+**Example**
+
+```go
+j := `{ "first_name": "Jim", "last_name": "May", "first_class": "English" }`
+
+a := jsqt.Get(j, `(iterate (match "first" -p) (val))`)
+b := jsqt.Get(j, `(iterate (match "name" -s) (val))`)
+c := jsqt.Get(j, `(iterate (match "(last|class)") (val))`)
+
+fmt.Println(a) // {"first_name":"Jim","first_class":"English"}
+fmt.Println(b) // {"first_name":"Jim","last_name":"May"}
+fmt.Println(c) // {"last_name":"May","first_class":"English"}
+```
+
 # Truth Table
 
 |       | void | empty | blank | nully | some | falsy | truthy |

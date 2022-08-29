@@ -3,6 +3,7 @@ package jsqt
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -263,6 +264,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return q.v
 	case "arg":
 		return funcArg(q, j)
+	case "match":
+		return funcMatch(q, j)
 	default:
 		if val, ok := q.defs[fname]; ok {
 			qq := q.Copy(val)
@@ -715,6 +718,21 @@ func funcArg(q *Query, j Json) Json {
 	val := q.args[arg.Int()]
 	jsn, _ := json.Marshal(val) // I think this is cheating.
 	return JSON(string(jsn))
+}
+
+func funcMatch(q *Query, j Json) Json {
+	str := j.TrimQuote()
+	arg := q.ParseFunOrRaw(j).TrimQuote()
+	if q.MatchFlag("-p") && strings.HasPrefix(str, arg) {
+		return j
+	}
+	if q.MatchFlag("-s") && strings.HasSuffix(str, arg) {
+		return j
+	}
+	if re := regexp.MustCompile(arg); re.MatchString(str) {
+		return j
+	}
+	return JSON("")
 }
 
 func funcIsNum(q *Query, j Json) Json {
