@@ -812,55 +812,56 @@ and apply a map function to transform them.
 
 ```clj
 (iterate key val)
-(iterate-k key)
-(iterate-v val)
-(iterate-kv keyval)
+(iterate -r key val)
+(iterate -d n key val)
 
-(iterate-all key val)
+(iterate -f key val)
+(iterate -k key)
+(iterate -v val)
+(iterate -kv keyval)
 ```
 
-The `iterate` iterates over all keys and values, but values do not include objects and arrays.
-Both `key` and `val` arguments must be a function.
+Arguments must be functions.
 
-The `iterate-k` iterates over all keys. The `key` argument must be a function and receives the key string.
+The `iterate` iterates over all keys and values, and values include objects and arrays.
+Use `-r` flag to tell iterate to emit the root value. When the root value is emitted `key` is `null`.
+If either `key` or `val` functions return an empty context the field is removed from the result.
+Use `-d n` flag to set the depth level to iterate.
 
-The `iterate-v` iterates over all values, but values do not include objects and arrays.
-The `val` argument must be a function and receives the value.
+The `iterate -f` is a fast version of iterate, but it does not emit objects and arrays.
 
-The `iterate-kv` iterates over all keys and values consecutively, but values do not include objects and arrays.
-The `keyval` argument must be a function and receives a key or a value consecutively.
+The `iterate -k` is a fast version that iterates over all keys. The `key` argument receives the key string.
+
+The `iterate -v` is a fast version that iterates over values, but values do not include objects and arrays.
+The `val` argument receives the value.
+
+The `iterate -kv` is a fast version that iterates over all keys and values consecutively,
+but values do not include objects and arrays.
+The `keyval` argument receives a key or a value consecutively.
 
 **Example**
 
 ```go
-j := `{ "One": "Two", "Three": "Four" }`
+j := `{ "One": "One", "Two": { "One": "One", "Three": "" }, "Three": "" }`
 
-a := jsqt.Get(j, `(iterate (lower) (upper))`)
-b := jsqt.Get(j, `(iterate-k (upper))`)
-c := jsqt.Get(j, `(iterate-v (upper))`)
-d := jsqt.Get(j, `(iterate-kv (upper))`)
+a := jsqt.Get(j, `(iterate (key) (pluck Three))`)
+b := jsqt.Get(j, `(iterate -r (key) (pluck Three))`)
+c := jsqt.Get(j, `(iterate -d 1 (upper) (val))`)
+d := jsqt.Get(j, `(iterate -f (lower) (size))`)
+e := jsqt.Get(j, `(iterate -k (upper))`)
+f := jsqt.Get(j, `(iterate -v (upper))`)
+g := jsqt.Get(j, `(iterate -kv (upper))`)
 
-fmt.Println(a) // {"one":"TWO","three":"FOUR"}
-fmt.Println(b) // {"ONE":"Two","THREE":"Four"}
-fmt.Println(c) // {"One":"TWO","Three":"FOUR"}
-fmt.Println(d) // {"ONE":"TWO","THREE":"FOUR"}
+fmt.Println(a) // {"One":"One","Two":{"One":"One"},"Three":""}
+fmt.Println(b) // {"One":"One","Two":{"One":"One"}}
+fmt.Println(c) // {"ONE":"One","TWO":{"One":"One","Three":""},"THREE":""}
+fmt.Println(d) // {"one":3,"two":{"one":3,"three":0},"three":0}
+fmt.Println(e) // {"ONE":"One","TWO":{"ONE":"One","THREE":""},"THREE":""}
+fmt.Println(f) // {"One":"ONE","Two":{"One":"ONE","Three":""},"Three":""}
+fmt.Println(g) // {"ONE":"ONE","TWO":{"ONE":"ONE","THREE":""},"THREE":""}
 ```
 
-The `iterate-all` iterates over all keys and values, but values also include objects and arrays.
-Both `key` and `val` arguments must be functions.
-If either key or val functions return an empty context the field is removed from the result.
-
-**Example**
-
-```go
-j := `{ "a": 3, "b": {}, "c": { "d": {} }, "e": { "f": 4 } }`
-
-a := jsqt.Get(j, `(iterate-all (upper) (not (is-empty)))`)
-
-fmt.Println(a) // {"A":3,"E":{"F":4}}
-```
-
-It is also possible to use [(key)](#key-val) and [(val)](#key-val) functions with the iterate family.
+It is also possible to use [(key)](#key-val) and [(val)](#key-val) functions with iterate.
 
 ## (debug)
 

@@ -155,14 +155,6 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return j.Merge()
 	case "iterate":
 		return funcIterate(q, j)
-	case "iterate-v":
-		return funcIterateValues(q, j)
-	case "iterate-k":
-		return funcIterateKeys(q, j)
-	case "iterate-kv":
-		return funcIterateKeysValues(q, j)
-	case "iterate-all":
-		return funcIterateAll(q, j)
 	case "is-num":
 		return funcIsNum(q, j)
 	case "is-obj":
@@ -627,10 +619,34 @@ func funcDefault(q *Query, j Json) Json {
 	return q.ParseFunOrRaw(j)
 }
 
+func funcIterate(q *Query, j Json) Json {
+	if q.MatchFlag("-f") {
+		return funcIterateFast(q, j)
+	}
+	if q.MatchFlag("-kv") {
+		return funcIterateKeysValues(q, j)
+	}
+	if q.MatchFlag("-k") {
+		return funcIterateKeys(q, j)
+	}
+	if q.MatchFlag("-v") {
+		return funcIterateValues(q, j)
+	}
+	return funcIterateAll(q, j)
+}
+
 func funcIterateAll(q *Query, j Json) Json {
+	includeRoot := q.MatchFlag("-r")
+	depth := 0
+	if q.MatchFlag("-d") {
+		depth = q.ParseRaw().Int()
+	}
 	ini := q.s.Mark()
-	return j.IterateAll(func(k, v Json) (Json, Json) {
+	return j.Iterate(depth, func(k, v Json) (Json, Json) {
 		q.k, q.v = k, v
+		if !includeRoot && k.IsNull() {
+			return k, v
+		}
 		q.s.Back(ini)
 		k = q.ParseFun(k)
 		v = q.ParseFun(v)
@@ -638,9 +654,9 @@ func funcIterateAll(q *Query, j Json) Json {
 	})
 }
 
-func funcIterate(q *Query, j Json) Json {
+func funcIterateFast(q *Query, j Json) Json {
 	ini := q.s.Mark()
-	return j.Iterate(func(k, v Json) (Json, Json) {
+	return j.IterateFast(func(k, v Json) (Json, Json) {
 		q.k, q.v = k, v
 		q.s.Back(ini)
 		k = q.ParseFun(k)
@@ -1269,18 +1285,24 @@ func (j Json) Exists() bool {
 	return j.String() != ""
 }
 
-func (j Json) IterateAll(m func(k, v Json) (Json, Json)) Json {
-	_, v := j.iterateAll(JSON("null"), m)
+func (j Json) Iterate(depth int, m func(k, v Json) (Json, Json)) Json {
+	if depth == 0 {
+		depth = -2
+	}
+	_, v := j.iterate(depth, JSON("null"), m)
 	return v
 }
 
-func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
+func (j Json) iterate(depth int, k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
+	if depth == -1 {
+		return k, j
+	}
 	if j.IsObject() {
 		var o strings.Builder
 		o.Grow(len(j.s))
 		o.WriteString("{")
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
+			if k, v = v.iterate(depth-1, k, m); k.Exists() && v.Exists() {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
@@ -1299,7 +1321,7 @@ func (j Json) iterateAll(k Json, m func(k, v Json) (Json, Json)) (Json, Json) {
 		o.Grow(len(j.s))
 		o.WriteString("[")
 		j.ForEach(func(k, v Json) bool {
-			if k, v = v.iterateAll(k, m); k.Exists() && v.Exists() {
+			if k, v = v.iterate(depth-1, k, m); k.Exists() && v.Exists() {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
@@ -1442,9 +1464,9 @@ func (j Json) IterateKeysValues(m func(Json) Json) Json {
 	return JSON(o.String())
 }
 
-// Iterate iterates over the keys and values of a valid Json
+// IterateFast iterates over the keys and values of a valid Json
 // and applies a map function to transform both at once.
-func (j Json) Iterate(m func(k, v Json) (Json, Json)) Json {
+func (j Json) IterateFast(m func(k, v Json) (Json, Json)) Json {
 	var o strings.Builder
 	o.Grow(len(j.s))
 	for j.s.More() {

@@ -73,21 +73,27 @@ func TestGet(t *testing.T) {
 		// (key) (val)
 		{give: `[3,4]`, when: `(collect (arr (key) (val)))`, then: `[[0,3],[1,4]]`},
 		{give: `{"a":3,"c":4}`, when: `(iterate (concat (key) (val)) (arr (key) (val)))`, then: `{"a3":["a",3],"c4":["c",4]}`},
-		{give: `{"a":3,"c":4}`, when: `(iterate-all (key) (arr (key) (val)))`, then: `[null,{"a":["a",3],"c":["c",4]}]`},
-		{give: `{"a":3}`, when: `(iterate-k (key))`, then: `{"a":3}`},
-		{give: `{"a":3}`, when: `(iterate-v (val))`, then: `{"a":3}`},
-		{give: `{"a":3}`, when: `(iterate-kv (concat (key) (val)))`, then: `{"aa":"33"}`},
+		{give: `{"a":3,"c":4}`, when: `(iterate -r (key) (arr (key) (val)))`, then: `[null,{"a":["a",3],"c":["c",4]}]`},
+		{give: `{"a":3}`, when: `(iterate -k (key))`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(iterate -v (val))`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(iterate -kv (concat (key) (val)))`, then: `{"aa":"33"}`},
 		// (save) (load)
 		{give: `{"a":3}`, when: `(save (get a)) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `(save a) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `a (save) (arr (load))`, then: `[3]`},
-		// (iterate-all)
-		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate-all (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
-		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
-		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate-all (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
-		{give: `{"a":3}`, when: `(iterate-all (raw "a b") (this))`, then: `{"a b":3}`},
-		{give: `{"a":3}`, when: `(iterate-all (if (== (key) "a") (nothing)) (this))`, then: `{}`},
-		{give: `[4,5]`, when: `(iterate-all (this) (if (is-num) (nothing)))`, then: `[]`},
+		// (iterate)
+		{give: `3`, when: `(iterate -r (key) (stringify))`, then: `"3"`},
+		{give: `{"a":{"b":{"c":3}}}`, when: `(iterate -d 3 (upper) (val))`, then: `{"A":{"B":{"C":3}}}`},
+		{give: `{"a":{"b":{"c":3}}}`, when: `(iterate -d 2 (upper) (val))`, then: `{"A":{"B":{"c":3}}}`},
+		{give: `{"a":{"b":{"c":3}}}`, when: `(iterate -d 1 (upper) (val))`, then: `{"A":{"b":{"c":3}}}`},
+		{give: `{"a":3,"b":{},"c":{"d":4,"e":[]},"f":{"g":[]},"h":[5,[6],{}]}`, when: `(iterate (upper) (not (is-empty)))`, then: `{"A":3,"C":{"D":4},"H":[5,[6]]}`},
+		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate (!= (this) "c") (this))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
+		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7},"c":9}`},
+		{give: `{"a":{"a":3,"b":4,"c":{"a":5,"c":6}},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate -r (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
+		{give: `{"a":{"a":3,"b":4,"c":5},"b":{"a":6,"b":7,"c":8},"c":9}`, when: `(iterate -r (this) (pluck c))`, then: `{"a":{"a":3,"b":4},"b":{"a":6,"b":7}}`},
+		{give: `{"a":3}`, when: `(iterate (raw "a b") (this))`, then: `{"a b":3}`},
+		{give: `{"a":3}`, when: `(iterate (if (== (key) "a") (nothing)) (this))`, then: `{}`},
+		{give: `[4,5]`, when: `(iterate (this) (if (is-num) (nothing)))`, then: `[]`},
 		// Test empty context input for many functions.
 		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
 		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
@@ -266,35 +272,35 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (<= b 7) a)`, then: `[3,4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (> b 7) a)`, then: `[5]`},
 		{give: `[{"a":3,"b":11},{"a":4,"b":100},{"a":5,"b":8}]`, when: `(collect (< b 77) a)`, then: `[3,5]`},
-		// (iterate-kv)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-kv (this))`, then: `{"a":3}`},
-		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate-kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
-		{give: `{ "a": "b" }`, when: `(iterate-kv (upper))`, then: `{"A":"B"}`},
-		{give: `3`, when: `(iterate-kv (stringify))`, then: `"3"`},
-		{give: `3`, when: `(iterate-kv (this))`, then: `3`},
-		// (iterate-v)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-v (this))`, then: `{"a":3}`},
-		{give: `{ "a" : 3, "b": [ 3 , { "a" : 3 } ] }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
-		{give: `{ "a": 3 }`, when: `(iterate-v (if (== (this) 3) (raw 4) (this)))`, then: `{"a":4}`},
-		{give: `3`, when: `(iterate-v (stringify))`, then: `"3"`},
-		{give: `3`, when: `(iterate-v (this))`, then: `3`},
-		// (iterate-k)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate-k (this))`, then: `{"a":3}`},
-		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
-		{give: `{ "a" : 3 }`, when: `(iterate-k (if (== (this) "a") (raw "x") (this)))`, then: `{"x":3}`},
-		{give: `3`, when: `(iterate-k (stringify))`, then: `3`},
-		{give: `3`, when: `(iterate-k (this))`, then: `3`},
-		// (iterate)
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate (key) (val))`, then: `{"a":3}`},
-		{give: "{ \"a\"\t:\t3\t}", when: `(iterate (this) (this))`, then: `{"a":3}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate (key) (if (is-num) (stringify) (val)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
-		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
-		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":"4"}`},
-		{give: `[3,4]`, when: `(iterate (key) (if (is-num) (stringify) (val)))`, then: `["3","4"]`},
-		{give: `[3,4]`, when: `(iterate (this) (if (is-num) (stringify) (this)))`, then: `["3","4"]`},
-		{give: `3`, when: `(iterate (this) (stringify))`, then: `"3"`},
-		{give: `3`, when: `(iterate (key) (val))`, then: `3`},
-		{give: `3`, when: `(iterate (this) (this))`, then: `3`},
+		// (iterate -kv)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -kv (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3, "b": [ 3 , { "c": "d" } ] }`, when: `(iterate -kv (upper))`, then: `{"A":3,"B":[3,{"C":"D"}]}`},
+		{give: `{ "a": "b" }`, when: `(iterate -kv (upper))`, then: `{"A":"B"}`},
+		{give: `3`, when: `(iterate -kv (stringify))`, then: `"3"`},
+		{give: `3`, when: `(iterate -kv (this))`, then: `3`},
+		// (iterate -v)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -v (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3, "b": [ 3 , { "a" : 3 } ] }`, when: `(iterate -v (if (== (this) 3) (raw 4) (this))))`, then: `{"a":4,"b":[4,{"a":4}]}`},
+		{give: `{ "a": 3 }`, when: `(iterate -v (if (== (this) 3) (raw 4) (this)))`, then: `{"a":4}`},
+		{give: `3`, when: `(iterate -v (stringify))`, then: `"3"`},
+		{give: `3`, when: `(iterate -v (this))`, then: `3`},
+		// (iterate -k)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -k (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate -k (if (== (this) "a") (raw "x") (this))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
+		{give: `{ "a" : 3 }`, when: `(iterate -k (if (== (this) "a") (raw "x") (this)))`, then: `{"x":3}`},
+		{give: `3`, when: `(iterate -k (stringify))`, then: `3`},
+		{give: `3`, when: `(iterate -k (this))`, then: `3`},
+		// (iterate -f)
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -f (key) (val))`, then: `{"a":3}`},
+		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -f (this) (this))`, then: `{"a":3}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate -f (key) (if (is-num) (stringify) (val)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3 , "b" : [ { "c" : 4 } , { "c" : 5 } ] , "d" : [ 6 , true ] }`, when: `(iterate -f (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":[{"c":"4"},{"c":"5"}],"d":["6",true]}`},
+		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate -f (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":"4"}`},
+		{give: `[3,4]`, when: `(iterate -f (key) (if (is-num) (stringify) (val)))`, then: `["3","4"]`},
+		{give: `[3,4]`, when: `(iterate -f (this) (if (is-num) (stringify) (this)))`, then: `["3","4"]`},
+		{give: `3`, when: `(iterate -f (this) (stringify))`, then: `"3"`},
+		{give: `3`, when: `(iterate -f (key) (val))`, then: `3`},
+		{give: `3`, when: `(iterate -f (this) (this))`, then: `3`},
 		// (default)
 		{give: `[{"b":3},{"c":4},{"b":5}]`, when: `(collect b (default 0))`, then: `[3,0,5]`},
 		// (size)
@@ -1066,7 +1072,7 @@ func BenchmarkJson_ForEach(b *testing.B) {
 func ExampleJson_Iterate() {
 
 	j := JSON(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0,{},[]]}]}},"d":1}`)
-	v := j.Iterate(func(k, v Json) (Json, Json) {
+	v := j.IterateFast(func(k, v Json) (Json, Json) {
 		k = JSON(strings.ToUpper(k.String()))
 		if v.IsNumber() {
 			return k, v.Stringify()
@@ -1086,7 +1092,7 @@ func BenchmarkJson_Iterate(b *testing.B) {
 	}
 	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
-		_ = j.Iterate(m)
+		_ = j.IterateFast(m)
 	}
 }
 
@@ -1150,7 +1156,7 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateKV(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-kv (this) (this))`)
+		Get(TestData1, `(iterate -kv (this) (this))`)
 	}
 }
 
@@ -1195,7 +1201,7 @@ func BenchmarkJson_IterateKeys(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateK(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-k (this))`)
+		Get(TestData1, `(iterate -k (this))`)
 	}
 }
 
@@ -1239,7 +1245,7 @@ func BenchmarkJson_IterateValues(b *testing.B) {
 
 func Benchmark_QueryFunction_IterateV(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-v (this))`)
+		Get(TestData1, `(iterate -v (this))`)
 	}
 }
 
@@ -1251,7 +1257,7 @@ func ExampleJson_IterateAll() {
 	}
 
 	j := JSON(`{ "a": 3, "b": { "c": 4 }, "d": [ 5, { "e": 6 } ] }`)
-	v := j.IterateAll(m)
+	v := j.Iterate(0, m)
 
 	fmt.Println("Final:", v)
 
@@ -1273,13 +1279,13 @@ func BenchmarkJson_IterateAll(b *testing.B) {
 	}
 	j := JSON(TestData1)
 	for i := 0; i < b.N; i++ {
-		j.IterateAll(m)
+		j.Iterate(0, m)
 	}
 }
 
 func Benchmark_QueryFunction_IterateAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate-all (this) (this))`)
+		Get(TestData1, `(iterate (this) (this))`)
 	}
 }
 
