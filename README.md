@@ -389,10 +389,9 @@ a := jsqt.Get(j, `(collect (obj value (this)))`)
 fmt.Println(a) // [{"value":3},{"value":4}]
 ```
 
-## (operators)
+## (comparison)
 
-These are operators functions.
-They return the current context if true or an empty context if false.
+These comparison functions return the current context if true or an empty context if false.
 
 ```clj
 (== a b)
@@ -828,7 +827,7 @@ and apply a map function to transform them.
 Arguments must be functions.
 
 The `iterate` iterates over all keys and values, and values include objects and arrays.
-Use `-r` flag to tell iterate to emit the root value. When the root value is emitted `key` is `null`.
+Use `-r` flag to tell iterate to emit the root value. When the root value is emitted `(key)` is `null`.
 If either `key` or `val` functions return an empty context the field is removed from the result.
 Use `-d n` flag to set the depth level to iterate.
 
