@@ -310,7 +310,7 @@ func funcSet(q *Query, j Json) Json {
 func funcSetInternal(q *Query, j Json, insert bool) Json {
 	keyOrIndex := q.ParseFunOrRaw(j)
 	if !q.MoreArg() {
-		return keyOrIndex
+		return keyOrIndex // The last item is the value.
 	}
 	if j.IsObject() {
 		var o strings.Builder
@@ -321,8 +321,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		j.ForEachKeyVal(func(k, v Json) bool {
 			if k.TrimQuote() == keyOrIdx {
 				found = true
-				v = funcSetInternal(q, v, insert)
-				if v.Exists() {
+				if v = funcSetInternal(q, v, insert); v.Exists() {
 					if o.Len() > 1 {
 						o.WriteString(",")
 					}
@@ -345,10 +344,18 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
-				o.WriteString(`"`)
-				o.WriteString(keyOrIndex.String())
-				o.WriteString(`":`)
-				o.WriteString(v.String())
+				if keyOrIndex.IsNumber() {
+					o.Reset()
+					o.WriteString(`[`)
+					o.WriteString(v.String())
+					o.WriteString(`]`)
+					return JSON(o.String())
+				} else {
+					o.WriteString(`"`)
+					o.WriteString(keyOrIndex.String())
+					o.WriteString(`":`)
+					o.WriteString(v.String())
+				}
 			}
 		}
 		o.WriteString("}")
@@ -429,10 +436,18 @@ func (j Json) Set(insert bool, keysOrIndexesOrValue ...string) Json {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
-				o.WriteString(`"`)
-				o.WriteString(keysOrIndexesOrValue[0])
-				o.WriteString(`":`)
-				o.WriteString(v.String())
+				if len(keysOrIndexesOrValue) > 0 && keysOrIndexesOrValue[0][0] >= '0' && keysOrIndexesOrValue[0][0] <= '9' {
+					o.Reset()
+					o.WriteString(`[`)
+					o.WriteString(v.String())
+					o.WriteString(`]`)
+					return JSON(o.String())
+				} else {
+					o.WriteString(`"`)
+					o.WriteString(keysOrIndexesOrValue[0])
+					o.WriteString(`":`)
+					o.WriteString(v.String())
+				}
 			}
 		}
 		o.WriteString("}")

@@ -19,6 +19,18 @@ func TestGet(t *testing.T) {
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match "a_" -p) (this))`, then: `{"a_b":3,"a_c":4}`},
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match "^a_") (this))`, then: `{"a_b":3,"a_c":4}`},
 		// (set)
+		{give: `{"a":{"b":3}}`, when: `(set -i a a 0 a 3)`, then: `{"a":{"b":3,"a":[{"a":3}]}}`},
+		{give: `{}`, when: `(set -i 0 a 0 a 3)`, then: `[{"a":[{"a":3}]}]`},
+		{give: `{}`, when: `(set -i 0 a 0 0 3)`, then: `[{"a":[[3]]}]`},
+		{give: `{}`, when: `(set -i 0 a 0 3)`, then: `[{"a":[3]}]`},
+		{give: `{}`, when: `(set -i 0 0 a 3)`, then: `[[{"a":3}]]`},
+		{give: `{}`, when: `(set -i 0 0 0 3)`, then: `[[[3]]]`},
+		{give: `{}`, when: `(set -i 0 0 3)`, then: `[[3]]`},
+		{give: `{}`, when: `(set -i 0 3)`, then: `[3]`},
+		{give: `{}`, when: `(set -i 0)`, then: `0`},
+		{give: `{}`, when: `(set -i a 0 b 0 3)`, then: `{"a":[{"b":[3]}]}`},
+		{give: `{}`, when: `(set -i a 1 b 3)`, then: `{"a":[{"b":3}]}`},
+		{give: `{}`, when: `(set -i a 0 b 3)`, then: `{"a":[{"b":3}]}`},
 		{give: `{"1":[{"1":[{"1":3},{"1":4}]},{"1":[{"1":5},{"1":6}]}]}`, when: `(set 1 1 1 1 1 7)`, then: `{"1":[{"1":[{"1":3},{"1":4}]},{"1":[{"1":5},{"1":7}]}]}`},
 		{give: `{"1":[{"1":[{"1":3},{"1":4}]},{"1":[{"1":5},{"1":6}]}]}`, when: `(set 1 * 1 * 1 7)`, then: `{"1":[{"1":[{"1":7},{"1":7}]},{"1":[{"1":7},{"1":7}]}]}`},
 		{give: `{"*":[{"*":[{"*":3},{"*":4}]},{"*":[{"*":5},{"*":6}]}]}`, when: `(set * * * * * 7)`, then: `{"*":[{"*":[{"*":7},{"*":7}]},{"*":[{"*":7},{"*":7}]}]}`},
@@ -577,12 +589,23 @@ func TestJsonSet(t *testing.T) {
 
 	tt := []struct {
 		give    string
-		when    string
-		then    string
 		giveIns bool
 		giveKey []string
+		then    string
 	}{
 		// (set)
+		{give: `{"a":{"b":3}}`, giveKey: []string{`a`, `a`, `0`, `a`, `3`}, giveIns: true, then: `{"a":{"b":3,"a":[{"a":3}]}}`},
+		{give: `{}`, giveKey: []string{`0`, `a`, `0`, `a`, `3`}, giveIns: true, then: `[{"a":[{"a":3}]}]`},
+		{give: `{}`, giveKey: []string{`0`, `a`, `0`, `0`, `3`}, giveIns: true, then: `[{"a":[[3]]}]`},
+		{give: `{}`, giveKey: []string{`0`, `a`, `0`, `3`}, giveIns: true, then: `[{"a":[3]}]`},
+		{give: `{}`, giveKey: []string{`0`, `0`, `a`, `3`}, giveIns: true, then: `[[{"a":3}]]`},
+		{give: `{}`, giveKey: []string{`0`, `0`, `0`, `3`}, giveIns: true, then: `[[[3]]]`},
+		{give: `{}`, giveKey: []string{`0`, `0`, `3`}, giveIns: true, then: `[[3]]`},
+		{give: `{}`, giveKey: []string{`0`, `3`}, giveIns: true, then: `[3]`},
+		{give: `{}`, giveKey: []string{`0`}, giveIns: true, then: `0`},
+		{give: `{}`, giveKey: []string{`a`, `0`, `b`, `0`, `3`}, giveIns: true, then: `{"a":[{"b":[3]}]}`},
+		{give: `{}`, giveKey: []string{`a`, `1`, `b`, `3`}, giveIns: true, then: `{"a":[{"b":3}]}`},
+		{give: `{}`, giveKey: []string{`a`, `0`, `b`, `3`}, giveIns: true, then: `{"a":[{"b":3}]}`},
 		{give: `{"a":[{"b":[{"c":3},{"c":4}]},{"b":[{"c":5},{"c":6}]}]}`, giveKey: []string{`a`, `*`, `b`, `*`, `c`, `7`}, then: `{"a":[{"b":[{"c":7},{"c":7}]},{"b":[{"c":7},{"c":7}]}]}`},
 		{give: `[[3],[4,5]]`, giveKey: []string{`0`, `1`, `x`, `7`}, giveIns: true, then: `[[3,{"x":7}],[4,5]]`},
 		{give: `{"a":[{"b":[{"c":3},{"c":4}]},{"b":[{"c":5},{"c":6}]}]}`, giveKey: []string{`a`, `*`, `b`, `100`, `{}`}, giveIns: true, then: `{"a":[{"b":[{"c":3},{"c":4},{}]},{"b":[{"c":5},{"c":6},{}]}]}`},
