@@ -1575,6 +1575,42 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 	return r
 }
 
+func (j Json) GetPrefix(prefix string) (r Json) {
+	j.ForEachKeyVal(func(k, v Json) bool {
+		if strings.HasPrefix(k.TrimQuote(), prefix) { // FIXME: strings.HasPrefix is slow.
+			r = v
+			return true
+		}
+		return false
+	})
+	return r
+}
+
+func (j Json) GetSuffix(suffix string) (r Json) {
+	j.ForEachKeyVal(func(k, v Json) bool {
+		if strings.HasSuffix(k.TrimQuote(), suffix) { // FIXME: strings.HasSuffix is slow.
+			r = v
+			return true
+		}
+		return false
+	})
+	return r
+}
+
+func (j Json) GetRegex(regex string) (r Json) {
+	if j.IsObject() {
+		re := regexp.MustCompile(regex)
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if re.MatchString(k.TrimQuote()) {
+				r = v
+				return true
+			}
+			return false
+		})
+	}
+	return r
+}
+
 func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 	if j.s.MatchByte('{') {
 		for j.s.WS() && !j.s.MatchByte('}') {
