@@ -736,16 +736,39 @@ func funcArg(q *Query, j Json) Json {
 }
 
 func funcMatch(q *Query, j Json) Json {
-	str := j.TrimQuote()
-	arg := q.ParseFunOrRaw(j).TrimQuote()
-	if q.MatchFlag("-p") && strings.HasPrefix(str, arg) {
-		return j
+	// Match a key. The context must be an object.
+	if q.MatchFlag("-k") {
+		if q.MatchFlag("-p") {
+			return j.GetPrefix(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		if q.MatchFlag("-s") {
+			return j.GetSuffix(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		return j.GetRegex(q.ParseFunOrRaw(j).TrimQuote())
 	}
-	if q.MatchFlag("-s") && strings.HasSuffix(str, arg) {
-		return j
+	// Match a key value or a string.
+	var v string
+	if q.MatchFlag("-v") {
+		v = q.ParseFunOrKey(j).TrimQuote()
+	} else {
+		v = j.TrimQuote()
 	}
-	if re := regexp.MustCompile(arg); re.MatchString(str) {
-		return j
+	switch {
+	case q.MatchFlag("-p"):
+		prefix := q.ParseFunOrRaw(j).TrimQuote()
+		if strings.HasPrefix(v, prefix) {
+			return j
+		}
+	case q.MatchFlag("-s"):
+		suffix := q.ParseFunOrRaw(j).TrimQuote()
+		if strings.HasSuffix(v, suffix) {
+			return j
+		}
+	default:
+		regex := q.ParseFunOrRaw(j).TrimQuote()
+		if re := regexp.MustCompile(regex); re.MatchString(v) {
+			return j
+		}
 	}
 	return JSON("")
 }

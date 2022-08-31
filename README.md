@@ -989,30 +989,42 @@ fmt.Println(a) // {"msg":"hello","val":3}
 
 ## (match)
 
-This function matches a value against a prefix, suffix or regular expression
-and returns the value if true or an empty context otherwise.
+This function matches a value against a prefix, suffix or regular expression.
 
 ```clj
 (match pattern)
-(match pattern -p)
-(match pattern -s)
+(match -p pattern)
+(match -s pattern)
+(match -k pattern)
+(match -v key pattern)
 ```
 
 The `pattern` argument can be a function or a raw value.
+
 Use `-p` to match a prefix; `-s` to match a suffix; and no flag to match a regular expression.
+
+Use `-k` to match an object key by a pattern. It returns the key value or an empty context.
+
+Use `-v key` to match the value of a key by a pattern. It returns the current context or an empty context.
 
 **Example**
 
 ```go
-j := `{ "first_name": "Jim", "last_name": "May", "first_class": "English" }`
+j := `{ "first_name": "Jim", "last_name": "May", "first_class": "July" }`
 
-a := jsqt.Get(j, `(iterate (match "first" -p) (val))`)
-b := jsqt.Get(j, `(iterate (match "name" -s) (val))`)
-c := jsqt.Get(j, `(iterate (match "(last|class)") (val))`)
+a := jsqt.Get(j, `(match -k "ast")`)
+b := jsqt.Get(j, `(match -k -s "class")`)
+c := jsqt.Get(j, `(match -k -p "last")`)
+d := jsqt.Get(j, `(iterate (match "name") (val))`)
+e := jsqt.Get(j, `(keys) * (match -s "name")`)
+f := jsqt.Get(j, `(values) * (obj name (this)) (match -v name -p "J")`)
 
-fmt.Println(a) // {"first_name":"Jim","first_class":"English"}
-fmt.Println(b) // {"first_name":"Jim","last_name":"May"}
-fmt.Println(c) // {"last_name":"May","first_class":"English"}
+fmt.Println(a) // "May"
+fmt.Println(b) // "July"
+fmt.Println(c) // "May"
+fmt.Println(d) // {"first_name":"Jim","last_name":"May"}
+fmt.Println(e) // ["first_name","last_name"]
+fmt.Println(f) // [{"name":"Jim"},{"name":"July"}]
 ```
 
 # Truth Table
