@@ -203,6 +203,9 @@ func TestGet(t *testing.T) {
 		// (key)
 		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
 		// (if)
+		{give: `[33,44]`, when: `(if -n (is-arr) (raw "array") (raw "skip array"))`, then: `"skip array"`},
+		{give: `[33,44]`, when: `(if (not (is-arr)) (raw "array") (raw "skip array"))`, then: `"skip array"`},
+		{give: `[33,44]`, when: `(if (is-arr) (raw "array") (raw "not array"))`, then: `"array"`},
 		{give: `[33,44]`, when: `(if (is-arr) (raw 4))`, then: `4`},                             // Can omit Else.
 		{give: `{"b":3}`, when: `(if (is-num) (raw 4))`, then: `{"b":3}`},                       // Can omit Else.
 		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},          // Then.

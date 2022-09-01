@@ -510,14 +510,18 @@ This function works like a regular `if`.
 if `cond` is true `then` is executed, otherwise `else` is. The arguments can be functions or keys.
 The `else` argument is optional and returns `(this)` when omited.
 
+Use `-n` to negate a condition.
+
 **Example**
 
 ```go
-j := `{}`
+j := `[ 3, {}, 4, [], 5, "", 6, true, 7 ]`
 
-a := jsqt.Get(j, `(if (is-obj) (raw "It's an object!") (raw "Not an object"))`)
+a := jsqt.Get(j, `(collect (if (is-obj) (raw "obj") (this)))`)
+b := jsqt.Get(j, `(collect (if -n (is-obj) (raw "nop")))`)
 
-fmt.Println(a) // "It's an object!"
+fmt.Println(a) // [3,"obj",4,[],5,"",6,true,7]
+fmt.Println(b) // ["nop",{},"nop","nop","nop","nop","nop","nop","nop"]
 ```
 
 ## (either)
