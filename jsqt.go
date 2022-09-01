@@ -653,7 +653,10 @@ func funcMatch(q *Query, j Json) Json {
 		if q.MatchFlag("-s") {
 			return j.GetSuffix(q.ParseFunOrRaw(j).TrimQuote())
 		}
-		return j.GetRegex(q.ParseFunOrRaw(j).TrimQuote())
+		if q.MatchFlag("-r") {
+			return j.GetRegex(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		return j.Get(q.ParseFunOrRaw(j).TrimQuote())
 	}
 	// Match a key value or a string.
 	var v string
@@ -673,9 +676,14 @@ func funcMatch(q *Query, j Json) Json {
 		if strings.HasSuffix(v, suffix) {
 			return j
 		}
-	default:
+	case q.MatchFlag("-r"):
 		regex := q.ParseFunOrRaw(j).TrimQuote()
-		if re := regexp.MustCompile(regex); re.MatchString(v) {
+		if ok, _ := regexp.MatchString(regex, v); ok {
+			return j
+		}
+	default:
+		exact := q.ParseFunOrRaw(j).TrimQuote()
+		if exact == v {
 			return j
 		}
 	}
@@ -1529,11 +1537,10 @@ func (j Json) GetSuffix(suffix string) (r Json) {
 	return r
 }
 
-func (j Json) GetRegex(regex string) (r Json) {
+func (j Json) GetRegex(pattern string) (r Json) {
 	if j.IsObject() {
-		re := regexp.MustCompile(regex)
 		j.ForEachKeyVal(func(k, v Json) bool {
-			if re.MatchString(k.TrimQuote()) {
+			if ok, _ := regexp.MatchString(pattern, k.TrimQuote()); ok {
 				r = v
 				return true
 			}

@@ -993,6 +993,7 @@ This function matches a value against a prefix, suffix or regular expression.
 
 ```clj
 (match pattern)
+(match -r pattern)
 (match -p pattern)
 (match -s pattern)
 (match -k pattern)
@@ -1001,9 +1002,10 @@ This function matches a value against a prefix, suffix or regular expression.
 
 The `pattern` argument can be a function or a raw value.
 
-Use `-p` to match a prefix; `-s` to match a suffix; and no flag to match a regular expression.
+Use `-r` to match a regular expression; `-p` to match a prefix; `-s` to match a suffix;
+and no flag for an exact match.
 
-Use `-k` to match an object key by a pattern. It returns the key value or an empty context.
+Use `-k` to match an object key by a pattern. It returns the matched key value or an empty context.
 
 Use `-v key` to match the value of a key by a pattern. It returns the current context or an empty context.
 
@@ -1012,19 +1014,21 @@ Use `-v key` to match the value of a key by a pattern. It returns the current co
 ```go
 j := `{ "first_name": "Jim", "last_name": "May", "first_class": "July" }`
 
-a := jsqt.Get(j, `(match -k "ast")`)
-b := jsqt.Get(j, `(match -k -s "class")`)
-c := jsqt.Get(j, `(match -k -p "last")`)
-d := jsqt.Get(j, `(iterate (match "name") (val))`)
-e := jsqt.Get(j, `(keys) * (match -s "name")`)
-f := jsqt.Get(j, `(values) * (obj name (this)) (match -v name -p "J")`)
+a := jsqt.Get(j, `(match -k -r name$)`)
+b := jsqt.Get(j, `(match -k -s class)`)
+c := jsqt.Get(j, `(match -k -p last)`)
+d := jsqt.Get(j, `(match -k first_name)`)
+e := jsqt.Get(j, `(iterate (match -r name) (val))`)
+f := jsqt.Get(j, `(keys) * (match -s name)`)
+g := jsqt.Get(j, `(values) * (obj name (this)) (match -v name -p J)`)
 
-fmt.Println(a) // "May"
+fmt.Println(a) // "Jim"
 fmt.Println(b) // "July"
 fmt.Println(c) // "May"
-fmt.Println(d) // {"first_name":"Jim","last_name":"May"}
-fmt.Println(e) // ["first_name","last_name"]
-fmt.Println(f) // [{"name":"Jim"},{"name":"July"}]
+fmt.Println(d) // "Jim"
+fmt.Println(e) // {"first_name":"Jim","last_name":"May"}
+fmt.Println(f) // ["first_name","last_name"]
+fmt.Println(g) // [{"name":"Jim"},{"name":"July"}]
 ```
 
 # Truth Table

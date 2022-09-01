@@ -15,14 +15,14 @@ func TestGet(t *testing.T) {
 		then string
 	}{
 		// (match)
-		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k "^aa")`, then: `4`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -r "^aa")`, then: `4`},
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -s "ac")`, then: `5`},
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -p "aa")`, then: `4`},
-		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v (match -k "^a") "[35]"))`, then: `[{"a":3},{"a":5}]`},
-		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v a "[35]"))`, then: `[{"a":3},{"a":5}]`},
+		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v (match -k -r "^a") -r "[35]"))`, then: `[{"a":3},{"a":5}]`},
+		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v a -r "[35]"))`, then: `[{"a":3},{"a":5}]`},
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -s "_c") (this))`, then: `{"a_c":4,"b_c":5}`},
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -p "a_") (this))`, then: `{"a_b":3,"a_c":4}`},
-		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match "^a_") (this))`, then: `{"a_b":3,"a_c":4}`},
+		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -r "^a_") (this))`, then: `{"a_b":3,"a_c":4}`},
 		// (set)
 		{give: `{"a":{"b":3}}`, when: `(set -i a a 0 a 3)`, then: `{"a":{"b":3,"a":[{"a":3}]}}`},
 		{give: `{}`, when: `(set -i 0 a 0 a 3)`, then: `[{"a":[{"a":3}]}]`},
