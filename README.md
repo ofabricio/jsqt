@@ -707,25 +707,30 @@ fmt.Println(a) // "Hello World"
 This function sorts a JSON array or object keys.
 
 ```clj
-(sort dir)
-(sort dir key)
+(sort)
+(sort key)
+(sort desc)
+(sort desc key)
 ```
 
-The `dir` argument is the sorting direction.
 The `key` argument is for sorting an array of objects by a key.
+
+Use `desc` to sort descending.
 
 **Example**
 
 ```go
-a := jsqt.Get(`[{ "a": 3 }, { "a": 4 }]`, `(sort desc a)`)
-b := jsqt.Get(`[5,4,3]`, `(sort asc)`)
-c := jsqt.Get(`["c","b","a"]`, `(sort asc)`)
-d := jsqt.Get(`{ "b": 3, "a": 4 }`, `(sort asc)`)
+a := jsqt.Get(`[5,4,3]`, `(sort)`)
+b := jsqt.Get(`["c","b","a"]`, `(sort desc)`)
+c := jsqt.Get(`{ "b": 3, "a": 4 }`, `(sort)`)
+d := jsqt.Get(`[{ "a": 4 }, { "a": 3 }]`, `(sort a)`)
+e := jsqt.Get(`[{ "a": 3 }, { "a": 4 }]`, `(sort desc a)`)
 
-fmt.Println(a) // [{ "a": 4 },{ "a": 3 }]
-fmt.Println(b) // [3,4,5]
-fmt.Println(c) // ["a","b","c"]
-fmt.Println(d) // {"a":4,"b":3}
+fmt.Println(a) // [3,4,5]
+fmt.Println(b) // ["c","b","a"]
+fmt.Println(c) // {"a":4,"b":3}
+fmt.Println(d) // [{ "a": 3 },{ "a": 4 }]
+fmt.Println(e) // [{ "a": 4 },{ "a": 3 }]
 ```
 
 ## (reverse)

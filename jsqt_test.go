@@ -143,12 +143,12 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3},{"b":4}]`, when: `(reverse)`, then: `[{"b":4},{"a":3}]`},
 		{give: `[3,4,5,6,2,7]`, when: `(reverse)`, then: `[7,2,6,5,4,3]`},
 		// (sort)
-		{give: `{"c":5,"b":4,"a":3}`, when: `(sort asc)`, then: `{"a":3,"b":4,"c":5}`},
-		{give: `{"a":5,"b":4,"c":3}`, when: `(sort desc)`, then: `{"c":3,"b":4,"a":5}`},
-		{give: `[5,3,4]`, when: `(sort desc)`, then: `[5,4,3]`},
-		{give: `[5,4,3]`, when: `(sort asc)`, then: `[3,4,5]`},
-		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(sort desc a)`, then: `[{"a":5},{"a":4},{"a":3}]`},
-		{give: `[{"a":5},{"a":4},{"a":3}]`, when: `(sort asc a)`, then: `[{"a":3},{"a":4},{"a":5}]`},
+		{give: `[1, 10, 2]`, when: `(sort)`, then: `[1,2,10]`},
+		{give: `[1, 10, 2]`, when: `(sort desc)`, then: `[10,2,1]`},
+		{give: `{"c":1,"b":10,"a":2}`, when: `(sort)`, then: `{"a":2,"b":10,"c":1}`},
+		{give: `{"a":1,"b":10,"c":2}`, when: `(sort desc)`, then: `{"c":2,"b":10,"a":1}`},
+		{give: `[{"a":1},{"a":10},{"a":2}]`, when: `(sort desc a)`, then: `[{"a":10},{"a":2},{"a":1}]`},
+		{give: `[{"a":1},{"a":10},{"a":2}]`, when: `(sort a)`, then: `[{"a":1},{"a":2},{"a":10}]`},
 		// (either) should skip its arguments.
 		{give: `{"a":"","b":"B","c":""}`, when: `(get (either a b c) (lower))`, then: `"b"`},
 		// (either)
@@ -1299,7 +1299,7 @@ func BenchmarkJson_Prettify(b *testing.B) {
 
 func Benchmark_QueryFunction_Sort(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Get(`[{ "a": 5 }, { "a": 4 }, { "a": 3 }]`, `(sort asc a)`)
+		Get(`[{ "a": 5 }, { "a": 4 }, { "a": 3 }]`, `(sort a)`)
 	}
 }
 

@@ -935,13 +935,13 @@ func funcConcat(q *Query, j Json) Json {
 }
 
 func funcSort(q *Query, j Json) Json {
-	asc := q.ParseRaw().String() == "asc"
+	asc := !q.MatchFlag("desc")
 	key := q.MoreArg()
 	if j.IsObject() {
 		if asc {
-			return j.Query("(get (entries) (sort asc 0) (objectify))")
+			return j.Query("(entries) (sort 0) (objectify)")
 		}
-		return j.Query("(get (entries) (sort desc 0) (objectify))")
+		return j.Query("(entries) (sort desc 0) (objectify)")
 	}
 	if j.IsArray() {
 		var items []string
@@ -962,9 +962,9 @@ func funcSort(q *Query, j Json) Json {
 				b = items[j]
 			}
 			if asc {
-				return a < b
+				return JSON(a).LT(JSON(b))
 			}
-			return a > b
+			return JSON(a).GT(JSON(b))
 		})
 		return JSON("[" + strings.Join(items, ",") + "]")
 	}
