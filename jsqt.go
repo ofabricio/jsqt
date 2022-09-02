@@ -806,13 +806,7 @@ func funcIsBlank(q *Query, j Json) Json {
 func funcEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na == nb {
-			return j
-		}
-	} else if a.String() == b.String() {
+	if a.EQ(b) {
 		return j
 	}
 	return JSON("")
@@ -821,13 +815,7 @@ func funcEQ(q *Query, j Json) Json {
 func funcNEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na != nb {
-			return j
-		}
-	} else if a.String() != b.String() {
+	if a.NEQ(b) {
 		return j
 	}
 	return JSON("")
@@ -836,13 +824,7 @@ func funcNEQ(q *Query, j Json) Json {
 func funcGTE(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na >= nb {
-			return j
-		}
-	} else if a.String() >= b.String() {
+	if a.GTE(b) {
 		return j
 	}
 	return JSON("")
@@ -851,13 +833,7 @@ func funcGTE(q *Query, j Json) Json {
 func funcLTE(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na <= nb {
-			return j
-		}
-	} else if a.String() <= b.String() {
+	if a.LTE(b) {
 		return j
 	}
 	return JSON("")
@@ -866,13 +842,7 @@ func funcLTE(q *Query, j Json) Json {
 func funcGT(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na > nb {
-			return j
-		}
-	} else if a.String() > b.String() {
+	if a.GT(b) {
 		return j
 	}
 	return JSON("")
@@ -881,13 +851,7 @@ func funcGT(q *Query, j Json) Json {
 func funcLT(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
-	if a.IsNumber() {
-		na, _ := strconv.ParseFloat(a.String(), 64)
-		nb, _ := strconv.ParseFloat(b.String(), 64)
-		if na < nb {
-			return j
-		}
-	} else if a.String() < b.String() {
+	if a.LT(b) {
 		return j
 	}
 	return JSON("")
@@ -1261,6 +1225,60 @@ func (j Json) IsSome() bool {
 
 func (j Json) Exists() bool {
 	return j.String() != ""
+}
+
+func (j Json) EQ(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na == nb
+	}
+	return j.String() == b.String()
+}
+
+func (j Json) NEQ(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na != nb
+	}
+	return j.String() != b.String()
+}
+
+func (j Json) GT(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na > nb
+	}
+	return j.String() > b.String()
+}
+
+func (j Json) GTE(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na >= nb
+	}
+	return j.String() >= b.String()
+}
+
+func (j Json) LT(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na < nb
+	}
+	return j.String() < b.String()
+}
+
+func (j Json) LTE(b Json) bool {
+	if j.IsNumber() {
+		na, nb := toFloat(j, b)
+		return na <= nb
+	}
+	return j.String() <= b.String()
+}
+
+func toFloat(a, b Json) (float64, float64) {
+	na, _ := strconv.ParseFloat(a.String(), 64)
+	nb, _ := strconv.ParseFloat(b.String(), 64)
+	return na, nb
 }
 
 func (j Json) Iterate(depth int, m func(k, v Json) (Json, Json)) Json {
