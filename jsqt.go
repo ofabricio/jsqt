@@ -1666,6 +1666,46 @@ func (j Json) Flatten(depth int) Json {
 		o.WriteString("]")
 		return JSON(o.String())
 	}
+	if j.s.MatchByte('{') {
+		var o strings.Builder
+		o.Grow(len(j.s))
+		o.WriteString("{")
+		d := 0
+		for j.s.WS() && j.s.More() {
+
+			if j.s.MatchByte(',') {
+				o.WriteByte(',')
+				continue
+			}
+			if j.s.MatchByte('}') {
+				d--
+				continue
+			}
+
+			m := j.s.Mark()
+			j.s.UtilMatchString('"')
+			k := j.s.Token(m)
+
+			j.s.WS()
+			j.s.MatchByte(':')
+			j.s.WS()
+
+			if (d < depth || depth <= 0) && j.s.MatchByte('{') {
+				d++
+				continue
+			}
+
+			m = j.s.Mark()
+			j.matchValue()
+			v := j.s.Token(m)
+
+			o.WriteString(k)
+			o.WriteString(":")
+			o.WriteString(v)
+		}
+		o.WriteString("}")
+		return JSON(o.String())
+	}
 	return j
 }
 
