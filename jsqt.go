@@ -1635,33 +1635,32 @@ func (j *Json) matchValue() bool {
 // If depth == -1 the array value is simply trimmed:
 // `[3, 4]` becomes `3, 4`.
 func (j Json) Flatten(depth int) Json {
-	if j.IsArray() {
+	if j.s.MatchByte('[') {
 		if depth == -1 {
 			v := j.String()
-			return JSON(v[1 : len(v)-1])
+			return JSON(v[0 : len(v)-1])
 		}
-		depth++
 		var o strings.Builder
 		o.Grow(len(j.s))
 		o.WriteString("[")
 		d := 0
 		for j.s.WS() && j.s.More() {
-			if (d < depth || depth == 1) && j.s.MatchByte('[') {
+			if j.s.MatchByte(',') {
+				o.WriteByte(',')
+				continue
+			}
+			if j.s.MatchByte(']') {
+				d--
+				continue
+			}
+			if (d < depth || depth <= 0) && j.s.MatchByte('[') {
 				d++
 				continue
 			}
 			m := j.s.Mark()
 			j.matchValue()
 			v := j.s.Token(m)
-			if len(v) > 0 {
-				for j.s.WS() && j.s.MatchByte(']') {
-					d--
-				}
-				o.WriteString(v)
-			} else {
-				o.WriteByte(j.s.Curr())
-				j.s.Next()
-			}
+			o.WriteString(v)
 		}
 		o.WriteString("]")
 		return JSON(o.String())
