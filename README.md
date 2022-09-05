@@ -353,6 +353,32 @@ fmt.Println(e) // 2
 fmt.Println(f) // 3
 ```
 
+## (slice)
+
+This function returns a slice of a JSON array selected from start (inclusive) to end (exclusive).
+
+```clj
+(slice start end)
+```
+
+Both `start` and `end` can be a function or raw value. They can be negative. `end` is optional.
+
+**Example**
+
+```go
+j := `[ "ant", "bear", "camel", "duck", "elephant" ]`
+
+a := jsqt.Get(j, `(slice 2)`)
+b := jsqt.Get(j, `(slice 2 4)`)
+c := jsqt.Get(j, `(slice -2)`)
+d := jsqt.Get(j, `(slice 2 -1)`)
+
+fmt.Println(a) // ["camel","duck","elephant"]
+fmt.Println(b) // ["camel","duck"]
+fmt.Println(c) // ["duck","elephant"]
+fmt.Println(d) // ["camel","duck"]
+```
+
 ## (root)
 
 This function returns the root JSON document.

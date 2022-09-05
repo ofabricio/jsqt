@@ -14,6 +14,16 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (slice)
+		{give: `[3,4,5,6,7,8]`, when: `(slice 2 -1)`, then: `[5,6,7]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice -2)`, then: `[7,8]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 2 4)`, then: `[5,6]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 0 3)`, then: `[3,4,5]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 0 0)`, then: `[3,4,5,6,7,8]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 6)`, then: `[]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 3)`, then: `[6,7,8]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 1)`, then: `[4,5,6,7,8]`},
+		{give: `[3,4,5,6,7,8]`, when: `(slice 0)`, then: `[3,4,5,6,7,8]`},
 		// (match)
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -r "^aa")`, then: `4`},
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -s "ac")`, then: `5`},

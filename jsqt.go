@@ -146,6 +146,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcLast(q, j)
 	case "flatten":
 		return funcFlatten(q, j)
+	case "slice":
+		return funcSlice(q, j)
 	case "upsert":
 		return funcUpsert(q, j)
 	case "size":
@@ -500,6 +502,39 @@ func funcFlatten(q *Query, j Json) Json {
 		depth = v.Int()
 	}
 	return j.Flatten(depth)
+}
+
+func funcSlice(q *Query, j Json) Json {
+	if j.IsArray() {
+		ini := q.ParseFunOrRaw(j).Int()
+		end := q.ParseFunOrRaw(j).Int()
+		if ini < 0 || end < 0 {
+			size := j.Size().Int()
+			if ini < 0 {
+				ini = size + ini
+			}
+			if end < 0 {
+				end = size + end
+			}
+		}
+		var o strings.Builder
+		o.Grow(len(j.s))
+		o.WriteString("[")
+		c := 0
+		j.ForEach(func(i, v Json) bool {
+			if c >= ini && (c < end || end == 0) {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			c++
+			return false
+		})
+		o.WriteString("]")
+		return JSON(o.String())
+	}
+	return j
 }
 
 func funcUpsert(q *Query, j Json) Json {
