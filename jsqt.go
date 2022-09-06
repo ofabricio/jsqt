@@ -1571,7 +1571,7 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 
 func (j Json) GetPrefix(prefix string) (r Json) {
 	j.ForEachKeyVal(func(k, v Json) bool {
-		if strings.HasPrefix(k.TrimQuote(), prefix) { // FIXME: strings.HasPrefix is slow.
+		if strings.HasPrefix(k.TrimQuote(), prefix) {
 			r = v
 			return true
 		}
@@ -1582,7 +1582,7 @@ func (j Json) GetPrefix(prefix string) (r Json) {
 
 func (j Json) GetSuffix(suffix string) (r Json) {
 	j.ForEachKeyVal(func(k, v Json) bool {
-		if strings.HasSuffix(k.TrimQuote(), suffix) { // FIXME: strings.HasSuffix is slow.
+		if strings.HasSuffix(k.TrimQuote(), suffix) {
 			r = v
 			return true
 		}
