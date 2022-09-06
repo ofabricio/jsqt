@@ -353,6 +353,28 @@ fmt.Println(e) // 2
 fmt.Println(f) // 3
 ```
 
+## (unique)
+
+This function collects unique values from an array.
+
+```clj
+(unique)
+(unique arg ...)
+```
+
+The argument list can be keys or functions and they work like `(collect)`,
+except that it collects unique values.
+
+**Example**
+
+```go
+a := jsqt.Get(`[3,4,3,4,5]`, `(unique)`)
+b := jsqt.Get(`[{"a":3},{"a":3},{"a":4}]`, `(unique a)`)
+
+fmt.Println(a) // [3,4,5]
+fmt.Println(b) // [3,4]
+```
+
 ## (slice)
 
 This function returns a slice of a JSON array selected from start (inclusive) to end (exclusive).

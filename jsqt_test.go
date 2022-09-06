@@ -14,6 +14,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (unique)
+		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(unique a)`, then: `[3,4]`},
+		{give: `[3,4,3,4,5]`, when: `(unique)`, then: `[3,4,5]`},
 		// (in)
 		{give: `[3,4,5,6,7]`, when: `(collect (not (in (val) [4,6])))`, then: `[3,5,7]`},
 		{give: `[3,4,5,6,7]`, when: `(collect (in (val) [4,6]))`, then: `[4,6]`},

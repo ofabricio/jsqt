@@ -134,6 +134,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return q.ParseRaw()
 	case "collect":
 		return funcCollect(q, j)
+	case "unique":
+		return funcUnique(q, j)
 	case "first":
 		return funcFirst(q, j)
 	case "last":
@@ -459,6 +461,28 @@ func funcCollect(q *Query, j Json) Json {
 			return false
 		})
 	}
+	o.WriteString("]")
+	return JSON(o.String())
+}
+
+func funcUnique(q *Query, j Json) Json {
+	uniq := make(map[Json]bool)
+	var o strings.Builder
+	o.Grow(len(j.s))
+	o.WriteString("[")
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		if item = funcGet(q, item); item.Exists() && !uniq[item] {
+			uniq[item] = true
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(item.String())
+		}
+		return false
+	})
 	o.WriteString("]")
 	return JSON(o.String())
 }
