@@ -401,6 +401,22 @@ fmt.Println(c) // ["duck","elephant"]
 fmt.Println(d) // ["camel","duck"]
 ```
 
+## (reverse)
+
+This function reverses a JSON array.
+
+```clj
+(reverse)
+```
+
+**Example**
+
+```go
+a := jsqt.Get(`[3,7,2,4]`, `(reverse)`)
+
+fmt.Println(a) // [4,2,7,3]
+```
+
 ## (root)
 
 This function returns the root JSON document.
@@ -802,22 +818,6 @@ fmt.Println(b) // ["c","b","a"]
 fmt.Println(c) // {"a":4,"b":3}
 fmt.Println(d) // [{ "a": 3 },{ "a": 4 }]
 fmt.Println(e) // [{ "a": 4 },{ "a": 3 }]
-```
-
-## (reverse)
-
-This function reverses a JSON array.
-
-```clj
-(reverse)
-```
-
-**Example**
-
-```go
-a := jsqt.Get(`[3,7,2,4]`, `(reverse)`)
-
-fmt.Println(a) // [4,2,7,3]
 ```
 
 ## (keys) (values) (entries) (objectify)
