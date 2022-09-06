@@ -1329,79 +1329,79 @@ func Benchmark_QueryFunction_Sort(b *testing.B) {
 	}
 }
 
-func Benchmark_QueryFuncion_Set(b *testing.B) {
+func Benchmark_QueryFunction_Set(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(set address city "xxx")`)
 	}
 }
 
-func Benchmark_QueryFuncion_Pick(b *testing.B) {
+func Benchmark_QueryFunction_Pick(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(pick name age)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Pluck(b *testing.B) {
+func Benchmark_QueryFunction_Pluck(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(pluck address contacts)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Keys(b *testing.B) {
+func Benchmark_QueryFunction_Keys(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(keys)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Values(b *testing.B) {
+func Benchmark_QueryFunction_Values(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(values)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Entries(b *testing.B) {
+func Benchmark_QueryFunction_Entries(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(TestData1, `(entries)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Objectify(b *testing.B) {
+func Benchmark_QueryFunction_Objectify(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`[["a","Hello"],["b","World"],["count",123]]`, `(objectify)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Merge(b *testing.B) {
+func Benchmark_QueryFunction_Merge(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`[{"a","Hello"},{"b","World"},{"count",123}]`, `(merge)`)
 	}
 }
 
-func Benchmark_QueryFuncion_Arr(b *testing.B) {
+func Benchmark_QueryFunction_Arr(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(``, `(arr (raw 3) (raw 4) (raw 5))`)
 	}
 }
 
-func Benchmark_QueryFuncion_Obj(b *testing.B) {
+func Benchmark_QueryFunction_Obj(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(``, `(obj a (raw 3) b (raw 4) c (raw 5))`)
 	}
 }
 
-func Benchmark_QueryFuncion_Collect(b *testing.B) {
+func Benchmark_QueryFunction_Collect(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`[0,1,2,3,4,5,6,7,8,9]`, `(collect (this))`)
 	}
 }
 
-func Benchmark_QueryFuncion_Concat(b *testing.B) {
+func Benchmark_QueryFunction_Concat(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(``, `(concat (raw "Hello") (raw "World"))`)
 	}
 }
 
-func Benchmark_QueryFuncion_FlattenDeep(b *testing.B) {
+func Benchmark_QueryFunction_FlattenDeep(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Get(`[3,[4],[[5]]]`, `(flatten 0)`)
 	}
