@@ -1208,6 +1208,18 @@ func (j Json) Int() int {
 	return int(v)
 }
 
+// Int64 converts a JSON number to int64.
+func (j Json) Int64() int64 {
+	v, _ := strconv.ParseInt(j.String(), 10, 64)
+	return v
+}
+
+// Uint64 converts a JSON number to uint64.
+func (j Json) Uint64() uint64 {
+	v, _ := strconv.ParseUint(j.String(), 10, 64)
+	return v
+}
+
 // Float converts a JSON number to float.
 func (j Json) Float() float64 {
 	v, _ := strconv.ParseFloat(j.String(), 64)

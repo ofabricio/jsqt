@@ -652,6 +652,39 @@ func TestJsonInt(t *testing.T) {
 	}
 }
 
+func TestJsonInt64(t *testing.T) {
+	tt := []struct {
+		give string
+		then int64
+	}{
+		{give: ``, then: 0},
+		{give: `0`, then: 0},
+		{give: `1`, then: 1},
+		{give: `-2`, then: -2},
+		{give: `100`, then: 100},
+	}
+	for _, tc := range tt {
+		j := JSON(tc.give)
+		assertEqual(t, tc.then, j.Int64(), tc.give)
+	}
+}
+
+func TestJsonUint64(t *testing.T) {
+	tt := []struct {
+		give string
+		then uint64
+	}{
+		{give: ``, then: 0},
+		{give: `0`, then: 0},
+		{give: `1`, then: 1},
+		{give: `100`, then: 100},
+	}
+	for _, tc := range tt {
+		j := JSON(tc.give)
+		assertEqual(t, tc.then, j.Uint64(), tc.give)
+	}
+}
+
 func TestJsonFloat(t *testing.T) {
 	tt := []struct {
 		give string
