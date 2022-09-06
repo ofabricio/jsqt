@@ -31,7 +31,7 @@ type Query struct {
 	k, v Json
 	save Json
 	args []any
-	defs map[string]string
+	defs map[string]Scanner
 }
 
 func (q *Query) Parse(j Json) Json {
@@ -110,12 +110,6 @@ func (q *Query) IsEmpty() bool {
 
 func (q Query) MoreArg() bool {
 	return !q.s.EqualByte(')') && !q.IsEmpty()
-}
-
-func (q Query) Copy(qry string) Query {
-	qq := q
-	qq.s = Scanner(qry)
-	return qq
 }
 
 func (q Query) String() string {
@@ -269,12 +263,19 @@ func (q *Query) CallFun(fname string, j Json) Json {
 	case "match":
 		return funcMatch(q, j)
 	default:
-		if val, ok := q.defs[fname]; ok {
-			qq := q.Copy(val)
-			return qq.ParseFun(j)
+		if defFunMark, ok := q.defs[fname]; ok {
+			return callDefFun(q, j, defFunMark)
 		}
 	}
 	return JSON("")
+}
+
+func callDefFun(q *Query, j Json, defFunMark Scanner) Json {
+	m := q.s.Mark()
+	q.s.Back(defFunMark)
+	j = q.ParseFun(j)
+	q.s.Back(m)
+	return j
 }
 
 // #region Functions
@@ -282,11 +283,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 func funcDef(q *Query, j Json) Json {
 	fname := q.ParseRaw().String()
 	if m := q.s.Mark(); q.s.UtilMatchOpenCloseCount('(', ')', '"') {
-		fun := q.s.Token(m)
 		if q.defs == nil {
-			q.defs = make(map[string]string)
+			q.defs = make(map[string]Scanner)
 		}
-		q.defs[fname] = fun
+		q.defs[fname] = m
 	}
 	return j
 }
