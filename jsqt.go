@@ -1681,7 +1681,6 @@ func (j Json) Flatten(depth int) Json {
 		d := 0
 		for j.s.WS() && j.s.More() {
 			if j.s.MatchByte(',') {
-				o.WriteByte(',')
 				continue
 			}
 			if j.s.MatchByte(']') {
@@ -1691,6 +1690,9 @@ func (j Json) Flatten(depth int) Json {
 			if (d < depth || depth <= 0) && j.s.MatchByte('[') {
 				d++
 				continue
+			}
+			if o.Len() > 1 {
+				o.WriteByte(',')
 			}
 			m := j.s.Mark()
 			j.matchValue()
@@ -1708,7 +1710,6 @@ func (j Json) Flatten(depth int) Json {
 		for j.s.WS() && j.s.More() {
 
 			if j.s.MatchByte(',') {
-				o.WriteByte(',')
 				continue
 			}
 			if j.s.MatchByte('}') {
@@ -1733,6 +1734,9 @@ func (j Json) Flatten(depth int) Json {
 			j.matchValue()
 			v := j.s.Token(m)
 
+			if o.Len() > 1 {
+				o.WriteByte(',')
+			}
 			o.WriteString(k)
 			o.WriteString(":")
 			o.WriteString(v)
