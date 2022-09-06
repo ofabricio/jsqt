@@ -499,6 +499,27 @@ fmt.Println(a) // true
 fmt.Println(b) // false
 ```
 
+## (in)
+
+This function tests if a value is in an array.
+
+```clj
+(in val arr)
+```
+
+`val` can be a key or a function.
+`arr` can be a raw value or a function.
+
+**Example**
+
+```go
+j := `[3,4,5,6,7]`
+
+a := jsqt.Get(j, `(collect (in (val) [ 4, 6 ]) (bool))`)
+
+fmt.Println(a) // [false,true,false,true,false]
+```
+
 ## (or) (and) (not)
 
 These functions apply OR, AND, NOT logic to its arguments.

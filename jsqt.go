@@ -192,6 +192,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return q.Root
 	case "this", "exists":
 		return j
+	case "in":
+		return funcIN(q, j)
 	case "==":
 		return funcEQ(q, j)
 	case "!=":
@@ -838,6 +840,15 @@ func funcIsBlank(q *Query, j Json) Json {
 	return JSON("")
 }
 
+func funcIN(q *Query, j Json) Json {
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrRaw(j)
+	if a.IN(b) {
+		return j
+	}
+	return JSON("")
+}
+
 func funcEQ(q *Query, j Json) Json {
 	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
@@ -1260,6 +1271,14 @@ func (j Json) IsSome() bool {
 
 func (j Json) Exists() bool {
 	return j.String() != ""
+}
+
+func (j Json) IN(arr Json) (yes bool) {
+	arr.ForEach(func(i, v Json) bool {
+		yes = j.EQ(v)
+		return yes
+	})
+	return
 }
 
 func (j Json) EQ(b Json) bool {
