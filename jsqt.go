@@ -1,3 +1,4 @@
+// Package jsqt provides a language to query and transform JSON documents.
 package jsqt
 
 import (
@@ -25,6 +26,7 @@ func JSON(jsn string) Json {
 
 // #region Query
 
+// Query is the query language parser.
 type Query struct {
 	s    Scanner
 	Root Json
@@ -1129,6 +1131,7 @@ func funcLoad(q *Query, j Json) Json {
 
 // #region Json
 
+// Json represents a JSON document.
 type Json struct {
 	s Scanner
 }
@@ -1680,7 +1683,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 			} else if c == '[' {
 				j.s.UtilMatchOpenCloseCount('[', ']', '"')
 			} else {
-				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TOOD: no need for 0. Create MatchUntilLTEOr3.
+				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TODO: no need for 0. Create MatchUntilLTEOr3.
 			}
 
 			if f(JSON(key), JSON(j.s.Token(ini))) {
@@ -1702,7 +1705,7 @@ func (j Json) ForEach(f func(i, v Json) bool) {
 			} else if c == '"' {
 				j.s.UtilMatchString('"')
 			} else {
-				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TOOD: no need for 0. Create MatchUntilLTEOr3.
+				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TODO: no need for 0. Create MatchUntilLTEOr3.
 			}
 			if f(JSON(strconv.Itoa(i)), JSON(j.s.Token(ini))) {
 				return
