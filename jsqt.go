@@ -114,10 +114,6 @@ func (q Query) MoreArg() bool {
 	return !q.s.EqualByte(')') && !q.IsEmpty()
 }
 
-func (q Query) String() string {
-	return q.s.String()
-}
-
 func (q *Query) MatchAnything() bool {
 	return q.s.MatchUntilLTEOr2(' ', ')', 0)
 }

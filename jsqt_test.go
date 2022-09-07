@@ -21,6 +21,7 @@ func TestGet(t *testing.T) {
 		{give: `[3,4,5,6,7]`, when: `(collect (not (in (val) [4,6])))`, then: `[3,5,7]`},
 		{give: `[3,4,5,6,7]`, when: `(collect (in (val) [4,6]))`, then: `[4,6]`},
 		// (slice)
+		{give: `3`, when: `(slice 0)`, then: `3`},
 		{give: `[3,4,5,6,7,8]`, when: `(slice 2 -1)`, then: `[5,6,7]`},
 		{give: `[3,4,5,6,7,8]`, when: `(slice -2)`, then: `[7,8]`},
 		{give: `[3,4,5,6,7,8]`, when: `(slice 2 4)`, then: `[5,6]`},
@@ -31,15 +32,18 @@ func TestGet(t *testing.T) {
 		{give: `[3,4,5,6,7,8]`, when: `(slice 1)`, then: `[4,5,6,7,8]`},
 		{give: `[3,4,5,6,7,8]`, when: `(slice 0)`, then: `[3,4,5,6,7,8]`},
 		// (match)
-		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -r "^aa")`, then: `4`},
-		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -s "ac")`, then: `5`},
-		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -p "aa")`, then: `4`},
-		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v (match -k -r "^a") -r "[35]"))`, then: `[{"a":3},{"a":5}]`},
-		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v a -r "[35]"))`, then: `[{"a":3},{"a":5}]`},
-		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -s "_c") (this))`, then: `{"a_c":4,"b_c":5}`},
-		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -p "a_") (this))`, then: `{"a_b":3,"a_c":4}`},
-		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -r "^a_") (this))`, then: `{"a_b":3,"a_c":4}`},
+		{give: `{"a":3,"b":4}`, when: `(match -k b)`, then: `4`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -r ^aa)`, then: `4`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -s ac)`, then: `5`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -p aa)`, then: `4`},
+		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v (match -k -r ^a) -r [35]))`, then: `[{"a":3},{"a":5}]`},
+		{give: `[{"a":3},{"a":4},{"a":5}]`, when: `(get * (match -v a -r [35]))`, then: `[{"a":3},{"a":5}]`},
+		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -s _c) (this))`, then: `{"a_c":4,"b_c":5}`},
+		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -p a_) (this))`, then: `{"a_b":3,"a_c":4}`},
+		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -r ^a_) (this))`, then: `{"a_b":3,"a_c":4}`},
+		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match a_c) (this))`, then: `{"a_c":4}`},
 		// (set)
+		{give: `3`, when: `(set a 7)`, then: `3`},
 		{give: `{"a":{"b":3}}`, when: `(set -i a a 0 a 3)`, then: `{"a":{"b":3,"a":[{"a":3}]}}`},
 		{give: `{}`, when: `(set -i 0 a 0 a 3)`, then: `[{"a":[{"a":3}]}]`},
 		{give: `{}`, when: `(set -i 0 a 0 0 3)`, then: `[{"a":[[3]]}]`},
@@ -142,6 +146,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (load)) (save (raw 5)) (arr (a) (b))`, then: `[3,5]`},
 		{give: `{"a":3,"b":4}`, when: `(def a (get a)) (def b (get b)) (arr (a) (b))`, then: `[3,4]`},
 		// (upsert)
+		{give: `3`, when: `(upsert b 5)`, then: `3`},
 		{give: `{"a":3}`, when: `(upsert (nothing) a)`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(upsert x (nothing))`, then: `{"a":3}`},
 		{give: `{"a":3,"b":4}`, when: `(upsert x 5 y (get a))`, then: `{"x":5,"y":3,"a":3,"b":4}`},
@@ -153,6 +158,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":{"b":3,"c":4},"b":{"d":3,"e":4},"c":5}`, when: `(pick a -m (pick c) c -m (nothing))`, then: `{"a":{"c":4}}`},
 		{give: `{"a":{"b":3,"c":4},"b":{"d":3,"e":4},"c":5}`, when: `(pick a -m (pick c) b -m (pick d))`, then: `{"a":{"c":4},"b":{"d":3}}`},
 		{give: `{"a":3,"b":4,"c":5}`, when: `(pick b c)`, then: `{"b":4,"c":5}`},
+		{give: `3`, when: `(pick)`, then: `3`},
 		// (this)
 		{give: `[3,4]`, when: `(collect (> (this) 3))`, then: `[4]`},
 		// (join)
@@ -244,6 +250,7 @@ func TestGet(t *testing.T) {
 		{give: `[]`, when: `(is-nully)`, then: `[]`},
 		{give: `null`, when: `(is-nully)`, then: `null`},
 		{give: `""`, when: `(is-nully)`, then: `""`},
+		{give: `3`, when: `(is-nully)`, then: ``},
 		// (is-some)
 		{give: `3`, when: `(is-some)`, then: `3`},
 		{give: `""`, when: `(is-some)`, then: `""`},
@@ -311,6 +318,11 @@ func TestGet(t *testing.T) {
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5,\n                \"d\": \"e f\"\n            }\n        ],\n        \"c\": [],\n        \"d\": {}\n    }\n]"},
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(ugly)`, then: `[{"a":3,"b":[4,{"c":5,"d":"e f"}],"c":[],"d":{}}]`},
 		// (operators)
+		{give: `"c"`, when: `(>= (this) "d")`, then: ``},
+		{give: `"c"`, when: `(>= (this) "b")`, then: `"c"`},
+		{give: `"c"`, when: `(<= (this) "d")`, then: `"c"`},
+		{give: `"c"`, when: `(<= (this) "c")`, then: `"c"`},
+		{give: `"c"`, when: `(<= (this) "b")`, then: ``},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (== b 7) a)`, then: `[4]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (!= b 7) a)`, then: `[3,5]`},
 		{give: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5,"b":8}]`, when: `(collect (>= b 7) a)`, then: `[4,5]`},
@@ -343,6 +355,7 @@ func TestGet(t *testing.T) {
 		{give: `{ "a" : 3, "b" : 4}`, when: `(iterate -f (this) (if (is-num) (stringify) (this)))`, then: `{"a":"3","b":"4"}`},
 		{give: `[3,4]`, when: `(iterate -f (key) (if (is-num) (stringify) (val)))`, then: `["3","4"]`},
 		{give: `[3,4]`, when: `(iterate -f (this) (if (is-num) (stringify) (this)))`, then: `["3","4"]`},
+		{give: `["30"]`, when: `(iterate -f (this) (jsonify))`, then: `[30]`},
 		{give: `3`, when: `(iterate -f (this) (stringify))`, then: `"3"`},
 		{give: `3`, when: `(iterate -f (key) (val))`, then: `3`},
 		{give: `3`, when: `(iterate -f (this) (this))`, then: `3`},
@@ -371,6 +384,7 @@ func TestGet(t *testing.T) {
 		{give: `[3,4]`, when: `(flatten 0)`, then: `[3,4]`},
 		{give: `[[3]]`, when: `(flatten)`, then: `[3]`},
 		{give: `[3]`, when: `(flatten)`, then: `3`},
+		{give: `3`, when: `(flatten)`, then: `3`},
 		// (first) (last)
 		{give: `{"a":[]}`, when: `a (last)`, then: ``},
 		{give: `{"a":[]}`, when: `(first a)`, then: ``},
@@ -530,6 +544,20 @@ func TestJsonWS(t *testing.T) {
 	for _, tc := range tt {
 		r := Get(tc.give, tc.when)
 		assertEqual(t, tc.then, r.String(), tc)
+	}
+}
+
+func TestJsonBytes(t *testing.T) {
+
+	tt := []struct {
+		give string
+		then []byte
+	}{
+		{give: `[3,4]`, then: []byte{'[', '3', ',', '4', ']'}},
+	}
+	for _, tc := range tt {
+		r := Get(tc.give, `(this`).Bytes()
+		assertEqual(t, tc.then, r, tc)
 	}
 }
 
