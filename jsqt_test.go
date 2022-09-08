@@ -32,6 +32,11 @@ func TestGet(t *testing.T) {
 		{give: `[3,4,5,6,7,8]`, when: `(slice 1)`, then: `[4,5,6,7,8]`},
 		{give: `[3,4,5,6,7,8]`, when: `(slice 0)`, then: `[3,4,5,6,7,8]`},
 		// (match)
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -kk x)`, then: ``},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -kk a)`, then: `"a"`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -kk -s ab)`, then: `"aab"`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -kk -p aa)`, then: `"aab"`},
+		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -kk -r ^aa)`, then: `"aab"`},
 		{give: `{"a":3,"b":4}`, when: `(match -k b)`, then: `4`},
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -r ^aa)`, then: `4`},
 		{give: `{"a":3,"aab":4,"aac":5,"bac":6}`, when: `(match -k -s ac)`, then: `5`},

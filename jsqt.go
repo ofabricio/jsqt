@@ -705,6 +705,19 @@ func funcArg(q *Query, j Json) Json {
 }
 
 func funcMatch(q *Query, j Json) Json {
+	// Match a key. Returns the matched key.
+	if q.MatchFlag("-kk") {
+		if q.MatchFlag("-p") {
+			return j.GetPrefixKey(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		if q.MatchFlag("-s") {
+			return j.GetSuffixKey(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		if q.MatchFlag("-r") {
+			return j.GetRegexKey(q.ParseFunOrRaw(j).TrimQuote())
+		}
+		return j.GetKey(q.ParseFunOrRaw(j).TrimQuote())
+	}
 	// Match a key. The context must be an object.
 	if q.MatchFlag("-k") {
 		if q.MatchFlag("-p") {
@@ -1626,10 +1639,32 @@ func (j Json) Get(keyOrIndex string) (r Json) {
 	return r
 }
 
+func (j Json) GetKey(key string) (r Json) {
+	j.ForEachKeyVal(func(k, v Json) bool {
+		if k.TrimQuote() == key {
+			r = k
+			return true
+		}
+		return false
+	})
+	return r
+}
+
 func (j Json) GetPrefix(prefix string) (r Json) {
 	j.ForEachKeyVal(func(k, v Json) bool {
 		if strings.HasPrefix(k.TrimQuote(), prefix) {
 			r = v
+			return true
+		}
+		return false
+	})
+	return r
+}
+
+func (j Json) GetPrefixKey(prefix string) (r Json) {
+	j.ForEachKeyVal(func(k, v Json) bool {
+		if strings.HasPrefix(k.TrimQuote(), prefix) {
+			r = k
 			return true
 		}
 		return false
@@ -1648,11 +1683,35 @@ func (j Json) GetSuffix(suffix string) (r Json) {
 	return r
 }
 
+func (j Json) GetSuffixKey(suffix string) (r Json) {
+	j.ForEachKeyVal(func(k, v Json) bool {
+		if strings.HasSuffix(k.TrimQuote(), suffix) {
+			r = k
+			return true
+		}
+		return false
+	})
+	return r
+}
+
 func (j Json) GetRegex(pattern string) (r Json) {
 	if j.IsObject() {
 		j.ForEachKeyVal(func(k, v Json) bool {
 			if ok, _ := regexp.MatchString(pattern, k.TrimQuote()); ok {
 				r = v
+				return true
+			}
+			return false
+		})
+	}
+	return r
+}
+
+func (j Json) GetRegexKey(pattern string) (r Json) {
+	if j.IsObject() {
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if ok, _ := regexp.MatchString(pattern, k.TrimQuote()); ok {
+				r = k
 				return true
 			}
 			return false

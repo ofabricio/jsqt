@@ -1086,6 +1086,7 @@ This function matches a value against a prefix, suffix or regular expression.
 (match -s pattern)
 (match -k pattern)
 (match -v key pattern)
+(match -kk pattern)
 ```
 
 The `pattern` argument can be a function or a raw value.
@@ -1096,6 +1097,8 @@ and no flag for an exact match.
 Use `-k` to match an object key by a pattern. It returns the matched key value or an empty context.
 
 Use `-v key` to match the value of a key by a pattern. It returns the current context or an empty context.
+
+Use `-kk` to match a key and return the matched key.
 
 **Example**
 
@@ -1109,6 +1112,7 @@ d := jsqt.Get(j, `(match -k first_name)`)
 e := jsqt.Get(j, `(iterate (match -r name) (val))`)
 f := jsqt.Get(j, `(keys) * (match -s name)`)
 g := jsqt.Get(j, `(values) * (obj name (this)) (match -v name -p J)`)
+h := jsqt.Get(j, `(match -kk -s name)`)
 
 fmt.Println(a) // "Jim"
 fmt.Println(b) // "July"
@@ -1117,6 +1121,7 @@ fmt.Println(d) // "Jim"
 fmt.Println(e) // {"first_name":"Jim","last_name":"May"}
 fmt.Println(f) // ["first_name","last_name"]
 fmt.Println(g) // [{"name":"Jim"},{"name":"July"}]
+fmt.Println(h) // "first_name"
 ```
 
 # Truth Table
