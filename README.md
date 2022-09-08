@@ -659,24 +659,32 @@ These functions pick or pluck fields from a JSON object.
 ```clj
 (pick key ...)
 (pick key -m map ...)
+(pick key -r newkey ...)
 (pluck key ...)
 ```
 
-The arguments are a list of object keys.
-Use `-m` to enable a map function for a key, it can be used to deep pick fields.
+The arguments are a list of object keys (raw values) or functions that return a key.
+
+Use `-m` to enable a map function for a key.
+This function receives the value of the key as context so that you can do something with it.
+It can be used to deep pick fields.
+
+Use `-r` to rename a key.
 
 **Example**
 
 ```go
-j := `{ "a": 3, "b": 4, "c": 5, "d": { "e": 6, "f": 7 } }`
+j := `{ "three": 3, "four": 4, "five": 5, "group": { "six": 6, "seven": 7 } }`
 
-a := jsqt.Get(j, `(pick a c)`)
-b := jsqt.Get(j, `(pluck a c d)`)
-c := jsqt.Get(j, `(pick a d -m (pick f))`)
+a := jsqt.Get(j, `(pick three five)`)
+b := jsqt.Get(j, `(pluck three five group)`)
+c := jsqt.Get(j, `(pick four group -m (pick seven))`)
+d := jsqt.Get(j, `(pick three -r third five)`)
 
-fmt.Println(a) // {"a":3,"c":5}
-fmt.Println(b) // {"b":4}
-fmt.Println(c) // {"a":3,"d":{"f":7}}
+fmt.Println(a) // {"three":3,"five":5}
+fmt.Println(b) // {"four":4}
+fmt.Println(c) // {"four":4,"group":{"seven":7}}
+fmt.Println(d) // {"third":3,"five":5}
 ```
 
 ## (merge)

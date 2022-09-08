@@ -1060,8 +1060,11 @@ func funcPick(q *Query, j Json) Json {
 		o.Grow(len(j.s) >> 1)
 		o.WriteByte('{')
 		for q.MoreArg() {
-			key := q.ParseRaw().TrimQuote()
+			key := q.ParseFunOrRaw(j).TrimQuote()
 			v := j.Get(key)
+			if q.MatchFlag("-r") {
+				key = q.ParseRaw().String()
+			}
 			if q.MatchFlag("-m") {
 				v = q.ParseFun(v)
 			}

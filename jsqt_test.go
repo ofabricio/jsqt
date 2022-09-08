@@ -154,6 +154,8 @@ func TestGet(t *testing.T) {
 		// (pluck)
 		{give: `{"a":3,"b":4,"c":5}`, when: `(pluck b c)`, then: `{"a":3}`},
 		// (pick)
+		{give: `{"a":3,"b":4,"c":5}`, when: `(pick b -r x -m (concat (raw "b") (this)) c)`, then: `{"x":"b4","c":5}`},
+		{give: `{"a":3,"b":4,"c":5}`, when: `(pick b -r x c)`, then: `{"x":4,"c":5}`},
 		{give: `{"a":{"b":3,"c":4,"d":{"e":3,"f":4}},"c":5}`, when: `(pick a -m (pick b d -m (pick f)))`, then: `{"a":{"b":3,"d":{"f":4}}}`},
 		{give: `{"a":{"b":3,"c":4},"b":{"d":3,"e":4},"c":5}`, when: `(pick a -m (pick c) c -m (nothing))`, then: `{"a":{"c":4}}`},
 		{give: `{"a":{"b":3,"c":4},"b":{"d":3,"e":4},"c":5}`, when: `(pick a -m (pick c) b -m (pick d))`, then: `{"a":{"c":4},"b":{"d":3}}`},
