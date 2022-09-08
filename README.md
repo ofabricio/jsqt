@@ -483,7 +483,8 @@ fmt.Println(a) // [3,5]
 
 ## (is-x)
 
-These functions test a JSON for the corresponding value and return it if true or an empty context if false.
+These functions test a context for the corresponding value and
+return the context if true or an empty context if false.
 
 ```clj
 (is-obj)
@@ -507,16 +508,20 @@ These functions test a JSON for the corresponding value and return it if true or
 
 See [Truth Table](#truth-table) for the values that some functions above match.
 
+All these functions accept an optional argument that can be a key or a function.
+
 **Example**
 
 ```go
-j := `{}`
+a := jsqt.Get(`3`, `(is-num)`)
+b := jsqt.Get(`3`, `(is-str)`)
+c := jsqt.Get(`{ "a": 3 }`, `(is-num a)`)
+d := jsqt.Get(`{ "a": 3 }`, `(is-str a)`)
 
-a := jsqt.Get(j, `(is-obj)`)
-b := jsqt.Get(j, `(is-num)`)
- 
-fmt.Println(a) // {}
+fmt.Println(a) // 3
 fmt.Println(b) //
+fmt.Println(c) // { "a": 3 }
+fmt.Println(d) //
 ```
 
 ## (bool)

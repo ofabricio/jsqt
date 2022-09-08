@@ -184,13 +184,15 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcIsTruthy(q, j)
 	case "falsy":
 		return funcIsFalsy(q, j)
+	case "exists":
+		return funcExists(q, j)
 	case "if":
 		return funcIf(q, j)
 	case "either":
 		return funcEither(q, j)
 	case "root":
 		return q.Root
-	case "this", "exists":
+	case "this":
 		return j
 	case "in":
 		return funcIN(q, j)
@@ -764,112 +766,187 @@ func funcMatch(q *Query, j Json) Json {
 }
 
 func funcIsNum(q *Query, j Json) Json {
-	if j.IsNumber() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsNumber() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsObj(q *Query, j Json) Json {
-	if j.IsObject() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsObject() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsArr(q *Query, j Json) Json {
-	if j.IsArray() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsArray() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsStr(q *Query, j Json) Json {
-	if j.IsString() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsString() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsBool(q *Query, j Json) Json {
-	if j.IsBool() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsBool() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsNull(q *Query, j Json) Json {
-	if j.IsNull() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsNull() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsEmpty(q *Query, j Json) Json {
-	if j.IsEmpty() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsEmpty() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsEmptyObj(q *Query, j Json) Json {
-	if j.IsEmptyObject() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsEmptyObject() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsEmptyArr(q *Query, j Json) Json {
-	if j.IsEmptyArray() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsEmptyArray() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsEmptyStr(q *Query, j Json) Json {
-	if j.IsEmptyString() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsEmptyString() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsTruthy(q *Query, j Json) Json {
-	if j.IsTruthy() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsTruthy() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsFalsy(q *Query, j Json) Json {
-	if j.IsFalsy() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsFalsy() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsSome(q *Query, j Json) Json {
-	if j.IsSome() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsSome() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsVoid(q *Query, j Json) Json {
-	if j.IsVoid() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsVoid() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsNully(q *Query, j Json) Json {
-	if j.IsNully() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsNully() {
 		return j
 	}
 	return JSON("")
 }
 
 func funcIsBlank(q *Query, j Json) Json {
-	if j.IsBlank() {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.IsBlank() {
+		return j
+	}
+	return JSON("")
+}
+
+func funcExists(q *Query, j Json) Json {
+	v := j
+	if q.MoreArg() {
+		v = q.ParseFunOrKey(v)
+	}
+	if v.Exists() {
 		return j
 	}
 	return JSON("")
@@ -965,6 +1042,9 @@ func funcNot(q *Query, j Json) Json {
 }
 
 func funcBool(q *Query, j Json) Json {
+	if q.MoreArg() {
+		j = q.ParseFunOrKey(j)
+	}
 	if j.Exists() {
 		return JSON("true")
 	}

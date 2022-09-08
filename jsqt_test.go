@@ -218,8 +218,10 @@ func TestGet(t *testing.T) {
 		{give: `"3"`, when: `(jsonify)`, then: `3`},
 		{give: `"{}"`, when: `(jsonify)`, then: `{}`},
 		// (bool)
-		{give: `3`, when: `(get (is-num) (bool))`, then: `true`},
-		{give: `{}`, when: `(get (is-num) (bool))`, then: `false`},
+		{give: `{"a":3}`, when: `(bool b)`, then: `false`},
+		{give: `{"a":3}`, when: `(bool a)`, then: `true`},
+		{give: `3`, when: `(is-num) (bool)`, then: `true`},
+		{give: `{}`, when: `(is-num) (bool)`, then: `false`},
 		// (or) (and) (not)
 		{give: `[3,"",4,"5"]`, when: `(collect (not (is-str)))`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
@@ -244,30 +246,42 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},              // Then.
 		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (this))`, then: `{"b":3}`},                // Else.
 		// (is-void)
+		{give: `{"a":[]}`, when: `(is-void a)`, then: `{"a":[]}`},
+		{give: `{"a":[3]}`, when: `(is-void a)`, then: ``},
 		{give: `{}`, when: `(is-void)`, then: `{}`},
 		{give: `[]`, when: `(is-void)`, then: `[]`},
 		{give: `""`, when: `(is-void)`, then: ``},
 		// (is-blank)
+		{give: `{"a":null}`, when: `(is-blank a)`, then: `{"a":null}`},
+		{give: `{"a":3}`, when: `(is-blank a)`, then: ``},
 		{give: `{}`, when: `(is-blank)`, then: `{}`},
 		{give: `[]`, when: `(is-blank)`, then: `[]`},
 		{give: `null`, when: `(is-blank)`, then: `null`},
 		{give: `""`, when: `(is-blank)`, then: ``},
 		// (is-nully)
+		{give: `{"a":""}`, when: `(is-nully a)`, then: `{"a":""}`},
+		{give: `{"a":3}`, when: `(is-nully a)`, then: ``},
 		{give: `{}`, when: `(is-nully)`, then: `{}`},
 		{give: `[]`, when: `(is-nully)`, then: `[]`},
 		{give: `null`, when: `(is-nully)`, then: `null`},
 		{give: `""`, when: `(is-nully)`, then: `""`},
 		{give: `3`, when: `(is-nully)`, then: ``},
 		// (is-some)
+		{give: `{"a":0}`, when: `(is-some a)`, then: `{"a":0}`},
+		{give: `{"a":null}`, when: `(is-some a)`, then: ``},
 		{give: `3`, when: `(is-some)`, then: `3`},
 		{give: `""`, when: `(is-some)`, then: `""`},
 		{give: `null`, when: `(is-some)`, then: ``},
 		// (nothing) - Undocumented.
 		{give: `3`, when: `(nothing)`, then: ``},
 		// (exists)
+		{give: `{"a":3}`, when: `(exists a)`, then: `{"a":3}`},
+		{give: `{"a":3}`, when: `(exists b)`, then: ``},
 		{give: `3`, when: `(exists)`, then: `3`},
 		{give: ``, when: `(exists)`, then: ``},
 		// (truthy)
+		{give: `{"a":1}`, when: `(truthy a)`, then: `{"a":1}`},
+		{give: `{"a":0}`, when: `(truthy a)`, then: ``},
 		{give: `{}`, when: `(truthy)`, then: ``},
 		{give: `[]`, when: `(truthy)`, then: ``},
 		{give: `0`, when: `(truthy)`, then: ``},
@@ -278,6 +292,8 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3}`, when: `(truthy)`, then: `{"a":3}`},
 		{give: `true`, when: `(truthy)`, then: `true`},
 		// (falsy)
+		{give: `{"a":0}`, when: `(falsy a)`, then: `{"a":0}`},
+		{give: `{"a":1}`, when: `(falsy a)`, then: ``},
 		{give: `{}`, when: `(falsy)`, then: `{}`},
 		{give: `[]`, when: `(falsy)`, then: `[]`},
 		{give: `0`, when: `(falsy)`, then: `0`},
@@ -287,38 +303,59 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(falsy)`, then: ``},
 		{give: `null`, when: `(falsy)`, then: `null`},
 		// (is-empty-obj)
+		{give: `{"a":{}}`, when: `(is-empty-obj a)`, then: `{"a":{}}`},
+		{give: `{"a":{"b":3}}`, when: `(is-empty-obj a)`, then: ``},
 		{give: `{}`, when: `(is-empty-obj)`, then: `{}`},
 		{give: `{"a":3}`, when: `(is-empty-obj)`, then: ``},
 		{give: `[]`, when: `(is-empty-obj)`, then: ``},
 		// (is-empty-arr)
+		{give: `{"a":[]}`, when: `(is-empty-arr a)`, then: `{"a":[]}`},
+		{give: `{"a":[3]}`, when: `(is-empty-arr a)`, then: ``},
 		{give: `{}`, when: `(is-empty-arr)`, then: ``},
 		{give: `[0]`, when: `(is-empty-arr)`, then: ``},
 		{give: `[]`, when: `(is-empty-arr)`, then: `[]`},
 		// (is-empty-str)
+		{give: `{"a":""}`, when: `(is-empty-str a)`, then: `{"a":""}`},
+		{give: `{"a":"3"}`, when: `(is-empty-str a)`, then: ``},
 		{give: `3`, when: `(is-empty-str)`, then: ``},
 		{give: `""`, when: `(is-empty-str)`, then: `""`},
 		// (is-empty)
+		{give: `{"a":""}`, when: `(is-empty a)`, then: `{"a":""}`},
+		{give: `{"a":"3"}`, when: `(is-empty a)`, then: ``},
 		{give: `3`, when: `(is-empty)`, then: ``},
 		{give: `{}`, when: `(is-empty)`, then: `{}`},
 		{give: `[]`, when: `(is-empty)`, then: `[]`},
 		{give: `""`, when: `(is-empty)`, then: `""`},
 		// (is-null)
+		{give: `{"a":null}`, when: `(is-null a)`, then: `{"a":null}`},
+		{give: `{"a":3}`, when: `(is-null a)`, then: ``},
 		{give: `3`, when: `(is-null)`, then: ``},
 		{give: `null`, when: `(is-null)`, then: `null`},
 		// (is-bool)
+		{give: `{"a":false}`, when: `(is-bool a)`, then: `{"a":false}`},
+		{give: `{"a":true}`, when: `(is-bool a)`, then: `{"a":true}`},
+		{give: `{"a":3}`, when: `(is-bool a)`, then: ``},
 		{give: `3`, when: `(is-bool)`, then: ``},
 		{give: `true`, when: `(is-bool)`, then: `true`},
 		{give: `false`, when: `(is-bool)`, then: `false`},
 		// (is-str)
+		{give: `{"a":"3"}`, when: `(is-str a)`, then: `{"a":"3"}`},
+		{give: `{"a":3}`, when: `(is-str a)`, then: ``},
 		{give: `3`, when: `(is-str)`, then: ``},
 		{give: `"3"`, when: `(is-str)`, then: `"3"`},
 		// (is-arr)
+		{give: `{"a":[3]}`, when: `(is-arr a)`, then: `{"a":[3]}`},
+		{give: `{"a":3}`, when: `(is-arr a)`, then: ``},
 		{give: `3`, when: `(is-arr)`, then: ``},
 		{give: `[]`, when: `(is-arr)`, then: `[]`},
 		// (is-obj)
+		{give: `{"a":{"b":3}}`, when: `(is-obj a)`, then: `{"a":{"b":3}}`},
+		{give: `{"a":3}`, when: `(is-obj a)`, then: ``},
 		{give: `3`, when: `(is-obj)`, then: ``},
 		{give: `{}`, when: `(is-obj)`, then: `{}`},
 		// (is-num)
+		{give: `{"a":3}`, when: `(is-num a)`, then: `{"a":3}`},
+		{give: `{"a":"3"}`, when: `(is-num a)`, then: ``},
 		{give: `"3"`, when: `(is-num)`, then: ``},
 		{give: `3`, when: `(is-num)`, then: `3`},
 		// (ugly) (pretty)
