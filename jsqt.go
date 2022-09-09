@@ -424,18 +424,37 @@ func funcArr(q *Query, j Json) Json {
 
 func funcObj(q *Query, j Json) Json {
 	var o strings.Builder
-	o.Grow(64)
+	o.Grow(len(j.s) + 64)
 	o.WriteString("{")
-	for q.MoreArg() {
-		if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); k.Exists() && v.Exists() {
-			if o.Len() > 1 {
-				o.WriteString(",")
+	writeKeyVals := func(j Json) {
+		for q.MoreArg() {
+			if k, v := q.ParseFunOrRaw(j), q.ParseFunOrKey(j); k.Exists() && v.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteByte('"')
+				o.WriteString(k.TrimQuote())
+				o.WriteString(`":`)
+				o.WriteString(v.String())
 			}
-			o.WriteByte('"')
-			o.WriteString(k.TrimQuote())
-			o.WriteString(`":`)
-			o.WriteString(v.String())
 		}
+	}
+	if q.MatchFlag("-each") {
+		m := q.s.Mark()
+		j.ForEach(func(i, v Json) bool {
+			q.k, q.v = i, v
+			q.s.Back(m)
+			writeKeyVals(v)
+			return false
+		})
+		j.ForEachKeyVal(func(k, v Json) bool {
+			q.k, q.v = k, v
+			q.s.Back(m)
+			writeKeyVals(j)
+			return false
+		})
+	} else {
+		writeKeyVals(j)
 	}
 	o.WriteString("}")
 	return JSON(o.String())

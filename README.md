@@ -148,11 +148,12 @@ you can replace it by `(get ... (collect ...) ...)` if you think it reads better
 This function creates a JSON object.
 
 ```clj
-(obj field value ...)
+(obj key val ...)
+(obj -each key val ...)
 ```
 
-The arguments are pairs of JSON keys and values. The `field` can be a function or a raw value.
-The `value` can be a function or a key.
+The arguments are pairs of JSON keys and values.
+`key` can be a function or a raw value and `val` can be a function or a key.
 
 **Example**
 
@@ -164,6 +165,31 @@ b := jsqt.Get(j, `(get loc (obj lat 0 lng 1))`) // Same as above.
 
 fmt.Println(a) // {"lat":63.465,"lng":-20.178}
 fmt.Println(b) // {"lat":63.465,"lng":-20.178}
+```
+
+Use `-each` to iterate over an array or object and create a new object out of it.
+When `-each` is used, two other functions become available:
+[(key)](#key-val) that returns an array index or object key; and
+[(val)](#key-val) that returns an array item or key value.
+
+**Example**
+
+```go
+j := `[{ "id": 6, "name": "June" }, { "id": 7, "name": "July" }]`
+
+a := jsqt.Get(j, `(obj -each (get id) (val))`)
+
+fmt.Println(a) // {"6":{ "id": 6, "name": "June" },"7":{ "id": 7, "name": "July" }}
+```
+
+**Example**
+
+```go
+j := `{ "id": 4, "name": "April" }`
+
+a := jsqt.Get(j, `(obj -each (concat (raw "key_") (key)) (val))`)
+
+fmt.Println(a) // {"key_id":4,"key_name":"April"}
 ```
 
 ## (arr)
@@ -1051,6 +1077,8 @@ These functions are available only inside a few functions.
 Inside a [(collect)](#collect), `(key)` is the array index and `(val)` is the array item value.
 
 Inside a [(iterate)](#iterate), `(key)` is the field key or an array index and `(val)` is the key value or an array value.
+
+Inside an [(obj -each)](#obj), `(key)` is an object key or an array index and `(val)` is a key value or an array item.
 
 **Example**
 
