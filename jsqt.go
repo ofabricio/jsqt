@@ -1124,16 +1124,20 @@ func funcReplace(q *Query, j Json) Json {
 }
 
 func funcJoin(q *Query, j Json) Json {
-	if j.IsArray() {
-		sep := q.ParseRaw().Str()
-		var o []string
-		j.ForEach(func(i, v Json) bool {
-			o = append(o, v.Str())
-			return false
-		})
-		return JSON(strings.Join(o, sep)).Stringify()
+	sep := q.ParseRaw().Str()
+	if q.MoreArg() {
+		j = q.ParseFunOrKey(j)
 	}
-	return j
+	var o strings.Builder
+	o.Grow(len(j.s))
+	j.ForEach(func(i, v Json) bool {
+		if o.Len() > 0 {
+			o.WriteString(sep)
+		}
+		o.WriteString(v.Str())
+		return false
+	})
+	return JSON(o.String()).Stringify()
 }
 
 func funcConcat(q *Query, j Json) Json {

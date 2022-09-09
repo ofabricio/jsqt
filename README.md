@@ -832,16 +832,19 @@ This function joins an array of strings given a separator.
 
 ```clj
 (join sep)
+(join sep arg)
 ```
 
-The `sep` argument must be a string.
+`sep` argument must be a string; `arg` is optional and can be a key or function.
 
 **Example**
 
 ```go
 a := jsqt.Get(`["a","b","c"]`, `(join "_")`)
+b := jsqt.Get(`{"x":["a","b","c"]}`, `(join "_" x)`)
 
 fmt.Println(a) // "a_b_c"
+fmt.Println(b) // "a_b_c"
 ```
 
 ## (concat)

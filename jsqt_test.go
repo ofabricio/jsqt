@@ -145,7 +145,6 @@ func TestGet(t *testing.T) {
 		{give: `[4,5]`, when: `(iterate (this) (if (is-num) (nothing)))`, then: `[]`},
 		// Test empty context input for many functions.
 		{give: `["3 4","5 6","7 8"]`, when: `(collect (!= (this) "5 6") (replace " " "_"))`, then: `["3_4","7_8"]`},
-		{give: `[["3","4"],["5","6"],["7","8"]]`, when: `(collect (!= 1 "6") (join "_"))`, then: `["3_4","7_8"]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (reverse))`, then: `[[4,3],[8,7]]`},
 		{give: `[[3,4],[5,6],[7,8]]`, when: `(collect (!= 1 6) (sort desc))`, then: `[[4,3],[8,7]]`},
 		// (def)
@@ -172,6 +171,7 @@ func TestGet(t *testing.T) {
 		// (this)
 		{give: `[3,4]`, when: `(collect (> (this) 3))`, then: `[4]`},
 		// (join)
+		{give: `{"x":["a","b","c"]}`, when: `(join "_" x)`, then: `"a_b_c"`},
 		{give: `["a","b","c"]`, when: `(join "_")`, then: `"a_b_c"`},
 		// (reverse)
 		{give: `[{"a":3},{"b":4}]`, when: `(reverse)`, then: `[{"b":4},{"a":3}]`},
