@@ -68,8 +68,12 @@ The argument list can be keys, functions or the `*` symbol.
 
 The arguments work like a pipeline: the output of the first one is the input of the next one and so on.
 
-The `*` symbol is to iterate over array; it makes `(get)` emit each array item to the next argument
-and collect the results into an array.
+The `*` symbol is to iterate over arrays or objects;
+when the context is an array it makes `(get)` emit each array item to the next argument and collect the results into an array;
+when the context is an object it makes `(get)` emit each key value to the next argument and collect the results into an array;
+When `*` is used, two other functions become available:
+[(key)](#key-val) that returns the current array index or object key and
+[(val)](#key-val) that returns the current array item or object value.
 
 This is one of the most important functions as its pipeline behavior is what allows passing
 a context to other functions. Because of that the root function is also a get function.
@@ -107,18 +111,14 @@ fmt.Println(h) // ["Apple","Chips","Beers","Wine"]
 fmt.Println(i) // ["Beers"]
 ```
 
-When `*` is used, two other functions become available:
-[(key)](#key-val) that returns the current index and
-[(val)](#key-val) that returns the current value.
-
 **Example**
 
 ```go
-j := `[ 3, 4 ]`
-
-a := jsqt.Get(j, `(get * (obj (key) (val)))`)
+a := jsqt.Get(`[ 3, 4 ]`, `(get * (obj (key) (val)))`)
+b := jsqt.Get(`{ "a": 3, "b": 4 }`, `(get * (obj (key) (val)))`)
 
 fmt.Println(a) // [{"0":3},{"1":4}]
+fmt.Println(b) // [{"a":3},{"b":4}]
 ```
 
 It is possible to nest `*` and still access both indexes with the help of the [(save)](#save-load) function.
