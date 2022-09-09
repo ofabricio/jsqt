@@ -1108,11 +1108,9 @@ These functions are available only inside a few functions.
 (val)
 ```
 
-Inside a [(collect)](#collect), `(key)` is the array index and `(val)` is the array item value.
+In functions that iterate over arrays `(key)` is the array index and `(val)` is the array item.
 
-Inside a [(iterate)](#iterate), `(key)` is the field key or an array index and `(val)` is the key value or an array value.
-
-Inside an [(obj -each)](#obj), `(key)` is an object key or an array index and `(val)` is a key value or an array item.
+In functions that deal with objects `(key)` is the object key and `(val)` is the key value.
 
 **Example**
 
