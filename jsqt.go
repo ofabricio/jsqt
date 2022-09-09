@@ -142,6 +142,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcFlatten(q, j)
 	case "slice":
 		return funcSlice(q, j)
+	case "group":
+		return funcGroup(q, j)
 	case "upsert":
 		return funcUpsert(q, j)
 	case "size":
@@ -580,6 +582,39 @@ func funcSlice(q *Query, j Json) Json {
 		return JSON(o.String())
 	}
 	return j
+}
+
+func funcGroup(q *Query, j Json) Json {
+	group := make(map[Json][]Json, 16)
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		if k, v := q.ParseFunOrKey(item), q.ParseFunOrKey(item); k.Exists() && v.Exists() {
+			group[k] = append(group[k], v)
+		}
+		return false
+	})
+	var o strings.Builder
+	o.Grow(len(j.s))
+	o.WriteString("{")
+	for k, arr := range group {
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		o.WriteString(`"`)
+		o.WriteString(k.TrimQuote())
+		o.WriteString(`":[`)
+		for i, v := range arr {
+			if i > 0 {
+				o.WriteString(",")
+			}
+			o.WriteString(v.String())
+		}
+		o.WriteString("]")
+	}
+	o.WriteString("}")
+	return JSON(o.String())
 }
 
 func funcUpsert(q *Query, j Json) Json {

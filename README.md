@@ -443,6 +443,40 @@ a := jsqt.Get(`[3,7,2,4]`, `(reverse)`)
 fmt.Println(a) // [4,2,7,3]
 ```
 
+## (group)
+
+This function groups values.
+
+```clj
+(group key val)
+```
+
+`key` can be a function or a key and it is the value that becomes the group key.
+
+`val` can be a function or a key and it is the value that is added to a group.
+
+[(key)](#key-val) and [(val)](#key-val) can be used to access the array index and value.
+
+**Example**
+
+```go 
+j := `[{ "g": "dog", "v": 15 }, { "g": "dog", "v": 12 }, { "g": "cat", "v": 10 }]`
+
+a := jsqt.Get(j, `(group g (pluck g))`)
+
+fmt.Println(a) // {"dog":[{"v":15},{"v":12}],"cat":[{"v":10}]}
+```
+
+**Example**
+
+```go
+j := `[3,4,3,4,5]`
+
+a := jsqt.Get(j, `(group (val) (key))`)
+
+fmt.Println(a) // {"3":[0,2],"4":[1,3],"5":[4]}
+```
+
 ## (root)
 
 This function returns the root JSON document.
