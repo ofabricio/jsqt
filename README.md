@@ -851,6 +851,27 @@ fmt.Println(a) // "a_b_c"
 fmt.Println(b) // "a_b_c"
 ```
 
+## (split)
+
+This function splits a string given a separator.
+
+```clj
+(split sep)
+(split sep arg)
+```
+
+`sep` argument must be a string; `arg` is optional and can be a key or function.
+
+**Example**
+
+```go
+a := jsqt.Get(`"one,two"`, `(split ",")`)
+b := jsqt.Get(`{ "a": "one,two" }`, `(split "," a)`)
+
+fmt.Println(a) // ["one","two"]
+fmt.Println(b) // ["one","two"]
+```
+
 ## (concat)
 
 This function concats values into a string.

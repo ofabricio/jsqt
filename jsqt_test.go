@@ -171,6 +171,11 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(pick)`, then: `3`},
 		// (this)
 		{give: `[3,4]`, when: `(collect (> (this) 3))`, then: `[4]`},
+		// (split)
+		{give: `{"a":"one,two"}`, when: `(split ";" a)`, then: `["one,two"]`},
+		{give: `"one,two,three"`, when: `(split ";")`, then: `["one,two,three"]`},
+		{give: `"one,\"two three\""`, when: `(split ",")`, then: `["one","\"two three\""]`},
+		{give: `"one,two,three"`, when: `(split ",")`, then: `["one","two","three"]`},
 		// (join)
 		{give: `{"x":["a","b","c"]}`, when: `(join "_" x)`, then: `"a_b_c"`},
 		{give: `["a","b","c"]`, when: `(join "_")`, then: `"a_b_c"`},
