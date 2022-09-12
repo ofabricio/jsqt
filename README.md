@@ -26,8 +26,8 @@ Note that it only works on a valid JSON.
 
 ### Notes
 
-- ⚠ In the current state of development many functions are not consolidated yet.
-  Watch for updates if you are using them, because they can change anytime as there is no official release yet.
+- ⚠ Many functions are not consolidated yet. Watch for updates if you are using them,
+  because they can change anytime as there is no official release yet.
 - Don't open PR.
 
 # Install
@@ -39,7 +39,6 @@ go get github.com/ofabricio/jsqt
 # Query functions
 
 Query functions have a name and arguments and live inside `()`.
-The function name is always after a `(`.
 For example, in `(get a b)` function, `get` is the query function name and `a` and `b` are its arguments.
 Make sure to write a valid query since no validation is done during the parsing.
 
@@ -47,8 +46,7 @@ There are three types of function arguments:
 
 - **Function** - These are functions, for example: `(get name)`, `(root)`.
   When the parser finds a function it calls it and uses its result as argument.
-  A function always receives the current JSON context as input;
-  its arguments also receive the current context.
+  A function and its arguments receive the current JSON context as input.
 - **Key** - These are object keys or array indexes, for example: `name`, `"full name"`, `0`.
   When the parser finds a key it gets the value of the key and uses it as argument.
 - **Raw** - These are anything you type, for example: `name`, `3`, `true`.
@@ -246,8 +244,7 @@ The `arg` is a list of object keys or array indexes.
 
 The `val` argument (the last item of the list) is the value to be set and can be a function or a raw value.
 
-By default `(set)` does not insert a field it does not find.
-If you want it to insert add the `-i` flag.
+By default `(set)` does not insert a field it does not find. Use `-i` flag to insert.
 
 The `*` symbol is also available to iterate on each array item.
 
@@ -278,22 +275,22 @@ fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"
 This function creates a new object field or updates an existing one.
 
 ```clj
-(upsert field value ...)
+(upsert key val ...)
 ```
 
 The arguments are pairs of JSON keys and values.
-Both `field` and `value` can be a function or a raw value.
+Both `key` and `val` can be a function or a raw value.
 
 **Example**
 
 ```go
-j := `{ "message": "Hello" }`
+j := `{ "msg": "Hello", "author": "May" }`
 
-a := jsqt.Get(j, `(upsert message "World")`)
-b := jsqt.Get(j, `(upsert id 123)`)
+a := jsqt.Get(j, `(upsert msg "World")`)
+b := jsqt.Get(j, `(upsert id 3 when "1m ago" msg "World")`)
 
-fmt.Println(a) // {"message":"World"}
-fmt.Println(b) // {"id":123,"message":"Hello"}
+fmt.Println(a) // {"msg":"World","author":"May"}
+fmt.Println(b) // {"id":3,"when":"1m ago","msg":"World","author":"May"}
 ```
 
 ## (flatten)
@@ -590,16 +587,23 @@ This function returns `true` if it gets a value or `false` if it gets an empty c
 
 ```clj
 (bool)
+(bool arg)
 ```
+
+`arg` is optional and can be a function or a key.
 
 **Example**
 
 ```go
-a := jsqt.Get(`[]`, `(get (is-arr) (bool))`)
-b := jsqt.Get(`{}`, `(get (is-arr) (bool))`)
+a := jsqt.Get(`[]`, `(is-arr) (bool)`)
+b := jsqt.Get(`{}`, `(is-arr) (bool)`)
+c := jsqt.Get(`{ "a": 3 }`, `(bool (is-arr a))`)
+d := jsqt.Get(`{ "a": 3 }`, `(bool a)`)
 
 fmt.Println(a) // true
 fmt.Println(b) // false
+fmt.Println(c) // false
+fmt.Println(d) // true
 ```
 
 ## (in)
@@ -667,13 +671,13 @@ Use `-n` to negate a condition.
 **Example**
 
 ```go
-j := `[ 3, {}, 4, [], 5, "", 6, true, 7 ]`
+j := `[ 3, {}, 4, [], 5 ]`
 
 a := jsqt.Get(j, `(collect (if (is-obj) (raw "obj") (this)))`)
 b := jsqt.Get(j, `(collect (if -n (is-obj) (raw "nop")))`)
 
-fmt.Println(a) // [3,"obj",4,[],5,"",6,true,7]
-fmt.Println(b) // ["nop",{},"nop","nop","nop","nop","nop","nop","nop"]
+fmt.Println(a) // [3,"obj",4,[],5]
+fmt.Println(b) // ["nop",{},"nop","nop","nop"]
 ```
 
 ## (either)
@@ -876,7 +880,7 @@ This function sorts a JSON array or object keys.
 (sort desc key)
 ```
 
-The `key` argument is for sorting an array of objects by a key.
+`key` is for sorting an array of objects by a key.
 
 Use `desc` to sort descending.
 
@@ -966,8 +970,8 @@ fmt.Println(b)
 
 ## (iterate)
 
-These functions iterate over keys and values of a valid JSON
-and apply a map function to transform them.
+This function iterates over keys and values of a valid JSON
+and applies a map function to transform them.
 
 ```clj
 (iterate key val)
