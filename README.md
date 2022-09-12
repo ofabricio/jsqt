@@ -440,6 +440,35 @@ a := jsqt.Get(`[3,7,2,4]`, `(reverse)`)
 fmt.Println(a) // [4,2,7,3]
 ```
 
+## (at)
+
+This function returns an array item at an index.
+
+```clj
+(at index)
+```
+
+`index` can be a function or a raw value.
+
+Note that there is no difference between `(at 0)` and `(get 0)`,
+but the same is not true for `(at (key))` and `(get (key))`:
+`at` will return the array item at the index returned by the function,
+whereas `get` will return the value returned by `(key)`.
+
+**Example**
+
+```go
+j := `[ "ant", "bear" ]`
+
+a := jsqt.Get(j, `(at 1)`)
+b := jsqt.Get(j, `(at  (raw 1))`)
+c := jsqt.Get(j, `(get (raw 1))`) // Note the difference.
+
+fmt.Println(a) // "bear"
+fmt.Println(b) // "bear"
+fmt.Println(c) // 1
+```
+
 ## (group)
 
 This function groups values.

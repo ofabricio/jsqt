@@ -143,6 +143,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcFlatten(q, j)
 	case "slice":
 		return funcSlice(q, j)
+	case "at":
+		return funcAt(q, j)
 	case "group":
 		return funcGroup(q, j)
 	case "upsert":
@@ -581,6 +583,20 @@ func funcSlice(q *Query, j Json) Json {
 		})
 		o.WriteString("]")
 		return JSON(o.String())
+	}
+	return j
+}
+
+func funcAt(q *Query, j Json) Json {
+	if j.IsArray() {
+		at := q.ParseFunOrRaw(j)
+		j.ForEach(func(i, v Json) bool {
+			if i == at {
+				j = v
+				return true
+			}
+			return false
+		})
 	}
 	return j
 }
