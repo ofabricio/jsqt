@@ -32,6 +32,7 @@ type Query struct {
 	Root Json
 	k, v Json
 	save Json
+	savs map[string]Json
 	args []any
 	defs map[string]Scanner
 }
@@ -1261,7 +1262,21 @@ func funcPluck(q *Query, j Json) Json {
 }
 
 func funcSave(q *Query, j Json) Json {
-	if q.MoreArg() {
+	if q.MatchFlag("-k") {
+		if q.savs == nil {
+			q.savs = make(map[string]Json, 4)
+		}
+		for q.MoreArg() {
+			k := q.ParseRaw().TrimQuote()
+			var v Json
+			if q.MatchFlag("-v") {
+				v = q.ParseFunOrKey(j)
+			} else {
+				v = j.Get(k)
+			}
+			q.savs[k] = v
+		}
+	} else if q.MoreArg() {
 		q.save = q.ParseFunOrKey(j)
 	} else {
 		q.save = j
@@ -1270,6 +1285,10 @@ func funcSave(q *Query, j Json) Json {
 }
 
 func funcLoad(q *Query, j Json) Json {
+	if q.MoreArg() {
+		id := q.ParseRaw().String()
+		return q.savs[id]
+	}
 	return q.save
 }
 

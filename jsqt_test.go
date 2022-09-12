@@ -127,6 +127,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3}`, when: `(iterate -v (val))`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(iterate -kv (concat (key) (val)))`, then: `{"aa":"33"}`},
 		// (save) (load)
+		{give: `{"a":3,"b":4}`, when: `(save -k a b c -v (raw 7)) (obj x (load a) y (load b) z (load c)`, then: `{"x":3,"y":4,"z":7}`},
 		{give: `{"a":3}`, when: `(save (get a)) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `(save a) (arr (load))`, then: `[3]`},
 		{give: `{"a":3}`, when: `a (save) (arr (load))`, then: `[3]`},

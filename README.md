@@ -1081,25 +1081,39 @@ These functions save and load a context.
 
 ```clj
 (save)
-(save arg)
+(save val)
+(save -k key ...)
+(save -k key -v val ...)
 
 (load)
+(load key)
 ```
 
-The `arg` argument is optional and can be a function or a key.
+`(save)` saves the value it receives;
+`(save val)` saves the value from `val` (can be a key or a function); these two forms of save make no allocation.
+Note that each call to save overrides the previous value.
+Use `(load)` to load a value saved by these two methods.
+
+`(save -k key ...)` saves the value of a key under an id of the same name;
+Use `-v val` (can be a key or a function) to save a value under an id.
+Use `(load key)` to load a value saved with `-k`.
+
+Save function returns the context it receives.
 
 **Example**
 
 ```go
-j := `{ "a": 3 }`
+j := `{ "a": 3, "b": 4 }`
 
 a := jsqt.Get(j, `a (save) (arr (load))`)
-c := jsqt.Get(j, `(save a) (arr (load))`)
-b := jsqt.Get(j, `(save (get a)) (arr (load))`)
+b := jsqt.Get(j, `(save a) (arr (load))`)
+c := jsqt.Get(j, `(save (get a)) (arr (load))`)
+d := jsqt.Get(j, `(save -k a b x -v (raw 7)) (arr (load a) (load b) (load x))`)
 
 fmt.Println(a) // [3]
 fmt.Println(b) // [3]
 fmt.Println(c) // [3]
+fmt.Println(d) // [3,4,7]
 ```
 
 ## (key) (val)
