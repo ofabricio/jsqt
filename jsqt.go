@@ -454,7 +454,7 @@ func funcObj(q *Query, j Json) Json {
 		j.ForEachKeyVal(func(k, v Json) bool {
 			q.k, q.v = k, v
 			q.s.Back(m)
-			writeKeyVals(j)
+			writeKeyVals(v)
 			return false
 		})
 	} else {

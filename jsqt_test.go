@@ -464,6 +464,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
 		{give: ``, when: `(arr)`, then: `[]`},
 		// (obj)
+		{give: `{"a":3,"b":4}`, when: `(obj -each (concat (raw "key_") (key)) (this))`, then: `{"key_a":3,"key_b":4}`},
 		{give: `{"a":3,"b":4}`, when: `(obj -each (concat (raw "key_") (key)) (val))`, then: `{"key_a":3,"key_b":4}`},
 		{give: `[{"a":3,"b":30},{"a":4,"b":40}]`, when: `(obj -each (get a) (val))`, then: `{"3":{"a":3,"b":30},"4":{"a":4,"b":40}}`},
 		{give: `{"a":3}`, when: `(obj (raw 4) a)`, then: `{"4":3}`},
