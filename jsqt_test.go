@@ -160,7 +160,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(upsert b 5)`, then: `3`},
 		{give: `{"a":3}`, when: `(upsert (nothing) a)`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(upsert x (nothing))`, then: `{"a":3}`},
-		{give: `{"a":3,"b":4}`, when: `(upsert x 5 y (get a))`, then: `{"x":5,"y":3,"a":3,"b":4}`},
+		{give: `{"a":3,"b":4,"c":5}`, when: `(upsert x 5 y (get a) b 7 a (nothing))`, then: `{"x":5,"y":3,"b":7,"c":5}`},
 		{give: `{"a":3,"b":4}`, when: `(upsert b 5)`, then: `{"b":5,"a":3}`},
 		// (pluck)
 		{give: `{"a":3,"b":4,"c":5}`, when: `(pluck b c)`, then: `{"a":3}`},

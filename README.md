@@ -272,7 +272,7 @@ fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"
 
 ## (upsert)
 
-This function creates a new object field or updates an existing one.
+This function creates, updates or removes object fields.
 
 ```clj
 (upsert key val ...)
@@ -280,17 +280,16 @@ This function creates a new object field or updates an existing one.
 
 The arguments are pairs of JSON keys and values.
 Both `key` and `val` can be a function or a raw value.
+When `val` is an empty context the key is removed.
 
 **Example**
 
 ```go
-j := `{ "msg": "Hello", "author": "May" }`
+j := `{ "msg": "Hello", "author": "May", "deleted": false }`
 
-a := jsqt.Get(j, `(upsert msg "World")`)
-b := jsqt.Get(j, `(upsert id 3 when "1m ago" msg "World")`)
+a := jsqt.Get(j, `(upsert id 3 msg "World" deleted (nothing))`)
 
-fmt.Println(a) // {"msg":"World","author":"May"}
-fmt.Println(b) // {"id":3,"when":"1m ago","msg":"World","author":"May"}
+fmt.Println(a) // {"id":3,"msg":"World","author":"May"}
 ```
 
 ## (flatten)

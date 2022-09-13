@@ -636,20 +636,22 @@ func funcGroup(q *Query, j Json) Json {
 
 func funcUpsert(q *Query, j Json) Json {
 	if j.IsObject() {
-		done := make(map[string]bool, 1)
+		done := make(map[string]bool)
 		var o strings.Builder
 		o.Grow(len(j.s))
 		o.WriteString("{")
 		for q.MoreArg() {
-			if k, v := q.ParseFunOrRaw(j), q.ParseFunOrRaw(j); k.Exists() && v.Exists() {
+			if k, v := q.ParseFunOrRaw(j), q.ParseFunOrRaw(j); k.Exists() {
 				key := k.TrimQuote()
-				if o.Len() > 1 {
-					o.WriteString(",")
+				if v.Exists() {
+					if o.Len() > 1 {
+						o.WriteString(",")
+					}
+					o.WriteByte('"')
+					o.WriteString(key)
+					o.WriteString(`":`)
+					o.WriteString(v.String())
 				}
-				o.WriteByte('"')
-				o.WriteString(key)
-				o.WriteString(`":`)
-				o.WriteString(v.String())
 				done[key] = true
 			}
 		}
