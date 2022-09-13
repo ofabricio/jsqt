@@ -299,12 +299,15 @@ This function flattens a JSON array or object.
 ```clj
 (flatten)
 (flatten depth)
+(flatten -k key ...)
 ```
 
 `(flatten)` just trims the `[]` out of a value. In some contexts this avoids allocations. Use with care.
 
 `(flatten depth)` applies a proper flatten.
 The `depth` argument is the depth level to flatten. Use `0` for a deep flatten.
+
+`(flatten -k key ...)` flattens only the given keys.
 
 **Example**
 
@@ -314,12 +317,14 @@ b := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 1)`)
 c := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 2)`)
 d := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 0)`)
 e := jsqt.Get(`{"a":3,"b":{"c":4},"d":{"e":5}}`, `(flatten)`)
+f := jsqt.Get(`{"a":3,"b":{"c":4},"d":{"e":5}}`, `(flatten -k b)`)
 
 fmt.Println(a) // [3,4,5]
 fmt.Println(b) // [3,4,[5]]
 fmt.Println(c) // [3,4,5]
 fmt.Println(d) // [3,4,5]
 fmt.Println(e) // {"a":3,"c":4,"e":5}
+fmt.Println(f) // {"a":3,"c":4,"e":{"e":5}}
 ```
 
 ## (size)

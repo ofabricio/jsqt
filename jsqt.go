@@ -547,6 +547,34 @@ func funcLast(q *Query, j Json) Json {
 }
 
 func funcFlatten(q *Query, j Json) Json {
+	if q.MatchFlag("-k") {
+		var o strings.Builder
+		o.WriteString("{")
+		m := q.s.Mark()
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			found := false
+			q.s.Back(m)
+			for q.MoreArg() {
+				if q.ParseRaw().TrimQuote() == k.TrimQuote() {
+					found = true
+					break
+				}
+			}
+			if vv := v.String(); found {
+				o.WriteString(vv[1 : len(vv)-1])
+			} else {
+				o.WriteString(k.String())
+				o.WriteString(":")
+				o.WriteString(vv)
+			}
+			return false
+		})
+		o.WriteString("}")
+		return JSON(o.String())
+	}
 	depth := -1
 	if v := q.ParseRaw(); v.Exists() {
 		depth = v.Int()
