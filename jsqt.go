@@ -1117,8 +1117,8 @@ func funcLT(q *Query, j Json) Json {
 }
 
 func funcOr(q *Query, j Json) Json {
-	a := q.ParseFun(j)
-	b := q.ParseFun(j)
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrKey(j)
 	if a.Exists() || b.Exists() {
 		return j
 	}
@@ -1126,8 +1126,8 @@ func funcOr(q *Query, j Json) Json {
 }
 
 func funcAnd(q *Query, j Json) Json {
-	a := q.ParseFun(j)
-	b := q.ParseFun(j)
+	a := q.ParseFunOrKey(j)
+	b := q.ParseFunOrKey(j)
 	if a.Exists() && b.Exists() {
 		return j
 	}
@@ -1135,7 +1135,7 @@ func funcAnd(q *Query, j Json) Json {
 }
 
 func funcNot(q *Query, j Json) Json {
-	a := q.ParseFun(j)
+	a := q.ParseFunOrKey(j)
 	if a.Exists() {
 		return JSON("")
 	}

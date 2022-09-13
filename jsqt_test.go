@@ -235,6 +235,10 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(is-num) (bool)`, then: `true`},
 		{give: `{}`, when: `(is-num) (bool)`, then: `false`},
 		// (or) (and) (not)
+		{give: `{"a":3,"b":4}`, when: `(not a)`, then: ``},
+		{give: `{"a":3,"b":4}`, when: `(and a b)`, then: `{"a":3,"b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(and a x)`, then: ``},
+		{give: `{"a":3,"b":4}`, when: `(or a x)`, then: `{"a":3,"b":4}`},
 		{give: `[3,"",4,"5"]`, when: `(collect (not (is-str)))`, then: `[3,4]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (and (>= a 4) (<= a 5)) a)`, then: `[4,5]`},
