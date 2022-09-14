@@ -4,6 +4,7 @@ package jsqt
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"regexp"
 	"sort"
 	"strconv"
@@ -273,6 +274,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcArg(q, j)
 	case "match":
 		return funcMatch(q, j)
+	case "expr":
+		return funcExpr(q, j)
 	default:
 		if defFunMark, ok := q.defs[fname]; ok {
 			return callDefFun(q, j, defFunMark)
@@ -864,6 +867,46 @@ func funcMatch(q *Query, j Json) Json {
 		}
 	}
 	return JSON("")
+}
+
+func funcExpr(q *Query, j Json) Json {
+	v := funcTerm(q, j).Float()
+	for q.MoreArg() {
+		if q.MatchFlag("+") {
+			v = v + funcTerm(q, j).Float()
+			continue
+		}
+		if q.MatchFlag("-") {
+			v = v - funcTerm(q, j).Float()
+			continue
+		}
+		break
+	}
+	return JSON(strconv.FormatFloat(v, 'f', -1, 64))
+}
+
+func funcTerm(q *Query, j Json) Json {
+	var v float64 = 1
+	if q.MatchFlag("-") {
+		v = -1
+	}
+	v = v * q.ParseFunOrRaw(j).Float()
+	for q.MoreArg() {
+		if q.MatchFlag("*") {
+			v = v * funcTerm(q, j).Float()
+			continue
+		}
+		if q.MatchFlag("/") {
+			v = v / funcTerm(q, j).Float()
+			continue
+		}
+		if q.MatchFlag("%") {
+			v = math.Mod(v, funcTerm(q, j).Float())
+			continue
+		}
+		break
+	}
+	return JSON(strconv.FormatFloat(v, 'f', -1, 64))
 }
 
 func funcIsNum(q *Query, j Json) Json {

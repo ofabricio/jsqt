@@ -1215,6 +1215,30 @@ a := jsqt.GetWith(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
 fmt.Println(a) // {"msg":"hello","val":3}
 ```
 
+## (expr)
+
+This function calculates math expressions.
+
+```clj
+(expr a op b ...)
+```
+
+`a` and `b` are the operands and can be a function or a raw value.
+
+`op` is the operator and can be any of these: `+ - * / %`.
+
+**Example**
+
+```go
+j := `{ "a": 3 }`
+
+a := jsqt.Get(j, `(expr 4 * 5 + (get a))`)
+b := jsqt.Get(j, `(expr 4 * (expr 5 + (get a)))`)
+
+fmt.Println(a) // 23
+fmt.Println(b) // 32
+```
+
 ## (match)
 
 This function matches a value against a prefix, suffix or regular expression.

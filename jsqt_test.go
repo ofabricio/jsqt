@@ -14,6 +14,30 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (expr)
+		{give: ``, when: `(expr 1 + 2 ? 3)`, then: `3`},
+		{give: ``, when: `(expr -4 * -5 + -(raw 1) - -2 + -3)`, then: `18`},
+		{give: `{"a":3}`, when: `(expr 4 * (expr 5 + (get a)))`, then: `32`},
+		{give: `{"a":3}`, when: `(expr 4 * 5 + (get a))`, then: `23`},
+		{give: ``, when: `(expr 1 + 1 / 2)`, then: `1.5`},
+		{give: ``, when: `(expr 1 + 1 % 2)`, then: `2`},
+		{give: ``, when: `(expr 1 % 2)`, then: `1`},
+		{give: ``, when: `(expr (raw 2) * 3 + 4 * 3 + 4 - 5)`, then: `17`},
+		{give: ``, when: `(expr 2 * 3 + 4 * 3 + 4 - 5)`, then: `17`},
+		{give: ``, when: `(expr 2 + 3 * 4 + 3 * 4 - 5)`, then: `21`},
+		{give: ``, when: `(expr 3 * (expr 4 * 2 - 5 + (expr 2 + 3) * 4 * 2 - 5) + 2)`, then: `116`},
+		{give: ``, when: `(expr 3 * 4 * 2 - 5 + (expr 2 + 3) * 4 * 2 - 5 + 2)`, then: `56`},
+		{give: ``, when: `(expr 3 * 4 * 2 - 5 + 2 + 3 * 4 * 2 - 5 + 2)`, then: `42`},
+		{give: ``, when: `(expr 3 * 4 - 5 + 2)`, then: `9`},
+		{give: ``, when: `(expr 3 * 4 * 2 - 5 + 2)`, then: `21`},
+		{give: ``, when: `(expr 2 + 3 * 4 - 5 + 2 + 3 * 4 - 5)`, then: `18`},
+		{give: ``, when: `(expr 2.1 + 2.5)`, then: `4.6`},
+		{give: ``, when: `(expr 2 - 5)`, then: `-3`},
+		{give: ``, when: `(expr 2 - -2)`, then: `4`},
+		{give: ``, when: `(expr 2 - 2)`, then: `0`},
+		{give: ``, when: `(expr 3 * 4)`, then: `12`},
+		{give: ``, when: `(expr 3 + 4)`, then: `7`},
+		{give: ``, when: `(expr 3)`, then: `3`},
 		// (at)
 		{give: `[3,4]`, when: `(at (raw 1))`, then: `4`},
 		{give: `[3,4]`, when: `(at 0)`, then: `3`},
