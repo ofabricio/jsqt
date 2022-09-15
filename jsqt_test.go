@@ -1203,7 +1203,7 @@ func BenchmarkJson_ForEach(b *testing.B) {
 	}
 }
 
-func ExampleJson_Iterate() {
+func ExampleJson_IterateFast() {
 
 	j := JSON(`{"a":1,"b":2,"c":{"a":3,"b":{"a":4,"b":[{"a":5},{"a":6,"b":7,"c":[8,9,0,{},[]]}]}},"d":1}`)
 	v := j.IterateFast(func(k, v Json) (Json, Json) {
@@ -1383,7 +1383,7 @@ func Benchmark_QueryFunction_IterateV(b *testing.B) {
 	}
 }
 
-func ExampleJson_IterateAll() {
+func ExampleJson_Iterate() {
 
 	m := func(k, v Json) (Json, Json) {
 		fmt.Println(k, v)
