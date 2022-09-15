@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/ofabricio/scanner"
+	. "github.com/ofabricio/scanner" //lint:ignore ST1001 should not use dot imports
 )
 
 func Get(jsn, qry string) Json {
