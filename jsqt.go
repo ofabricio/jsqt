@@ -278,6 +278,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcExpr(q, j)
 	case "unwind":
 		return funcUnwind(q, j)
+	case "transpose":
+		return funcTranspose(q, j)
 	default:
 		if defFunMark, ok := q.defs[fname]; ok {
 			return callDefFun(q, j, defFunMark)
@@ -953,6 +955,72 @@ func funcUnwind(q *Query, j Json) Json {
 	})
 	o.WriteString("]")
 	return JSON(o.String())
+}
+
+func funcTranspose(q *Query, j Json) Json {
+	if j.IsObject() {
+		var o strings.Builder
+		o.Grow(len(j.s) << 1)
+		o.WriteString("[")
+		done := 0
+		size := j.Size().Int()
+		for i := 0; done < size; i++ {
+			c := 0
+			open := true
+			j.ForEachKeyVal(func(k, v Json) bool {
+				if !v.IsArray() {
+					return false
+				}
+				idx := strconv.FormatInt(int64(i), 10)
+				if v = v.Get(idx); !v.Exists() {
+					done++
+					return false
+				}
+				if open {
+					open = false
+					done = 0
+					if i > 0 {
+						o.WriteString(",")
+					}
+					o.WriteString("{")
+				}
+				if c > 0 {
+					o.WriteString(",")
+				}
+				o.WriteString(k.String())
+				o.WriteString(":")
+				o.WriteString(v.String())
+				c++
+				return false
+			})
+			if done < size-1 {
+				o.WriteString("}")
+			}
+		}
+		o.WriteString("]")
+		return JSON(o.String())
+	}
+	if j.IsArray() {
+		var arg [1]any
+		var o strings.Builder
+		o.Grow(len(j.s))
+		o.WriteString("{")
+		keys := j.Get("0").Keys()
+		keys.ForEach(func(i, k Json) bool {
+			arg[0] = k.TrimQuote()
+			v := j.QueryWith("(get * (match -k (arg 0)))", arg[:])
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(k.String())
+			o.WriteString(":")
+			o.WriteString(v.String())
+			return false
+		})
+		o.WriteString("}")
+		return JSON(o.String())
+	}
+	return j
 }
 
 func funcIsNum(q *Query, j Json) Json {

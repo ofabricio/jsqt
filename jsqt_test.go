@@ -14,6 +14,14 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (transpose)
+		{give: `3`, when: `(transpose)`, then: `3`},
+		{give: `[{"a":3,"b":5,"c":7},{"a":4,"b":6}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6],"c":[7]}`},
+		{give: `[{"a":3,"b":5},{"a":4,"b":6}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6]}`},
+		{give: `{"a":[3,4],"b":[5,6,7,8]}`, when: `(transpose)`, then: `[{"a":3,"b":5},{"a":4,"b":6},{"b":7},{"b":8}]`},
+		{give: `{"a":[3,4],"b":[5,6],"c":[7]}`, when: `(transpose)`, then: `[{"a":3,"b":5,"c":7},{"a":4,"b":6}]`},
+		{give: `{"a":[3,4],"b":[5,6],"c":7}`, when: `(transpose)`, then: `[{"a":3,"b":5},{"a":4,"b":6}]`},
+		{give: `{"a":[3,4],"b":[5,6]}`, when: `(transpose)`, then: `[{"a":3,"b":5},{"a":4,"b":6}]`},
 		// (unwind)
 		{give: `{"a":3}`, when: `(unwind b)`, then: `[]`},
 		{give: `{"a":3,"b":null}`, when: `(unwind b)`, then: `[]`},

@@ -1267,6 +1267,42 @@ fmt.Println(a) // [{"a":3,"b":4},{"a":3,"b":5}]
 fmt.Println(b) // [{"a":3,"x":4},{"a":3,"x":5}]
 ```
 
+## (transpose)
+
+This function is easier to understand with an example.
+
+```clj
+(transpose)
+```
+
+It will convert this input:
+
+```json
+{
+    "a": [ 3, 5 ],
+    "b": [ 4, 6 ]
+}
+```
+
+To this output:
+
+```json
+[
+    {
+        "a": 3,
+        "b": 4
+    },
+    {
+        "a": 5,
+        "b": 6
+    }
+]
+```
+
+And vice-versa. It will convert the output above back to the input again if you transpose it.
+
+Note that in general transpose is reversible only when fields have the same number of items.
+
 ## (match)
 
 This function matches a value against a prefix, suffix or regular expression.
