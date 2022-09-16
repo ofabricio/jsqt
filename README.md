@@ -233,11 +233,12 @@ fmt.Println(a) // ["Hello","World"]
 
 ## (set)
 
-This function sets or removes a value.
+This function sets or removes fields. It can also rename keys.
 
 ```clj
 (set arg ... val)
 (set -i arg ... val)
+(set arg -r ... val)
 ```
 
 The `arg` is a list of object keys or array indexes.
@@ -245,6 +246,8 @@ The `arg` is a list of object keys or array indexes.
 The `val` argument (the last item of the list) is the value to be set and can be a function or a raw value.
 
 By default `(set)` does not insert a field it does not find. Use `-i` flag to insert.
+
+Use `-r` after a key to rename it.
 
 The `*` symbol is also available to iterate on each array item.
 
@@ -260,6 +263,7 @@ d := jsqt.Get(j, `(set fruits 0 name (raw "banana"))`)
 e := jsqt.Get(j, `(set fruits * name "banana")`)
 f := jsqt.Get(j, `(set -i data open true)`)
 g := jsqt.Get(j, `(set data open true)`)
+h := jsqt.Get(j, `(set fruits -r items * name -r value (this))`)
 
 fmt.Println(a) // {"data":{"name":"Grocery"},"fruits":[{"name":"apple"},{"name":"grape"}]}
 fmt.Println(b) // {"data":{"name":"Market"}}
@@ -268,6 +272,7 @@ fmt.Println(d) // {"data":{"name":"Market"},"fruits":[{"name":"banana"},{"name":
 fmt.Println(e) // {"data":{"name":"Market"},"fruits":[{"name":"banana"},{"name":"banana"}]}
 fmt.Println(f) // {"data":{"name":"Market","open":true},"fruits":[{"name":"apple"},{"name":"grape"}]}
 fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"grape"}]}
+fmt.Println(h) // {"data":{"name":"Market"},"items":[{"value":"apple"},{"value":"grape"}]}
 ```
 
 ## (upsert)

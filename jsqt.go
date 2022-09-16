@@ -338,12 +338,16 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		j.ForEachKeyVal(func(k, v Json) bool {
 			if k.TrimQuote() == keyOrIdx {
 				found = true
+				if q.MatchFlag("-r") {
+					k = q.ParseRaw()
+				}
 				if v = funcSetInternal(q, v, insert); v.Exists() {
 					if o.Len() > 1 {
 						o.WriteString(",")
 					}
-					o.WriteString(k.String())
-					o.WriteString(":")
+					o.WriteString(`"`)
+					o.WriteString(k.TrimQuote())
+					o.WriteString(`":`)
 					o.WriteString(v.String())
 				}
 			} else {

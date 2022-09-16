@@ -85,6 +85,13 @@ func TestGet(t *testing.T) {
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -r ^a_) (this))`, then: `{"a_b":3,"a_c":4}`},
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match a_c) (this))`, then: `{"a_c":4}`},
 		// (set)
+		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a -r y * a -r x (this))`, then: `[{"y":[{"x":3},{"x":4}]},{"y":[{"x":5}]}]`},
+		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a -r y * a (this))`, then: `[{"y":[{"a":3},{"a":4}]},{"y":[{"a":5}]}]`},
+		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a * a -r x (this))`, then: `[{"a":[{"x":3},{"x":4}]},{"a":[{"x":5}]}]`},
+		{give: `[{"a":3},{"a":3}]`, when: `(set * a -r x (this))`, then: `[{"x":3},{"x":3}]`},
+		{give: `{"a":3,"b":4}`, when: `(set c -r x (this))`, then: `{"a":3,"b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(set b -r x (this))`, then: `{"a":3,"x":4}`},
+		{give: `{"a":3,"b":4}`, when: `(set a -r x (this))`, then: `{"x":3,"b":4}`},
 		{give: `3`, when: `(set a 7)`, then: `3`},
 		{give: `{"a":{"b":3}}`, when: `(set -i a a 0 a 3)`, then: `{"a":{"b":3,"a":[{"a":3}]}}`},
 		{give: `{}`, when: `(set -i 0 a 0 a 3)`, then: `[{"a":[{"a":3}]}]`},
