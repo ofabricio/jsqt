@@ -1239,6 +1239,29 @@ fmt.Println(a) // 23
 fmt.Println(b) // 32
 ```
 
+## (unwind)
+
+This function deconstructs an array field.
+
+```clj
+(unwind key)
+(unwind key -r newkey)
+```
+
+`key` can be a function or a raw value. Use `-r` to rename a key.
+
+**Example**
+
+```go
+j := `{ "a": 3, "b": [ 4, 5 ] }`
+
+a := jsqt.Get(j, `(unwind b)`)
+b := jsqt.Get(j, `(unwind b -r x)`)
+
+fmt.Println(a) // [{"a":3,"b":4},{"a":3,"b":5}]
+fmt.Println(b) // [{"a":3,"x":4},{"a":3,"x":5}]
+```
+
 ## (match)
 
 This function matches a value against a prefix, suffix or regular expression.

@@ -14,6 +14,13 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (unwind)
+		{give: `{"a":3}`, when: `(unwind b)`, then: `[]`},
+		{give: `{"a":3,"b":null}`, when: `(unwind b)`, then: `[]`},
+		{give: `{"a":3,"b":[]}`, when: `(unwind b)`, then: `[]`},
+		{give: `{"a":3,"b":4}`, when: `(unwind b)`, then: `[]`},
+		{give: `{"a":3,"b":[4,5]}`, when: `(unwind b -r x)`, then: `[{"a":3,"x":4},{"a":3,"x":5}]`},
+		{give: `{"a":3,"b":[4,5]}`, when: `(unwind b)`, then: `[{"a":3,"b":4},{"a":3,"b":5}]`},
 		// (expr)
 		{give: ``, when: `(expr 1 + 2 ? 3)`, then: `3`},
 		{give: ``, when: `(expr -4 * -5 + -(raw 1) - -2 + -3)`, then: `18`},
