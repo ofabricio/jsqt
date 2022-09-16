@@ -289,6 +289,7 @@ func TestGet(t *testing.T) {
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (or (< a 4) (> a 5)) a)`, then: `[3,6]`},
 		{give: `[{"a":3},{"a":4},{"a":5},{"a":6}]`, when: `(collect (and (>= a 4) (<= a 5)) a)`, then: `[4,5]`},
 		// (objectify)
+		{give: `[[1,3],[2,4]]`, when: `(objectify)`, then: `{"1":3,"2":4}`},
 		{give: `[["a",3],["b",4]]`, when: `(objectify)`, then: `{"a":3,"b":4}`},
 		// (entries)
 		{give: `{"a":3,"b":4}`, when: `(entries) (collect (flatten))`, then: `["a",3,"b",4]`},

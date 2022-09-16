@@ -2319,8 +2319,9 @@ func (j Json) Objectify() Json {
 		if o.Len() > 1 {
 			o.WriteString(",")
 		}
-		o.WriteString(v.Get("0").String())
-		o.WriteString(`:`)
+		o.WriteString(`"`)
+		o.WriteString(v.Get("0").TrimQuote())
+		o.WriteString(`":`)
 		o.WriteString(v.Get("1").String())
 		return false
 	})
