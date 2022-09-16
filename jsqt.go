@@ -572,7 +572,7 @@ func funcFlatten(q *Query, j Json) Json {
 					break
 				}
 			}
-			if vv := v.String(); found {
+			if vv := v.String(); found && v.IsObject() {
 				o.WriteString(vv[1 : len(vv)-1])
 			} else {
 				o.WriteString(k.String())
