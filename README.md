@@ -133,9 +133,7 @@ fmt.Println(a) // [["0-0-3","0-1-4"],["1-0-5"]]
 
 ## (collect)
 
-This function is the same as `(get *)`.
-Because some patterns require `(get ... (get * ...) ...)`,
-you can replace it by `(get ... (collect ...) ...)` if you think it reads better.
+This function is just an alias for `(get *)` for readability.
 
 ```clj
 (collect arg ...)
@@ -249,7 +247,7 @@ By default `(set)` does not insert a field it does not find. Use `-i` flag to in
 
 Use `-r` after a key to rename it.
 
-The `*` symbol is also available to iterate on each array item.
+The `*` symbol is to iterate on each array item.
 
 **Example**
 
