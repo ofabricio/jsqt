@@ -1265,6 +1265,18 @@ fmt.Println(a) // [{"a":3,"b":4},{"a":3,"b":5}]
 fmt.Println(b) // [{"a":3,"x":4},{"a":3,"x":5}]
 ```
 
+Unwind also work with objects inside arrays:
+
+**Example**
+
+```go
+j := `[{ "a": 3, "b": [ 4, 5 ] }, { "a": 6, "b": [ 7, 8 ] }]`
+
+a := jsqt.Get(j, `(unwind b)`)
+
+fmt.Println(a) // [{"a":3,"b":4},{"a":3,"b":5},{"a":6,"b":7},{"a":6,"b":8}]
+```
+
 ## (transpose)
 
 This function is easier to understand with an example.

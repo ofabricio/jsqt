@@ -27,6 +27,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":null}`, when: `(unwind b)`, then: `[]`},
 		{give: `{"a":3,"b":[]}`, when: `(unwind b)`, then: `[]`},
 		{give: `{"a":3,"b":4}`, when: `(unwind b)`, then: `[]`},
+		{give: `[{"a":3,"b":[4,5]},{"a":6,"b":[7,8]}]`, when: `(unwind b)`, then: `[{"a":3,"b":4},{"a":3,"b":5},{"a":6,"b":7},{"a":6,"b":8}]`},
 		{give: `{"a":3,"b":[4,5]}`, when: `(unwind b -r x)`, then: `[{"a":3,"x":4},{"a":3,"x":5}]`},
 		{give: `{"a":3,"b":[4,5]}`, when: `(unwind b)`, then: `[{"a":3,"b":4},{"a":3,"b":5}]`},
 		// (expr)

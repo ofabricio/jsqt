@@ -918,41 +918,55 @@ func funcTerm(q *Query, j Json) Json {
 }
 
 func funcUnwind(q *Query, j Json) Json {
-	key := q.ParseFunOrRaw(j).TrimQuote()
-	ren := key
-	if q.MatchFlag("-r") {
-		ren = q.ParseFunOrRaw(j).TrimQuote()
-	}
-	val := j.Get(key)
 	var o strings.Builder
 	o.Grow(len(j.s) << 1)
 	o.WriteString("[")
-	val.ForEach(func(i, item Json) bool {
-		if o.Len() > 1 {
-			o.WriteString(",")
+	if j.IsObject() {
+		key := q.ParseFunOrRaw(j).TrimQuote()
+		ren := key
+		if q.MatchFlag("-r") {
+			ren = q.ParseFunOrRaw(j).TrimQuote()
 		}
-		o.WriteString("{")
-		idx := 0
-		j.ForEachKeyVal(func(k, v Json) bool {
-			if idx > 0 {
+		val := j.Get(key)
+		val.ForEach(func(i, item Json) bool {
+			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			idx++
-			if k.TrimQuote() == key {
-				o.WriteString(`"`)
-				o.WriteString(ren)
-				o.WriteString(`":`)
-				o.WriteString(item.String())
-			} else {
-				o.WriteString(k.String())
-				o.WriteString(":")
-				o.WriteString(v.String())
+			o.WriteString("{")
+			idx := 0
+			j.ForEachKeyVal(func(k, v Json) bool {
+				if idx > 0 {
+					o.WriteString(",")
+				}
+				idx++
+				if k.TrimQuote() == key {
+					o.WriteString(`"`)
+					o.WriteString(ren)
+					o.WriteString(`":`)
+					o.WriteString(item.String())
+				} else {
+					o.WriteString(k.String())
+					o.WriteString(":")
+					o.WriteString(v.String())
+				}
+				return false
+			})
+			o.WriteString("}")
+			return false
+		})
+	} else if j.IsArray() {
+		m := q.s.Mark()
+		j.ForEach(func(i, v Json) bool {
+			q.s.Back(m)
+			if unwinded := funcUnwind(q, v).Flatten(-1); unwinded.Exists() {
+				if o.Len() > 1 {
+					o.WriteString(",")
+				}
+				o.WriteString(unwinded.String())
 			}
 			return false
 		})
-		o.WriteString("}")
-		return false
-	})
+	}
 	o.WriteString("]")
 	return JSON(o.String())
 }
