@@ -2158,7 +2158,7 @@ func (j Json) ForEachKeyVal(f func(k, v Json) bool) {
 				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TODO: no need for 0. Create MatchUntilLTEOr3.
 			}
 
-			if f(JSON(key), JSON(j.s.Token(ini))) {
+			if t := j.s.Token(ini); len(t) == 0 || f(JSON(key), JSON(t)) {
 				return
 			}
 
@@ -2179,7 +2179,7 @@ func (j Json) ForEach(f func(i, v Json) bool) {
 			} else {
 				j.s.MatchUntilLTEOr4(' ', ',', '}', ']', 0) // TODO: no need for 0. Create MatchUntilLTEOr3.
 			}
-			if f(JSON(strconv.Itoa(i)), JSON(j.s.Token(ini))) {
+			if t := j.s.Token(ini); len(t) == 0 || f(JSON(strconv.Itoa(i)), JSON(t)) {
 				return
 			}
 			j.s.WS()
