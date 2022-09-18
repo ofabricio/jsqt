@@ -91,7 +91,7 @@ func (q *Query) ParseRaw() Json {
 	return JSON(raw)
 }
 
-func (q *Query) MatchFlag(flag string) bool {
+func (q *Query) Match(flag string) bool {
 	return q.s.Match(flag) && q.s.WS()
 }
 
@@ -322,7 +322,7 @@ func funcGet(q *Query, j Json) Json {
 }
 
 func funcSet(q *Query, j Json) Json {
-	insert := q.MatchFlag("-i")
+	insert := q.Match("-i")
 	return funcSetInternal(q, j, insert)
 }
 
@@ -340,7 +340,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		j.ForEachKeyVal(func(k, v Json) bool {
 			if k.TrimQuote() == keyOrIdx {
 				found = true
-				if q.MatchFlag("-r") {
+				if q.Match("-r") {
 					k = q.ParseRaw()
 				}
 				if v = funcSetInternal(q, v, insert); v.Exists() {
@@ -456,7 +456,7 @@ func funcObj(q *Query, j Json) Json {
 			}
 		}
 	}
-	if q.MatchFlag("-each") {
+	if q.Match("-each") {
 		m := q.s.Mark()
 		j.ForEach(func(i, v Json) bool {
 			q.k, q.v = i, v
@@ -558,7 +558,7 @@ func funcLast(q *Query, j Json) Json {
 }
 
 func funcFlatten(q *Query, j Json) Json {
-	if q.MatchFlag("-k") {
+	if q.Match("-k") {
 		if j.IsObject() {
 			var o strings.Builder
 			o.Grow(len(j.s))
@@ -740,25 +740,25 @@ func funcDefault(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
-	if q.MatchFlag("-f") {
+	if q.Match("-f") {
 		return funcIterateFast(q, j)
 	}
-	if q.MatchFlag("-kv") {
+	if q.Match("-kv") {
 		return funcIterateKeysValues(q, j)
 	}
-	if q.MatchFlag("-k") {
+	if q.Match("-k") {
 		return funcIterateKeys(q, j)
 	}
-	if q.MatchFlag("-v") {
+	if q.Match("-v") {
 		return funcIterateValues(q, j)
 	}
 	return funcIterateAll(q, j)
 }
 
 func funcIterateAll(q *Query, j Json) Json {
-	includeRoot := q.MatchFlag("-r")
+	includeRoot := q.Match("-r")
 	depth := 0
-	if q.MatchFlag("-d") {
+	if q.Match("-d") {
 		depth = q.ParseRaw().Int()
 	}
 	ini := q.s.Mark()
@@ -813,7 +813,7 @@ func funcIterateKeysValues(q *Query, j Json) Json {
 }
 
 func funcIf(q *Query, j Json) Json {
-	not := q.MatchFlag("-n")
+	not := q.Match("-n")
 	if cond := q.ParseFunOrKey(j); cond.Exists() != not {
 		return q.ParseFunOrKey(j)
 	}
@@ -840,50 +840,50 @@ func funcArg(q *Query, j Json) Json {
 
 func funcMatch(q *Query, j Json) Json {
 	// Match a key. Returns the matched key.
-	if q.MatchFlag("-kk") {
-		if q.MatchFlag("-p") {
+	if q.Match("-kk") {
+		if q.Match("-p") {
 			return j.GetPrefixKey(q.ParseFunOrRaw(j).TrimQuote())
 		}
-		if q.MatchFlag("-s") {
+		if q.Match("-s") {
 			return j.GetSuffixKey(q.ParseFunOrRaw(j).TrimQuote())
 		}
-		if q.MatchFlag("-r") {
+		if q.Match("-r") {
 			return j.GetRegexKey(q.ParseFunOrRaw(j).TrimQuote())
 		}
 		return j.GetKey(q.ParseFunOrRaw(j).TrimQuote())
 	}
 	// Match a key. The context must be an object.
-	if q.MatchFlag("-k") {
-		if q.MatchFlag("-p") {
+	if q.Match("-k") {
+		if q.Match("-p") {
 			return j.GetPrefix(q.ParseFunOrRaw(j).TrimQuote())
 		}
-		if q.MatchFlag("-s") {
+		if q.Match("-s") {
 			return j.GetSuffix(q.ParseFunOrRaw(j).TrimQuote())
 		}
-		if q.MatchFlag("-r") {
+		if q.Match("-r") {
 			return j.GetRegex(q.ParseFunOrRaw(j).TrimQuote())
 		}
 		return j.Get(q.ParseFunOrRaw(j).TrimQuote())
 	}
 	// Match a key value or a string.
 	var v string
-	if q.MatchFlag("-v") {
+	if q.Match("-v") {
 		v = q.ParseFunOrKey(j).TrimQuote()
 	} else {
 		v = j.TrimQuote()
 	}
 	switch {
-	case q.MatchFlag("-p"):
+	case q.Match("-p"):
 		prefix := q.ParseFunOrRaw(j).TrimQuote()
 		if strings.HasPrefix(v, prefix) {
 			return j
 		}
-	case q.MatchFlag("-s"):
+	case q.Match("-s"):
 		suffix := q.ParseFunOrRaw(j).TrimQuote()
 		if strings.HasSuffix(v, suffix) {
 			return j
 		}
-	case q.MatchFlag("-r"):
+	case q.Match("-r"):
 		regex := q.ParseFunOrRaw(j).TrimQuote()
 		if ok, _ := regexp.MatchString(regex, v); ok {
 			return j
@@ -900,11 +900,11 @@ func funcMatch(q *Query, j Json) Json {
 func funcExpr(q *Query, j Json) Json {
 	v := funcTerm(q, j).Float()
 	for q.MoreArg() {
-		if q.MatchFlag("+") {
+		if q.Match("+") {
 			v = v + funcTerm(q, j).Float()
 			continue
 		}
-		if q.MatchFlag("-") {
+		if q.Match("-") {
 			v = v - funcTerm(q, j).Float()
 			continue
 		}
@@ -915,20 +915,20 @@ func funcExpr(q *Query, j Json) Json {
 
 func funcTerm(q *Query, j Json) Json {
 	var v float64 = 1
-	if q.MatchFlag("-") {
+	if q.Match("-") {
 		v = -1
 	}
 	v = v * q.ParseFunOrRaw(j).Float()
 	for q.MoreArg() {
-		if q.MatchFlag("*") {
+		if q.Match("*") {
 			v = v * funcTerm(q, j).Float()
 			continue
 		}
-		if q.MatchFlag("/") {
+		if q.Match("/") {
 			v = v / funcTerm(q, j).Float()
 			continue
 		}
-		if q.MatchFlag("%") {
+		if q.Match("%") {
 			v = math.Mod(v, funcTerm(q, j).Float())
 			continue
 		}
@@ -944,7 +944,7 @@ func funcUnwind(q *Query, j Json) Json {
 	if j.IsObject() {
 		key := q.ParseFunOrRaw(j).TrimQuote()
 		ren := key
-		if q.MatchFlag("-r") {
+		if q.Match("-r") {
 			ren = q.ParseFunOrRaw(j).TrimQuote()
 		}
 		val := j.Get(key)
@@ -1412,7 +1412,7 @@ func funcConcat(q *Query, j Json) Json {
 }
 
 func funcSort(q *Query, j Json) Json {
-	asc := !q.MatchFlag("desc")
+	asc := !q.Match("desc")
 	key := q.MoreArg()
 	if j.IsObject() {
 		if asc {
@@ -1471,10 +1471,10 @@ func funcPick(q *Query, j Json) Json {
 		for q.MoreArg() {
 			key := q.ParseFunOrRaw(j).TrimQuote()
 			v := j.Get(key)
-			if q.MatchFlag("-r") {
+			if q.Match("-r") {
 				key = q.ParseRaw().String()
 			}
-			if q.MatchFlag("-m") {
+			if q.Match("-m") {
 				v = q.ParseFun(v)
 			}
 			if v.Exists() {
@@ -1521,14 +1521,14 @@ func funcPluck(q *Query, j Json) Json {
 }
 
 func funcSave(q *Query, j Json) Json {
-	if q.MatchFlag("-k") {
+	if q.Match("-k") {
 		if q.savs == nil {
 			q.savs = make(map[string]Json, 4)
 		}
 		for q.MoreArg() {
 			k := q.ParseRaw().TrimQuote()
 			var v Json
-			if q.MatchFlag("-v") {
+			if q.Match("-v") {
 				v = q.ParseFunOrKey(j)
 			} else {
 				v = j.Get(k)
