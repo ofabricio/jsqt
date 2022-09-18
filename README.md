@@ -310,7 +310,7 @@ This function flattens a JSON array or object.
 `(flatten depth)` applies a proper flatten.
 The `depth` argument is the depth level to flatten. Use `0` for a deep flatten.
 
-`(flatten -k key ...)` flattens only the given keys.
+`(flatten -k key ...)` flattens only the given keys. It also work with objects inside array.
 
 **Example**
 
@@ -321,6 +321,7 @@ c := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 2)`)
 d := jsqt.Get(`[3, [4], [[5]]]`, `(flatten 0)`)
 e := jsqt.Get(`{"a":3,"b":{"c":4},"d":{"e":5}}`, `(flatten)`)
 f := jsqt.Get(`{"a":3,"b":{"c":4},"d":{"e":5}}`, `(flatten -k b)`)
+g := jsqt.Get(`[{"a":{"b":3}},{"a":{"b":4}}]`, `(flatten -k a)`)
 
 fmt.Println(a) // [3,4,5]
 fmt.Println(b) // [3,4,[5]]
@@ -328,6 +329,7 @@ fmt.Println(c) // [3,4,5]
 fmt.Println(d) // [3,4,5]
 fmt.Println(e) // {"a":3,"c":4,"e":5}
 fmt.Println(f) // {"a":3,"c":4,"e":{"e":5}}
+fmt.Println(g) // [{"b":3},{"b":4}]
 ```
 
 ## (size)

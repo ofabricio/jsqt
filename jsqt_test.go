@@ -478,6 +478,7 @@ func TestGet(t *testing.T) {
 		// (flatten)
 		{give: `{"a":{}}`, when: `(flatten -k a)`, then: `{}`},
 		{give: `{"a":null}`, when: `(flatten -k a)`, then: `{"a":null}`},
+		{give: `[{"a":{"b":3}},{"a":{"b":4}}]`, when: `(flatten -k a)`, then: `[{"b":3},{"b":4}]`},
 		{give: `{"a":{"d":3,"e":4},"b":{"f":5},"c":{"g":6}}`, when: `(flatten -k a b)`, then: `{"d":3,"e":4,"f":5,"c":{"g":6}}`},
 		{give: `{"a":{},"c":{"d":{}},"f":5,"b":{"g":{"h":3,"i":{"l":7}},"j":5}}`, when: `(flatten)`, then: `{"f":5,"h":3,"l":7,"j":5}`},
 		{give: `{"a":[{"c":{"d":3,"e":{"k":6}},"f":5}],"b":{"g":{"h":3,"i":{"l":7}},"j":5}}`, when: `(flatten 0)`, then: `{"a":[{"c":{"d":3,"e":{"k":6}},"f":5}],"h":3,"l":7,"j":5}`},
