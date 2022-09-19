@@ -151,6 +151,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcFlatten(q, j)
 	case "slice":
 		return funcSlice(q, j)
+	case "reduce":
+		return funcReduce(q, j)
 	case "at":
 		return funcAt(q, j)
 	case "group":
@@ -665,6 +667,20 @@ func funcAt(q *Query, j Json) Json {
 		})
 	}
 	return j
+}
+
+func funcReduce(q *Query, j Json) Json {
+	acc := q.ParseFunOrRaw(j)
+	m := q.s.Mark()
+	f := func(i, v Json) bool {
+		q.k, q.v = i, v
+		q.s.Back(m)
+		acc = q.ParseFun(acc)
+		return false
+	}
+	j.ForEachKeyVal(f)
+	j.ForEach(f)
+	return acc
 }
 
 func funcGroup(q *Query, j Json) Json {

@@ -14,6 +14,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (reduce)
+		{give: `{"a":3,"b":4,"c":5}`, when: `(reduce 2 (expr (this) + (val)))`, then: `14`},
+		{give: `[3,4,5]`, when: `(reduce 2 (expr (this) + (val)))`, then: `14`},
 		// (transpose)
 		{give: `3`, when: `(transpose)`, then: `3`},
 		{give: `[{"a":3,"b":5,"c":7},{"a":4,"b":6}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6],"c":[7]}`},

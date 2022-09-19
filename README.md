@@ -478,6 +478,29 @@ fmt.Println(b) // "bear"
 fmt.Println(c) // 1
 ```
 
+## (reduce)
+
+This function reduces an array or object to a single value.
+
+```clj
+(reduce ini map)
+```
+
+`ini` can be a function or a raw value and it is the initial value.
+
+`map` must be a function; in this function [(this)](#this) is the accumulator (previous value),
+[(key)](#key-val) is the array index or object key; and [(val)](#key-val) is the array item or object value.
+
+**Example**
+
+```go
+a := jsqt.Get(`[ 3, 4, 5 ]`, `(reduce 2 (expr (this) + (val)))`)
+b := jsqt.Get(`{ "a": 3, "b": 4, "c": 5 }`, `(reduce 2 (expr (this) + (val)))`)
+
+fmt.Println(a) // 14
+fmt.Println(b) // 14
+```
+
 ## (group)
 
 This function groups values.
