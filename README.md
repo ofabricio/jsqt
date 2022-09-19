@@ -96,7 +96,7 @@ e := jsqt.Get(j, `(get tags * name)`)
 f := jsqt.Get(j, `(get tags (size))`)
 g := jsqt.Get(j, `(get tags * items * name)`)
 h := jsqt.Get(j, `(get tags * items (get * name) (flatten))`)
-i := jsqt.Get(j, `tags * (== name "Drink") items 0 name`) // Can omit root (get).
+i := jsqt.Get(j, `tags * (== "Drink" name) items 0 name`) // Can omit root (get).
 
 fmt.Println(a) // { "store name": "Grocery" }
 fmt.Println(b) // "Grocery"
@@ -372,10 +372,10 @@ j := `[{ "a": 1, "b": 3 }, { "a": 2, "b": 4 }, { "a": 3, "b": 4 }, { "a": 4, "b"
 
 a := jsqt.Get(j, `(first)`)
 b := jsqt.Get(j, `(last)`)
-c := jsqt.Get(j, `(first (== b 4))`)
-d := jsqt.Get(j, `(last  (== b 4))`)
-e := jsqt.Get(j, `(first (== b 4) a)`)
-f := jsqt.Get(j, `(last  (== b 4) a)`)
+c := jsqt.Get(j, `(first (== 4 b))`)
+d := jsqt.Get(j, `(last  (== 4 b))`)
+e := jsqt.Get(j, `(first (== 4 b) a)`)
+f := jsqt.Get(j, `(last  (== 4 b) a)`)
 
 fmt.Println(a) // { "a": 1, "b": 3 }
 fmt.Println(b) // { "a": 4, "b": 5 }
@@ -561,19 +561,24 @@ These comparison functions return the current context if true or an empty contex
 (<= a b)
 (> a b)
 (< a b)
+(in a b)
 ```
 
-The `a` argument can be a key or a function.
-The `b` argument can be a raw value or a function.
+`a` can be a function or a raw value.
+
+`b` is optional and can be a function or a key.
+When this argument is used, a comparison like `(> 33 age)` reads "is age greater than 33?".
 
 **Example**
 
 ```go
 j := `[{ "a": 3, "b": true }, { "a": 4, "b": false }, { "a": 5, "b": true }]`
 
-a := jsqt.Get(j, `(collect (== b true) a)`)
+a := jsqt.Get(j, `(collect (== true b) a)`)
+b := jsqt.Get(j, `(collect (in [3, 4] a) b)`)
 
 fmt.Println(a) // [3,5]
+fmt.Println(b) // [true,false]
 ```
 
 ## (is-x)
@@ -644,27 +649,6 @@ fmt.Println(c) // false
 fmt.Println(d) // true
 ```
 
-## (in)
-
-This function tests if a value is in an array.
-
-```clj
-(in val arr)
-```
-
-`val` can be a key or a function.
-`arr` can be a raw value or a function.
-
-**Example**
-
-```go
-j := `[3,4,5,6,7]`
-
-a := jsqt.Get(j, `(collect (in (val) [ 4, 6 ]) (bool))`)
-
-fmt.Println(a) // [false,true,false,true,false]
-```
-
 ## (or) (and) (not)
 
 These functions apply OR, AND, NOT logic to its arguments.
@@ -683,9 +667,9 @@ The arguments must be functions.
 ```go
 j := `[{"a":3},{"a":4},{"a":5},{"a":6}]`
 
-a := jsqt.Get(j, `(collect (or (< a 4) (> a 5)) a)`)
-b := jsqt.Get(j, `(collect (and (>= a 4) (<= a 5)) a)`)
-c := jsqt.Get(j, `(collect (not (<= a 4)) a)`)
+a := jsqt.Get(j, `(collect (or (< 4 a) (> 5 a)) a)`)
+b := jsqt.Get(j, `(collect (and (>= 4 a) (<= 5 a)) a)`)
+c := jsqt.Get(j, `(collect (not (<= 4 a)) a)`)
 
 fmt.Println(a) // [3,6]
 fmt.Println(b) // [4,5]

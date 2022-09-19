@@ -50,6 +50,13 @@ func (q *Query) ParseFunOrKey(j Json) Json {
 	return q.ParseKey(j)
 }
 
+func (q *Query) ParseFunOrKeyOptional(j Json) Json {
+	if q.MoreArg() {
+		return q.ParseFunOrKey(j)
+	}
+	return j
+}
+
 func (q *Query) ParseFunOrRaw(j Json) Json {
 	if q.s.EqualByte('(') {
 		return q.ParseFun(j)
@@ -1245,8 +1252,8 @@ func funcExists(q *Query, j Json) Json {
 }
 
 func funcIN(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.IN(b) {
 		return j
 	}
@@ -1254,8 +1261,8 @@ func funcIN(q *Query, j Json) Json {
 }
 
 func funcEQ(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.EQ(b) {
 		return j
 	}
@@ -1263,8 +1270,8 @@ func funcEQ(q *Query, j Json) Json {
 }
 
 func funcNEQ(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.NEQ(b) {
 		return j
 	}
@@ -1272,8 +1279,8 @@ func funcNEQ(q *Query, j Json) Json {
 }
 
 func funcGTE(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.GTE(b) {
 		return j
 	}
@@ -1281,8 +1288,8 @@ func funcGTE(q *Query, j Json) Json {
 }
 
 func funcLTE(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.LTE(b) {
 		return j
 	}
@@ -1290,8 +1297,8 @@ func funcLTE(q *Query, j Json) Json {
 }
 
 func funcGT(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.GT(b) {
 		return j
 	}
@@ -1299,8 +1306,8 @@ func funcGT(q *Query, j Json) Json {
 }
 
 func funcLT(q *Query, j Json) Json {
-	a := q.ParseFunOrKey(j)
 	b := q.ParseFunOrRaw(j)
+	a := q.ParseFunOrKeyOptional(j)
 	if a.LT(b) {
 		return j
 	}
