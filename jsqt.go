@@ -859,8 +859,11 @@ func funcEither(q *Query, j Json) Json {
 }
 
 func funcArg(q *Query, j Json) Json {
-	arg := q.ParseRaw()
+	arg := q.ParseFunOrRaw(j)
 	val := q.args[arg.Int()]
+	if f, ok := val.(func(Json) Json); ok {
+		return f(j)
+	}
 	jsn, _ := json.Marshal(val) // I think this is cheating.
 	return JSON(string(jsn))
 }

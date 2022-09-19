@@ -676,6 +676,12 @@ func TestGetWith(t *testing.T) {
 			args: []any{"Hello \"World\"", 4, float32(1.2), float64(1.5), []any{3, "4"}},
 			then: `{"a":"Hello \"World\"","b":4,"c":1.2,"d":1.5,"e":[3,"4"]}`,
 		},
+		{
+			give: `3`,
+			when: `(obj a (arg 0))`,
+			args: []any{func(j Json) Json { return j.Stringify() }},
+			then: `{"a":"3"}`,
+		},
 	}
 	for _, tc := range tt {
 		r := GetWith(tc.give, tc.when, tc.args)

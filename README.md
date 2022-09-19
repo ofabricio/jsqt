@@ -1227,12 +1227,33 @@ This function returns the value of an argument provided with `GetWith(jsn, qry, 
 (arg index)
 ```
 
+`index` is a function or a raw value.
+
 **Example**
 
 ```go
 a := jsqt.GetWith(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
 
 fmt.Println(a) // {"msg":"hello","val":3}
+```
+
+Use a function in the format `func (Json) Json` as argument
+to apply a custom logic to the current context.
+
+**Example**
+
+```go
+f := func(j jsqt.Json) jsqt.Json {
+    date, _ := time.Parse(time.RFC3339, j.TrimQuote())
+    newDate := date.Format(time.RFC1123)
+    return jsqt.JSON(newDate).Stringify()
+}
+
+j := `{ "date": "2022-09-07T12:30:00Z" }`
+
+a := jsqt.GetWith(j, `(set date (arg 0))`, []any{f})
+
+fmt.Println(a) // {"date":"Wed, 07 Sep 2022 12:30:00 UTC"}
 ```
 
 ## (expr)
