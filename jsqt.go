@@ -382,7 +382,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 					return JSON(o.String())
 				} else {
 					o.WriteString(`"`)
-					o.WriteString(keyOrIndex.String())
+					o.WriteString(keyOrIndex.TrimQuote())
 					o.WriteString(`":`)
 					o.WriteString(v.String())
 				}

@@ -111,6 +111,7 @@ func TestGet(t *testing.T) {
 		{give: `{}`, when: `(set -i 0 0 3)`, then: `[[3]]`},
 		{give: `{}`, when: `(set -i 0 3)`, then: `[3]`},
 		{give: `{}`, when: `(set -i 0)`, then: `0`},
+		{give: `{}`, when: `(set -i "0" 3)`, then: `{"0":3}`},
 		{give: `{}`, when: `(set -i a 0 b 0 3)`, then: `{"a":[{"b":[3]}]}`},
 		{give: `{}`, when: `(set -i a 1 b 3)`, then: `{"a":[{"b":3}]}`},
 		{give: `{}`, when: `(set -i a 0 b 3)`, then: `{"a":[{"b":3}]}`},
