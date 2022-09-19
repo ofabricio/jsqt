@@ -569,6 +569,7 @@ func funcLast(q *Query, j Json) Json {
 }
 
 func funcFlatten(q *Query, j Json) Json {
+	m := q.s.Mark()
 	if q.Match("-k") {
 		if j.IsObject() {
 			var o strings.Builder
@@ -599,7 +600,6 @@ func funcFlatten(q *Query, j Json) Json {
 			o.WriteString("}")
 			return JSON(o.String())
 		} else if j.IsArray() {
-			m := q.s.Mark()
 			var o strings.Builder
 			o.Grow(len(j.s))
 			o.WriteString("[")
