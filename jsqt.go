@@ -1065,10 +1065,7 @@ func funcTranspose(q *Query, j Json) Json {
 }
 
 func funcIsNum(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsNumber() {
 		return j
 	}
@@ -1076,10 +1073,7 @@ func funcIsNum(q *Query, j Json) Json {
 }
 
 func funcIsObj(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsObject() {
 		return j
 	}
@@ -1087,10 +1081,7 @@ func funcIsObj(q *Query, j Json) Json {
 }
 
 func funcIsArr(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsArray() {
 		return j
 	}
@@ -1098,10 +1089,7 @@ func funcIsArr(q *Query, j Json) Json {
 }
 
 func funcIsStr(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsString() {
 		return j
 	}
@@ -1109,10 +1097,7 @@ func funcIsStr(q *Query, j Json) Json {
 }
 
 func funcIsBool(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsBool() {
 		return j
 	}
@@ -1120,10 +1105,7 @@ func funcIsBool(q *Query, j Json) Json {
 }
 
 func funcIsNull(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsNull() {
 		return j
 	}
@@ -1131,10 +1113,7 @@ func funcIsNull(q *Query, j Json) Json {
 }
 
 func funcIsEmpty(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsEmpty() {
 		return j
 	}
@@ -1142,10 +1121,7 @@ func funcIsEmpty(q *Query, j Json) Json {
 }
 
 func funcIsEmptyObj(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsEmptyObject() {
 		return j
 	}
@@ -1153,10 +1129,7 @@ func funcIsEmptyObj(q *Query, j Json) Json {
 }
 
 func funcIsEmptyArr(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsEmptyArray() {
 		return j
 	}
@@ -1164,10 +1137,7 @@ func funcIsEmptyArr(q *Query, j Json) Json {
 }
 
 func funcIsEmptyStr(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsEmptyString() {
 		return j
 	}
@@ -1175,10 +1145,7 @@ func funcIsEmptyStr(q *Query, j Json) Json {
 }
 
 func funcIsTruthy(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsTruthy() {
 		return j
 	}
@@ -1186,10 +1153,7 @@ func funcIsTruthy(q *Query, j Json) Json {
 }
 
 func funcIsFalsy(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsFalsy() {
 		return j
 	}
@@ -1197,10 +1161,7 @@ func funcIsFalsy(q *Query, j Json) Json {
 }
 
 func funcIsSome(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsSome() {
 		return j
 	}
@@ -1208,10 +1169,7 @@ func funcIsSome(q *Query, j Json) Json {
 }
 
 func funcIsVoid(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsVoid() {
 		return j
 	}
@@ -1219,10 +1177,7 @@ func funcIsVoid(q *Query, j Json) Json {
 }
 
 func funcIsNully(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsNully() {
 		return j
 	}
@@ -1230,10 +1185,7 @@ func funcIsNully(q *Query, j Json) Json {
 }
 
 func funcIsBlank(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.IsBlank() {
 		return j
 	}
@@ -1241,10 +1193,7 @@ func funcIsBlank(q *Query, j Json) Json {
 }
 
 func funcExists(q *Query, j Json) Json {
-	v := j
-	if q.MoreArg() {
-		v = q.ParseFunOrKey(v)
-	}
+	v := q.ParseFunOrKeyOptional(j)
 	if v.Exists() {
 		return j
 	}
@@ -1341,9 +1290,7 @@ func funcNot(q *Query, j Json) Json {
 }
 
 func funcBool(q *Query, j Json) Json {
-	if q.MoreArg() {
-		j = q.ParseFunOrKey(j)
-	}
+	j = q.ParseFunOrKeyOptional(j)
 	if j.Exists() {
 		return JSON("true")
 	}
@@ -1370,9 +1317,7 @@ func funcReplace(q *Query, j Json) Json {
 
 func funcJoin(q *Query, j Json) Json {
 	sep := q.ParseRaw().Str()
-	if q.MoreArg() {
-		j = q.ParseFunOrKey(j)
-	}
+	j = q.ParseFunOrKeyOptional(j)
 	var o strings.Builder
 	o.Grow(len(j.s))
 	j.ForEach(func(i, v Json) bool {
@@ -1387,9 +1332,7 @@ func funcJoin(q *Query, j Json) Json {
 
 func funcSplit(q *Query, j Json) Json {
 	sep := q.ParseRaw().Str()
-	if q.MoreArg() {
-		j = q.ParseFunOrKey(j)
-	}
+	j = q.ParseFunOrKeyOptional(j)
 	var o strings.Builder
 	o.Grow(len(j.s) + 32)
 	o.WriteString("[")
