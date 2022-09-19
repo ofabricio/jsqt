@@ -820,12 +820,16 @@ func funcIterateKeysValues(q *Query, j Json) Json {
 }
 
 func funcIf(q *Query, j Json) Json {
-	not := q.Match("-n")
-	if cond := q.ParseFunOrKey(j); cond.Exists() != not {
-		return q.ParseFunOrKey(j)
-	}
-	if q.SkipArg(); q.MoreArg() {
-		return q.ParseFunOrKey(j)
+	for q.MoreArg() {
+		not := q.Match("-n")
+		if condOrElse := q.ParseFunOrKey(j); condOrElse.Exists() != not {
+			if q.MoreArg() {
+				return q.ParseFunOrRaw(j)
+			}
+			return condOrElse
+		} else {
+			q.SkipArg()
+		}
 	}
 	return j
 }

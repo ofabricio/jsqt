@@ -678,15 +678,19 @@ fmt.Println(c) // [5,6]
 
 ## (if)
 
-This function works like a regular `if`.
+This function works like a regular `if` or `switch/case`.
 
 ```clj
-(if cond then else)
-(if cond then)
+(if cond then ... else)
 ```
 
-if `cond` is true `then` is executed, otherwise `else` is. The arguments can be functions or keys.
-The `else` argument is optional and returns `(this)` when omited.
+If `cond` is true `then` is executed, otherwise `else` is;
+`else` is optional and returns `(this)` when omited.
+
+`if` accepts many pairs of cond/then and in that case it works like a switch/case.
+
+`cond` and `else` can be a function or a key;
+`then` can be a function or a raw value.
 
 Use `-n` to negate a condition.
 
@@ -695,11 +699,15 @@ Use `-n` to negate a condition.
 ```go
 j := `[ 3, {}, 4, [], 5 ]`
 
-a := jsqt.Get(j, `(collect (if (is-obj) (raw "obj") (this)))`)
-b := jsqt.Get(j, `(collect (if -n (is-obj) (raw "nop")))`)
+a := jsqt.Get(j, `(collect (if (is-obj) "obj"))`)
+b := jsqt.Get(j, `(collect (if (is-obj) "obj" (is-arr) "arr"))`)
+c := jsqt.Get(j, `(collect (if (is-obj) "obj" (is-arr) "arr" (raw "nop")))`)
+d := jsqt.Get(j, `(collect (if -n (is-obj) "nop")`)
 
 fmt.Println(a) // [3,"obj",4,[],5]
-fmt.Println(b) // ["nop",{},"nop","nop","nop"]
+fmt.Println(b) // [3,"obj",4,"arr",5]
+fmt.Println(c) // ["nop","obj","nop","arr","nop"]
+fmt.Println(d) // ["nop",{},"nop","nop","nop"]
 ```
 
 ## (either)

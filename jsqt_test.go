@@ -300,15 +300,17 @@ func TestGet(t *testing.T) {
 		// (key)
 		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
 		// (if)
-		{give: `[33,44]`, when: `(if -n (is-arr) (raw "array") (raw "skip array"))`, then: `"skip array"`},
-		{give: `[33,44]`, when: `(if (not (is-arr)) (raw "array") (raw "skip array"))`, then: `"skip array"`},
-		{give: `[33,44]`, when: `(if (is-arr) (raw "array") (raw "not array"))`, then: `"array"`},
-		{give: `[33,44]`, when: `(if (is-arr) (raw 4))`, then: `4`},                             // Can omit Else.
-		{give: `{"b":3}`, when: `(if (is-num) (raw 4))`, then: `{"b":3}`},                       // Can omit Else.
-		{give: `{"a":""}`, when: `(get a (if (is-str) (raw {}) (raw 3)))`, then: `{}`},          // Then.
-		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) (raw {}) (this)))`, then: `{"b":3}`}, // Else.
-		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},              // Then.
-		{give: `{"b":3}`, when: `(if (is-num) (raw 3) (this))`, then: `{"b":3}`},                // Else.
+		{give: `[3,4,5,6]`, when: `(iterate (key) (if (== 4) 7 (== 5) 8 (raw 9)))`, then: `[9,7,8,9]`},
+		{give: `[3,4,5,6]`, when: `(iterate (key) (if (== 4) 7 (== 5) 8))`, then: `[3,7,8,6]`},
+		{give: `[33,44]`, when: `(if -n (is-arr) "array" (raw "skip array"))`, then: `"skip array"`},
+		{give: `[33,44]`, when: `(if (not (is-arr)) "array" (raw "skip array"))`, then: `"skip array"`},
+		{give: `[33,44]`, when: `(if (is-arr) "array" (raw "not array"))`, then: `"array"`},
+		{give: `[33,44]`, when: `(if (is-arr) 4)`, then: `4`},                             // Can omit Else.
+		{give: `{"b":3}`, when: `(if (is-num) 4)`, then: `{"b":3}`},                       // Can omit Else.
+		{give: `{"a":""}`, when: `(get a (if (is-str) {} (raw 3)))`, then: `{}`},          // Then.
+		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) {} (this)))`, then: `{"b":3}`}, // Else.
+		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},        // Then.
+		{give: `{"b":3}`, when: `(if (is-num) 3 (this))`, then: `{"b":3}`},                // Else.
 		// (is-void)
 		{give: `{"a":[]}`, when: `(is-void a)`, then: `{"a":[]}`},
 		{give: `{"a":[3]}`, when: `(is-void a)`, then: ``},
