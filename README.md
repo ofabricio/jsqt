@@ -273,6 +273,8 @@ fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"
 fmt.Println(h) // {"data":{"name":"Market"},"items":[{"value":"apple"},{"value":"grape"}]}
 ```
 
+[(key)](#key-val) and [(val)](#key-val) are available.
+
 ## (upsert)
 
 This function creates, updates or removes object fields.

@@ -347,6 +347,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		found := false
 		keyOrIdx := keyOrIndex.TrimQuote()
 		j.ForEachKeyVal(func(k, v Json) bool {
+			q.k, q.v = k, v
 			if k.TrimQuote() == keyOrIdx {
 				found = true
 				if q.Match("-r") {
@@ -399,6 +400,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 		o.WriteString("[")
 		found := false
 		j.ForEach(func(i, v Json) bool {
+			q.k, q.v = i, v
 			if q.MoreArg() {
 				if i.String() == keyOrIndex.String() {
 					found = true
