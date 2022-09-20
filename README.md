@@ -3,6 +3,7 @@
 This Go package provides a language to query and transform JSON documents.
 
 [![build](https://github.com/ofabricio/jsqt/actions/workflows/go.yml/badge.svg)](https://github.com/ofabricio/jsqt/actions/workflows/go.yml)
+[![playground](https://img.shields.io/badge/play-ground-blueviolet.svg?logo=github&labelColor=2b3137)](https://ofabricio.github.io/jsqt/)
 
 ### Example
 
