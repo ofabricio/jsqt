@@ -539,14 +539,8 @@ func funcFirst(q *Query, j Json) Json {
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
 		q.s.Back(ini)
-		for q.MoreArg() {
-			item = q.ParseFunOrKey(item)
-		}
-		if item.Exists() {
-			first = item
-			return true
-		}
-		return false
+		first = funcGet(q, item)
+		return first.Exists()
 	})
 	return first
 }
@@ -557,10 +551,7 @@ func funcLast(q *Query, j Json) Json {
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
 		q.s.Back(ini)
-		for q.MoreArg() {
-			item = q.ParseFunOrKey(item)
-		}
-		if item.Exists() {
+		if item = funcGet(q, item); item.Exists() {
 			last = item
 		}
 		return false
