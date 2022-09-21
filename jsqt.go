@@ -469,7 +469,7 @@ func funcObj(q *Query, j Json) Json {
 			}
 		}
 	}
-	if q.Match("-each") {
+	if q.Match("-i") {
 		m := q.s.Mark()
 		j.ForEach(func(i, v Json) bool {
 			q.k, q.v = i, v

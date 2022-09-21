@@ -174,7 +174,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(set a (raw 7))`, then: `{"a":7,"b":4}`},
 		{give: `{"a":3,"b":4}`, when: `(set a 7)`, then: `{"a":7,"b":4}`},
 		// (key) (val)
-		{give: `[[3,4]]`, when: `(get * (arr (key) (val) (obj -each (key) (val)) (key) (val))) (flatten)`, then: `[0,[3,4],{"0":3,"1":4},0,[3,4]]`},
+		{give: `[[3,4]]`, when: `(get * (arr (key) (val) (obj -i (key) (val)) (key) (val))) (flatten)`, then: `[0,[3,4],{"0":3,"1":4},0,[3,4]]`},
 		{give: `[3,4]`, when: `(collect (arr (key) (val)))`, then: `[[0,3],[1,4]]`},
 		{give: `{"a":3,"c":4}`, when: `(iterate (concat (key) (val)) (arr (key) (val)))`, then: `{"a3":["a",3],"c4":["c",4]}`},
 		{give: `{"a":3,"c":4}`, when: `(iterate -r (key) (arr (key) (val)))`, then: `[null,{"a":["a",3],"c":["c",4]}]`},
@@ -577,9 +577,9 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(arr (get a) (get b) (get a))`, then: `[3,4,3]`},
 		{give: ``, when: `(arr)`, then: `[]`},
 		// (obj)
-		{give: `{"a":3,"b":4}`, when: `(obj -each (concat (raw "key_") (key)) (this))`, then: `{"key_a":3,"key_b":4}`},
-		{give: `{"a":3,"b":4}`, when: `(obj -each (concat (raw "key_") (key)) (val))`, then: `{"key_a":3,"key_b":4}`},
-		{give: `[{"a":3,"b":30},{"a":4,"b":40}]`, when: `(obj -each (get a) (val))`, then: `{"3":{"a":3,"b":30},"4":{"a":4,"b":40}}`},
+		{give: `{"a":3,"b":4}`, when: `(obj -i (concat (raw "key_") (key)) (this))`, then: `{"key_a":3,"key_b":4}`},
+		{give: `{"a":3,"b":4}`, when: `(obj -i (concat (raw "key_") (key)) (val))`, then: `{"key_a":3,"key_b":4}`},
+		{give: `[{"a":3,"b":30},{"a":4,"b":40}]`, when: `(obj -i (get a) (val))`, then: `{"3":{"a":3,"b":30},"4":{"a":4,"b":40}}`},
 		{give: `{"a":3}`, when: `(obj (raw 4) a)`, then: `{"4":3}`},
 		{give: `{"a":3}`, when: `(obj "4" a)`, then: `{"4":3}`},
 		{give: `{"a":3}`, when: `(obj 4 a)`, then: `{"4":3}`},
