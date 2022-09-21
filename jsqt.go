@@ -66,11 +66,13 @@ func (q *Query) ParseFunOrRaw(j Json) Json {
 
 func (q *Query) ParseFun(j Json) Json {
 	if q.s.MatchByte('(') {
+		qk, qv := q.k, q.v
 		fname := q.ParseRaw().String()
 		j = q.CallFun(fname, j)
 		q.SkipArgs()
 		q.s.MatchByte(')')
 		q.s.WS()
+		q.k, q.v = qk, qv
 	}
 	return j
 }

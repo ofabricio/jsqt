@@ -174,6 +174,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4}`, when: `(set a (raw 7))`, then: `{"a":7,"b":4}`},
 		{give: `{"a":3,"b":4}`, when: `(set a 7)`, then: `{"a":7,"b":4}`},
 		// (key) (val)
+		{give: `[[3,4]]`, when: `(get * (arr (key) (val) (obj -each (key) (val)) (key) (val))) (flatten)`, then: `[0,[3,4],{"0":3,"1":4},0,[3,4]]`},
 		{give: `[3,4]`, when: `(collect (arr (key) (val)))`, then: `[[0,3],[1,4]]`},
 		{give: `{"a":3,"c":4}`, when: `(iterate (concat (key) (val)) (arr (key) (val)))`, then: `{"a3":["a",3],"c4":["c",4]}`},
 		{give: `{"a":3,"c":4}`, when: `(iterate -r (key) (arr (key) (val)))`, then: `[null,{"a":["a",3],"c":["c",4]}]`},
