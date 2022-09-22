@@ -510,22 +510,32 @@ This function groups values.
 
 ```clj
 (group key val)
+(group key val -a)
+(group key val -a newkey newval)
 ```
 
 `key` can be a function or a key and it is the value that becomes the group key.
 
 `val` can be a function or a key and it is the value that is added to a group.
 
+`(group)` groups into this format: `{ "group1": [], "group2": [] }`.
+Use `-a` to group into an array in the format: `[{ "key": "group1", "values": [] }, { "key": "group2", "values": [] }]`.
+To rename `"key"` and `"values"` use `-a newkey newval` (both must be provided).
+
 [(key)](#key-val) and [(val)](#key-val) can be used to access the array index and value.
 
 **Example**
 
-```go 
+```go
 j := `[{ "g": "dog", "v": 15 }, { "g": "dog", "v": 12 }, { "g": "cat", "v": 10 }]`
 
 a := jsqt.Get(j, `(group g (pluck g))`)
+b := jsqt.Get(j, `(group g (pluck g) -a)`)
+c := jsqt.Get(j, `(group g (pluck g) -a group vals)`)
 
 fmt.Println(a) // {"dog":[{"v":15},{"v":12}],"cat":[{"v":10}]}
+fmt.Println(b) // [{"key":"dog","values":[{"v":15},{"v":12}]},{"key":"cat","values":[{"v":10}]}]
+fmt.Println(c) // [{"group":"dog","vals":[{"v":15},{"v":12}]},{"group":"cat","vals":[{"v":10}]}]
 ```
 
 **Example**

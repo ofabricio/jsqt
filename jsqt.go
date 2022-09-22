@@ -684,30 +684,61 @@ func funcGroup(q *Query, j Json) Json {
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
 		q.s.Back(ini)
-		if k, v := q.ParseFunOrKey(item), q.ParseFunOrKey(item); k.Exists() && v.Exists() {
-			group[k] = append(group[k], v)
+		if g, v := q.ParseFunOrKey(item), q.ParseFunOrKey(item); g.Exists() && v.Exists() {
+			group[g] = append(group[g], v)
 		}
 		return false
 	})
 	var o strings.Builder
 	o.Grow(len(j.s))
-	o.WriteString("{")
-	for k, arr := range group {
-		if o.Len() > 1 {
-			o.WriteString(",")
+	if q.Match("-a") {
+		keyName := "key"
+		valName := "values"
+		if q.MoreArg() {
+			keyName = q.ParseFunOrRaw(j).TrimQuote()
+			valName = q.ParseFunOrRaw(j).TrimQuote()
 		}
-		o.WriteString(`"`)
-		o.WriteString(k.TrimQuote())
-		o.WriteString(`":[`)
-		for i, v := range arr {
-			if i > 0 {
+		o.WriteString("[")
+		for g, v := range group {
+			if o.Len() > 1 {
 				o.WriteString(",")
 			}
-			o.WriteString(v.String())
+			o.WriteString(`{"`)
+			o.WriteString(keyName)
+			o.WriteString(`":`)
+			o.WriteString(g.String())
+			o.WriteString(`,"`)
+			o.WriteString(valName)
+			o.WriteString(`":[`)
+			for i, v := range v {
+				if i > 0 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			o.WriteString("]")
+			o.WriteString("}")
 		}
 		o.WriteString("]")
+	} else {
+		o.WriteString("{")
+		for g, v := range group {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(`"`)
+			o.WriteString(g.TrimQuote())
+			o.WriteString(`":[`)
+			for i, v := range v {
+				if i > 0 {
+					o.WriteString(",")
+				}
+				o.WriteString(v.String())
+			}
+			o.WriteString("]")
+		}
+		o.WriteString("}")
 	}
-	o.WriteString("}")
 	return JSON(o.String())
 }
 
