@@ -1245,6 +1245,9 @@ fmt.Println(b) // [33,44]
 fmt.Println(c) // {"a3":"3a"}
 ```
 
+Note that `(key)` and `(val)` are overridden inside nested functions and this might lead to confusion.
+The solution in this case is to [(save)](#save-load) the previous value and [(load)](#save-load) it.
+
 ## (arg)
 
 This function returns the value of an argument provided with `GetWith(jsn, qry, args)`.
