@@ -232,21 +232,24 @@ fmt.Println(a) // ["Hello","World"]
 
 ## (set)
 
-This function sets or removes fields. It can also rename keys.
+This function sets or removes values. It can also rename keys.
 
 ```clj
-(set arg ... val)
-(set -i arg ... val)
-(set arg -r ... val)
+(set key ... val)
+(set -i key ... val)
+(set key -r newkey ... val)
+(set key -m map ... val)
 ```
 
-The `arg` is a list of object keys or array indexes.
+`key ...` is a list of keys or functions.
 
-The `val` argument (the last item of the list) is the value to be set and can be a function or a raw value.
+`val` (the last item of the list) is the value to be set and can be a function or a raw value.
 
 By default `(set)` does not insert a field it does not find. Use `-i` flag to insert.
 
-Use `-r` after a key to rename it.
+Use `-r newkey` after any key to rename it.
+
+Use `-m map` after any key to apply a map function to its value.
 
 The `*` symbol is to iterate on each array item.
 
@@ -272,6 +275,16 @@ fmt.Println(e) // {"data":{"name":"Market"},"fruits":[{"name":"banana"},{"name":
 fmt.Println(f) // {"data":{"name":"Market","open":true},"fruits":[{"name":"apple"},{"name":"grape"}]}
 fmt.Println(g) // {"data":{"name":"Market"},"fruits":[{"name":"apple"},{"name":"grape"}]}
 fmt.Println(h) // {"data":{"name":"Market"},"items":[{"value":"apple"},{"value":"grape"}]}
+```
+
+**Example**
+
+```go
+j := `[{ "a": 3, "b": [{ "c": 4, "d": 5 }] }, { "a": 6, "b": [{ "c": 7, "d": 8 }] }]`
+
+a := jsqt.Get(j, `(set * -m (pick b) b * -m (upsert x 0) c 9)`)
+
+fmt.Println(a) // [{"b":[{"x":0,"c":9,"d":5}]},{"b":[{"x":0,"c":9,"d":8}]}]
 ```
 
 [(key)](#key-val) and [(val)](#key-val) are available.

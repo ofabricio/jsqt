@@ -338,6 +338,9 @@ func funcSet(q *Query, j Json) Json {
 }
 
 func funcSetInternal(q *Query, j Json, insert bool) Json {
+	if q.Match("-m") {
+		j = q.ParseFun(j)
+	}
 	keyOrIndex := q.ParseFunOrRaw(j)
 	if !q.MoreArg() {
 		return keyOrIndex // The last item is the value.

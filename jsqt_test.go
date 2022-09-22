@@ -99,6 +99,8 @@ func TestGet(t *testing.T) {
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match -r ^a_) (this))`, then: `{"a_b":3,"a_c":4}`},
 		{give: `{"a_b":3,"a_c":4,"b_c":5}`, when: `(iterate (match a_c) (this))`, then: `{"a_c":4}`},
 		// (set)
+		{give: `[{"a":3,"b":[{"c":4,"d":5}]},{"a":6,"b":[{"c":7,"d":8}]}]`, when: `(set * -m (pick b) b * -m (upsert x 0) c 9)`, then: `[{"b":[{"x":0,"c":9,"d":5}]},{"b":[{"x":0,"c":9,"d":8}]}]`},
+		{give: `[{"a":{"b":3,"c":4,"d":{"e":5}}},{"a":{"b":6,"c":7,"d":{"e":8}}}]`, when: `(set * a -m (pick c d) d e 9)`, then: `[{"a":{"c":4,"d":{"e":9}}},{"a":{"c":7,"d":{"e":9}}}]`},
 		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a -r y * a -r x (this))`, then: `[{"y":[{"x":3},{"x":4}]},{"y":[{"x":5}]}]`},
 		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a -r y * a (this))`, then: `[{"y":[{"a":3},{"a":4}]},{"y":[{"a":5}]}]`},
 		{give: `[{"a":[{"a":3},{"a":4}]},{"a":[{"a":5}]}]`, when: `(set * a * a -r x (this))`, then: `[{"a":[{"x":3},{"x":4}]},{"a":[{"x":5}]}]`},
