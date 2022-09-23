@@ -410,7 +410,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 				if i.String() == keyOrIndex.String() {
 					found = true
 					v = funcSetInternal(q, v, insert)
-				} else if keyOrIndex.String()[0] == '*' {
+				} else if keyOrIndex.s.EqualByte('*') {
 					found = true
 					m := q.s.Mark()
 					v = funcSetInternal(q, v, insert)
