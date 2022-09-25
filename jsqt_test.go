@@ -14,6 +14,58 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (valid)
+		{give: ``, when: `(valid)`, then: ``},
+		{give: `{"a":[3,{"a":}]}`, when: `(valid a)`, then: ``},
+		{give: `{"a":[3,{"a":4}]}`, when: `(valid a)`, then: `[3,{"a":4}]`},
+		{give: `{ "a" : [ { "b" : "c" } , null , false , true , { } , [ 3 , 1.2 ] ] }`, when: `(valid)`, then: `{ "a" : [ { "b" : "c" } , null , false , true , { } , [ 3 , 1.2 ] ] }`},
+		{give: `x`, when: `(valid)`, then: ``},
+		{give: `"a"`, when: `(valid)`, then: `"a"`},
+		{give: `""`, when: `(valid)`, then: `""`},
+		{give: `3`, when: `(valid)`, then: `3`},
+		{give: `true`, when: `(valid)`, then: `true`},
+		{give: `false`, when: `(valid)`, then: `false`},
+		{give: `null`, when: `(valid)`, then: `null`},
+		{give: `{"a":[{"b":"c"},null,false,true,{},[3,1.2,01]]}`, when: `(valid)`, then: ``},
+		{give: `{"a":[{"b":"c"},null,false,true,{},[3,1.2,x]]}`, when: `(valid)`, then: ``},
+		{give: `{"a":[{"b":"c"},null,false,true,{},[3,1.2,null]]}`, when: `(valid)`, then: `{"a":[{"b":"c"},null,false,true,{},[3,1.2,null]]}`},
+		{give: `{"a":[{"b":"c"},null,false,true,{},[]]}`, when: `(valid)`, then: `{"a":[{"b":"c"},null,false,true,{},[]]}`},
+		{give: `{"a":[{},[]]}`, when: `(valid)`, then: `{"a":[{},[]]}`},
+		{give: `{"a":[,""]}`, when: `(valid)`, then: ``},
+		{give: `{"a":["",""]}`, when: `(valid)`, then: `{"a":["",""]}`},
+		{give: `["a":""]`, when: `(valid)`, then: ``},
+		{give: `["" ""]`, when: `(valid)`, then: ``},
+		{give: `["",""]`, when: `(valid)`, then: `["",""]`},
+		{give: `[,""]`, when: `(valid)`, then: ``},
+		{give: `[3,4}`, when: `(valid)`, then: ``},
+		{give: `[3,,3]`, when: `(valid)`, then: ``},
+		{give: `[3,]`, when: `(valid)`, then: ``},
+		{give: `[""]`, when: `(valid)`, then: `[""]`},
+		{give: `[,]`, when: `(valid)`, then: ``},
+		{give: `]`, when: `(valid)`, then: ``},
+		{give: `[`, when: `(valid)`, then: ``},
+		{give: `[]`, when: `(valid)`, then: `[]`},
+		{give: `"a":""}`, when: `(valid)`, then: ``},
+		{give: `{"a",""}`, when: `(valid)`, then: ``},
+		{give: `{,"a"}`, when: `(valid)`, then: ``},
+		{give: `{,"a":""}`, when: `(valid)`, then: ``},
+		{give: `{"a":"",}`, when: `(valid)`, then: ``},
+		{give: `{"a":}`, when: `(valid)`, then: ``},
+		{give: `{"a":"}`, when: `(valid)`, then: ``},
+		{give: `{"a"""}`, when: `(valid)`, then: ``},
+		{give: `{"a":""`, when: `(valid)`, then: ``},
+		{give: `{"a":"b":""}`, when: `(valid)`, then: ``},
+		{give: `{"a":{"b":""}`, when: `(valid)`, then: ``},
+		{give: `{"a":{"b":"",}}`, when: `(valid)`, then: ``},
+		{give: `{,}`, when: `(valid)`, then: ``},
+		{give: `{"a":{"b":"","c":""}}`, when: `(valid)`, then: `{"a":{"b":"","c":""}}`},
+		{give: `{"a":{"b":""}}`, when: `(valid)`, then: `{"a":{"b":""}}`},
+		{give: `{"a":"",,"b":""}`, when: `(valid)`, then: ``},
+		{give: `{"a":"","b":""}`, when: `(valid)`, then: `{"a":"","b":""}`},
+		{give: `{"a":""}`, when: `(valid)`, then: `{"a":""}`},
+		{give: `{`, when: `(valid)`, then: ``},
+		{give: `}`, when: `(valid)`, then: ``},
+		{give: `{}`, when: `(valid)`, then: `{}`},
 		// (reduce)
 		{give: `{"a":3,"b":4,"c":5}`, when: `(reduce 2 (expr (this) + (val)))`, then: `14`},
 		{give: `[3,4,5]`, when: `(reduce 2 (expr (this) + (val)))`, then: `14`},
@@ -712,6 +764,27 @@ func BenchmarkGetWith(b *testing.B) {
 	a := []any{3}
 	for i := 0; i < b.N; i++ {
 		_ = GetWith("", "(arg 0)", a)
+	}
+}
+
+func TestValid(t *testing.T) {
+
+	tt := []struct {
+		give string
+		then bool
+	}{
+		{give: `{"a":3}`, then: true},
+		{give: `{"a":3,}`, then: false},
+	}
+	for _, tc := range tt {
+		ok := Valid(tc.give)
+		assertEqual(t, tc.then, ok, tc)
+	}
+}
+
+func BenchmarkValid(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = Valid(TestData1)
 	}
 }
 

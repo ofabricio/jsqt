@@ -25,6 +25,10 @@ func JSON(jsn string) Json {
 	return Json{Scanner(jsn)}
 }
 
+func Valid(jsn string) bool {
+	return JSON(jsn).Valid()
+}
+
 // #region Query
 
 // Query is the query language parser.
@@ -291,6 +295,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcUnwind(q, j)
 	case "transpose":
 		return funcTranspose(q, j)
+	case "valid":
+		return funcValid(q, j)
 	default:
 		if defFunMark, ok := q.defs[fname]; ok {
 			return callDefFun(q, j, defFunMark)
@@ -1133,6 +1139,13 @@ func funcTranspose(q *Query, j Json) Json {
 		return JSON(o.String())
 	}
 	return j
+}
+
+func funcValid(q *Query, j Json) Json {
+	if j = q.ParseFunOrKeyOptional(j); j.Valid() {
+		return j
+	}
+	return JSON("")
 }
 
 func funcIsNum(q *Query, j Json) Json {
@@ -2490,6 +2503,68 @@ func (j Json) Prettify() Json {
 		}
 	}
 	return JSON(o.String())
+}
+
+func (j Json) Valid() bool {
+	return j.valid() && !j.s.More()
+}
+
+func (j *Json) valid() bool {
+	for j.s.More() {
+		switch j.s.Curr() {
+		case ' ', '\t', '\n', '\r':
+		case '{':
+			j.s.Next()
+			for i := 0; j.s.WS() && j.s.More(); i++ {
+				if j.s.MatchByte('}') {
+					return true
+				}
+				if i > 0 && j.s.MatchByte(',') && j.s.WS() && !j.s.EqualByte('"') {
+					return false
+				}
+				if !j.s.UtilMatchString('"') {
+					return false
+				}
+				j.s.WS()
+				if !j.s.MatchByte(':') {
+					return false
+				}
+				if !j.valid() {
+					return false
+				}
+			}
+			return false
+		case '[':
+			j.s.Next()
+			for i := 0; j.s.WS() && j.s.More(); i++ {
+				if j.s.MatchByte(']') {
+					return true
+				}
+				if i > 0 {
+					if !(j.s.MatchByte(',') && j.valid()) {
+						return false
+					}
+				} else if !j.valid() {
+					return false
+				}
+			}
+			return false
+		case '"':
+			return j.s.UtilMatchString('"')
+		case 't':
+			return j.s.Match("true")
+		case 'f':
+			return j.s.Match("false")
+		case 'n':
+			return j.s.Match("null")
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-':
+			return j.s.UtilMatchNumber()
+		default:
+			return false
+		}
+		j.s.Next()
+	}
+	return false
 }
 
 // #endregion Json

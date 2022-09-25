@@ -837,6 +837,30 @@ fmt.Println(a) // "A"
 fmt.Println(b) // "B"
 ```
 
+## (valid)
+
+This function validates a JSON document.
+If valid it returns the value it receives; if invalid it returns an empty context.
+
+```clj
+(valid)
+(valid arg)
+```
+
+`arg` is optional and can be a function or a key.
+
+**Example**
+
+```go
+a := jsqt.Get(`{ "a": 3 }`, `(valid)`)
+b := jsqt.Get(`{ "a": 3, }`, `(valid)`)
+
+fmt.Println(a) // { "a": 3 }
+fmt.Println(b) //
+```
+
+Note that there is also the `jsqt.Valid(jsn)` function.
+
 ## (default)
 
 This function returns a default value if it receives an empty context;
