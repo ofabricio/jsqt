@@ -440,6 +440,9 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 }
 
 func funcArr(q *Query, j Json) Json {
+	if q.Match("-t") {
+		return funcArrTest(q, j)
+	}
 	var o strings.Builder
 	o.Grow(64)
 	o.WriteString("[")
@@ -453,6 +456,22 @@ func funcArr(q *Query, j Json) Json {
 	}
 	o.WriteString("]")
 	return JSON(o.String())
+}
+
+func funcArrTest(q *Query, j Json) Json {
+	if j.IsArray() {
+		var ok bool
+		m := q.s.Mark()
+		j.ForEach(func(i, v Json) bool {
+			q.s.Back(m)
+			ok = q.ParseFunOrKey(v).Exists()
+			return !ok
+		})
+		if ok {
+			return j
+		}
+	}
+	return JSON("")
 }
 
 func funcObj(q *Query, j Json) Json {

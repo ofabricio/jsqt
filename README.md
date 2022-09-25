@@ -195,6 +195,7 @@ This function creates a JSON array.
 
 ```clj
 (arr item ...)
+(arr -t cond)
 ```
 
 Each argument becomes an array item. The arguments can be functions or keys.
@@ -202,11 +203,28 @@ Each argument becomes an array item. The arguments can be functions or keys.
 **Example**
 
 ```go
-j := `{ "author": "Mary", "comment": "Hello" }`
+j := `{ "a": 3, "b": 4 }`
 
-a := jsqt.Get(j, `(arr (raw "author") author (raw "comment") comment)`)
+a := jsqt.Get(j, `(arr a (raw 5) b)`)
 
-fmt.Println(a) // ["author","Mary","comment","Hello"]
+fmt.Println(a) // [3,5,4]
+```
+
+Use `-t cond` to test each array item against a condition.
+If all items succeed it returns the current context;
+if any item fails it returns an empty context.
+This can be used to validate a JSON schema. See [(and)](#or-and-not) for another example.
+
+**Example**
+
+```go
+j := `[ 3, 4 ]`
+
+a := jsqt.Get(j, `(arr -t (is-num))`)
+b := jsqt.Get(j, `(arr -t (is-str))`)
+
+fmt.Println(a) // [ 3, 4 ]
+fmt.Println(b) //
 ```
 
 ## (raw)
@@ -704,7 +722,7 @@ These functions apply OR, AND, NOT logic to its arguments.
 They return the current context when true or an empty context otherwise.
 
 ```clj
-(or a b ...)
+(or  a b ...)
 (and a b ...)
 (not a)
 ```
@@ -724,6 +742,46 @@ fmt.Println(a) // [3,6]
 fmt.Println(b) // [4,5]
 fmt.Println(c) // [5,6]
 ```
+
+Note that `(and)` can be used to validate a JSON schema.
+
+**Example**
+
+```go
+j := `
+    {
+        "name": "Chesterton",
+        "age": 62,
+        "books": [
+            { "name": "Orthodoxy", "pages": 166 },
+            { "name": "The Everlasting Man", "pages": 269 }
+        ]
+    }`
+
+// Invalid schema because (size) is not 2, but 3.
+a := jsqt.Get(j, `
+    (and
+        (is-str name)
+        (== 62  age)
+        (== 2 (size))
+    )`)
+
+// Valid schema.
+b := jsqt.Get(j, `
+    (and
+        (is-str name)
+        (is-num age)
+        (get books (arr -t (and
+            (is-str name)
+            (is-num pages)
+        )))
+    )`)
+
+fmt.Println(a) //
+fmt.Println(b) // The result here is the input (b == j).
+```
+
+Note the help of [(arr -t)](#arr) function.
 
 ## (if)
 
