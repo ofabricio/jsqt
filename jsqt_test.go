@@ -71,6 +71,7 @@ func TestGet(t *testing.T) {
 		{give: `[3,4,5]`, when: `(reduce 2 (expr (this) + (val)))`, then: `14`},
 		// (transpose)
 		{give: `3`, when: `(transpose)`, then: `3`},
+		{give: `[{"a":3,"b":5},{"a":4,"b":6,"c":7}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6]}`},
 		{give: `[{"a":3,"b":5,"c":7},{"a":4,"b":6}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6],"c":[7]}`},
 		{give: `[{"a":3,"b":5},{"a":4,"b":6}]`, when: `(transpose)`, then: `{"a":[3,4],"b":[5,6]}`},
 		{give: `{"a":[3,4,5],"b":[6,7]}`, when: `(transpose)`, then: `[{"a":3,"b":6},{"a":4,"b":7},{"a":5}]`},

@@ -1077,62 +1077,73 @@ func funcUnwind(q *Query, j Json) Json {
 
 func funcTranspose(q *Query, j Json) Json {
 	if j.IsObject() {
+		keyAndArr := make([]Json, 0, 16)
+		j.ForEachKeyVal(func(k, v Json) bool {
+			if v.IsArray() {
+				keyAndArr = append(keyAndArr, k, v.Flatten(-1))
+			}
+			return false
+		})
 		var o strings.Builder
 		o.Grow(len(j.s) << 1)
 		o.WriteString("[")
-		done := 0
-		size := j.Size().Int()
-		for i := 0; done < size; i++ {
-			c := 0
-			open := true
-			j.ForEachKeyVal(func(k, v Json) bool {
-				if !v.IsArray() {
-					return false
+		for {
+			wrote := 0
+			for i := 0; i < len(keyAndArr)-1; i += 2 {
+
+				key, arr := keyAndArr[i], keyAndArr[i+1]
+
+				arr.s.WS()
+				val := arr.s.TokenFor(arr.matchValue)
+				arr.s.WS()
+				arr.s.MatchByte(',')
+				keyAndArr[i+1] = arr
+
+				if len(val) == 0 {
+					continue
 				}
-				done++
-				idx := strconv.FormatInt(int64(i), 10)
-				if v = v.Get(idx); !v.Exists() {
-					return false
-				}
-				if open {
-					open = false
-					done = 0
-					if i > 0 {
+
+				if wrote > 0 {
+					o.WriteString(",")
+				} else {
+					if o.Len() > 1 {
 						o.WriteString(",")
 					}
 					o.WriteString("{")
 				}
-				if c > 0 {
-					o.WriteString(",")
-				}
-				o.WriteString(k.String())
+				o.WriteString(key.String())
 				o.WriteString(":")
-				o.WriteString(v.String())
-				c++
-				return false
-			})
-			if !open {
-				o.WriteString("}")
+				o.WriteString(val)
+				wrote++
 			}
+			if wrote == 0 {
+				break
+			}
+			o.WriteString("}")
 		}
 		o.WriteString("]")
 		return JSON(o.String())
 	}
 	if j.IsArray() {
-		var arg [1]any
 		var o strings.Builder
 		o.Grow(len(j.s))
 		o.WriteString("{")
-		keys := j.Get("0").Keys()
-		keys.ForEach(func(i, k Json) bool {
-			arg[0] = k.TrimQuote()
-			v := j.QueryWith("(get * (match -k (arg 0)))", arg[:])
+		j.Get("0").ForEachKeyVal(func(k, v Json) bool {
 			if o.Len() > 1 {
 				o.WriteString(",")
 			}
 			o.WriteString(k.String())
-			o.WriteString(":")
-			o.WriteString(v.String())
+			o.WriteString(":[")
+			j.ForEach(func(i, item Json) bool {
+				if item = item.Get(k.TrimQuote()); item.Exists() {
+					if i.String() != "0" {
+						o.WriteString(",")
+					}
+					o.WriteString(item.String())
+				}
+				return false
+			})
+			o.WriteString("]")
 			return false
 		})
 		o.WriteString("}")
