@@ -1089,9 +1089,9 @@ func funcTranspose(q *Query, j Json) Json {
 				if !v.IsArray() {
 					return false
 				}
+				done++
 				idx := strconv.FormatInt(int64(i), 10)
 				if v = v.Get(idx); !v.Exists() {
-					done++
 					return false
 				}
 				if open {
@@ -1111,7 +1111,7 @@ func funcTranspose(q *Query, j Json) Json {
 				c++
 				return false
 			})
-			if done < size-1 {
+			if !open {
 				o.WriteString("}")
 			}
 		}

@@ -1444,7 +1444,7 @@ It will convert this input:
 }
 ```
 
-To this output:
+Into this output:
 
 ```json
 [
