@@ -397,7 +397,8 @@ These functions return the first or last item of a JSON array.
 (last arg ...)
 ```
 
-The arguments are optional and can be keys or functions and they work like `(get)`, but without `*`.
+The arguments are optional and they have the same behavior as in `(get)` function,
+except that it returns only the first or last item found.
 
 **Example**
 
@@ -428,7 +429,7 @@ This function collects unique values from an array.
 (unique arg ...)
 ```
 
-The argument list can be keys or functions and they work like `(collect)`,
+The arguments are optional and they have the same behavior as in `(get)` function,
 except that it collects unique values.
 
 **Example**
@@ -716,18 +717,18 @@ fmt.Println(c) // false
 fmt.Println(d) // true
 ```
 
-## (or) (and) (not)
+## (and) (or) (not)
 
-These functions apply OR, AND, NOT logic to its arguments.
+These functions apply AND, OR and NOT logic to its arguments.
 They return the current context when true or an empty context otherwise.
 
 ```clj
-(or  a b ...)
 (and a b ...)
+(or  a b ...)
 (not a)
 ```
 
-The arguments must be functions.
+The arguments can be functions or keys. Both `(and)` and `(or)` have variadic arguments.
 
 **Example**
 
@@ -794,7 +795,7 @@ This function works like a regular `if` or `switch/case`.
 If `cond` is true `then` is executed, otherwise `else` is;
 `else` is optional and returns `(this)` when omited.
 
-`if` accepts many pairs of cond/then and in that case it works like a switch/case.
+`(if)` accepts variadic pairs of cond/then and in that case it works like a switch/case.
 
 `cond` and `else` can be a function or a key;
 `then` can be a function or a raw value.
@@ -1354,13 +1355,13 @@ to apply a custom logic to the current context.
 **Example**
 
 ```go
-f := func(j jsqt.Json) jsqt.Json {
-    date, _ := time.Parse(time.RFC3339, j.TrimQuote())
-    newDate := date.Format(time.RFC1123)
+j := `{ "date": "2022-09-07T12:30:00Z" }`
+
+f := func(date jsqt.Json) jsqt.Json {
+    curDate, _ := time.Parse(time.RFC3339, date.TrimQuote())
+    newDate := curDate.Format(time.RFC1123)
     return jsqt.JSON(newDate).Stringify()
 }
-
-j := `{ "date": "2022-09-07T12:30:00Z" }`
 
 a := jsqt.GetWith(j, `(set date (arg 0))`, []any{f})
 
