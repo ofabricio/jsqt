@@ -1400,7 +1400,7 @@ func ExampleJson_IterateFast() {
 	// {"A":"1","B":"2","C":{"A":"3","B":{"A":"4","B":[{"A":"5"},{"A":"6","B":"7","C":["8","9","0",{},[]]}]}},"D":"1"}
 }
 
-func BenchmarkJson_Iterate(b *testing.B) {
+func BenchmarkJson_IterateFast(b *testing.B) {
 	m := func(k, v Json) (Json, Json) {
 		return k, v
 	}
@@ -1587,7 +1587,7 @@ func ExampleJson_Iterate() {
 	// Final: {"a":3,"b":{"c":4},"d":[5,{"e":6}]}
 }
 
-func BenchmarkJson_IterateAll(b *testing.B) {
+func BenchmarkJson_Iterate(b *testing.B) {
 	m := func(k, v Json) (Json, Json) {
 		return k, v
 	}
