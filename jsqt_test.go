@@ -284,7 +284,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":4,"c":5}`, when: `(pick b c)`, then: `{"b":4,"c":5}`},
 		{give: `3`, when: `(pick)`, then: `3`},
 		// (this)
-		{give: `[3,4]`, when: `(collect (> 3))`, then: `[4]`},
+		{give: `[3,4]`, when: `(collect (obj x (this)))`, then: `[{"x":3},{"x":4}]`},
 		// (split)
 		{give: `{"a":"one,two"}`, when: `(split ";" a)`, then: `["one,two"]`},
 		{give: `"one,two,three"`, when: `(split ";")`, then: `["one,two,three"]`},
