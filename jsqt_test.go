@@ -1597,12 +1597,6 @@ func BenchmarkJson_Iterate(b *testing.B) {
 	}
 }
 
-func Benchmark_QueryFunction_IterateAll(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate (this) (this))`)
-	}
-}
-
 func ExampleJson_Flatten() {
 
 	j := JSON(`[3,[4,[[5]]],[[{"a":6},{"a":[7,[8]]}]],{"a":[[9]]}]`)
