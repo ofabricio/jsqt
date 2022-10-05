@@ -159,6 +159,10 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcSlice(q, j)
 	case "reduce":
 		return funcReduce(q, j)
+	case "min":
+		return funcMin(q, j)
+	case "max":
+		return funcMax(q, j)
 	case "at":
 		return funcAt(q, j)
 	case "group":
@@ -704,6 +708,38 @@ func funcReduce(q *Query, j Json) Json {
 	j.ForEachKeyVal(f)
 	j.ForEach(f)
 	return acc
+}
+
+func funcMin(q *Query, j Json) Json {
+	var min Json
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		if item = funcGet(q, item); item.Exists() {
+			if i.String() == "0" || item.LT(min) {
+				min = item
+			}
+		}
+		return false
+	})
+	return min
+}
+
+func funcMax(q *Query, j Json) Json {
+	var max Json
+	ini := q.s.Mark()
+	j.ForEach(func(i, item Json) bool {
+		q.k, q.v = i, item
+		q.s.Back(ini)
+		if item = funcGet(q, item); item.Exists() {
+			if i.String() == "0" || item.GT(max) {
+				max = item
+			}
+		}
+		return false
+	})
+	return max
 }
 
 func funcGroup(q *Query, j Json) Json {

@@ -536,6 +536,31 @@ fmt.Println(a) // 14
 fmt.Println(b) // 14
 ```
 
+## (min) (max)
+
+These functions return the min or max value.
+
+```clj
+(min)
+(min arg ...)
+(max)
+(max arg ...)
+```
+
+The arguments are optional and they behave as in `(get)` function on each array item.
+
+**Example**
+
+```go
+j := `[{ "a": 3 }, { "a": 1 }, { "a": 2 }]`
+
+a := jsqt.Get(j, `(min a)`)
+b := jsqt.Get(j, `(max a)`)
+
+fmt.Println(a) // 1
+fmt.Println(b) // 3
+```
+
 ## (root)
 
 This function returns the root JSON document.

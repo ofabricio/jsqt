@@ -14,6 +14,13 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (min) (max)
+		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(max a)`, then: `3`},
+		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(min a)`, then: `1`},
+		{give: `[2,1,3]`, when: `(min)`, then: `1`},
+		{give: `[2,1,3]`, when: `(max)`, then: `3`},
+		{give: `[2]`, when: `(max)`, then: `2`},
+		{give: `[2]`, when: `(min)`, then: `2`},
 		// (valid)
 		{give: ``, when: `(valid)`, then: ``},
 		{give: `{"a":[3,{"a":}]}`, when: `(valid a)`, then: ``},
