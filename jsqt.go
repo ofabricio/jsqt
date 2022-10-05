@@ -696,9 +696,9 @@ func funcReduce(q *Query, j Json) Json {
 	acc := q.ParseFunOrRaw(j)
 	m := q.s.Mark()
 	f := func(i, v Json) bool {
-		q.k, q.v = i, v
+		q.k, q.v = i, acc
 		q.s.Back(m)
-		acc = q.ParseFun(acc)
+		acc = q.ParseFun(v)
 		return false
 	}
 	j.ForEachKeyVal(f)
