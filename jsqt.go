@@ -9,16 +9,37 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unsafe"
 
 	. "github.com/ofabricio/scanner" //lint:ignore ST1001 should not use dot imports
 )
 
 func Get(jsn, qry string) Json {
-	return JSON(jsn).Query(qry)
+	return Compile(qry).Get(jsn)
 }
 
-func GetWith(jsn, qry string, args []any) Json {
-	return JSON(jsn).QueryWith(qry, args)
+func GetArgs(jsn, qry string, args []any) Json {
+	return Compile(qry).GetArgs(jsn, args)
+}
+
+func (b ByteCode) Get(jsn string) Json {
+	j := JSON(jsn)
+	j.s.WS()
+	q := Query{Root: j, code: b}
+	return q.Parse(j)
+}
+
+func (b ByteCode) GetArgs(jsn string, args []any) Json {
+	j := JSON(jsn)
+	j.s.WS()
+	q := Query{Root: j, code: b, args: args}
+	return q.Parse(j)
+}
+
+func Compile(qry string) ByteCode {
+	c := encoder{s: Scanner(qry), b: make(ByteCode, 0, len(qry))}
+	c.Encode()
+	return c.b
 }
 
 func JSON(jsn string) Json {
@@ -33,25 +54,28 @@ func Valid(jsn string) bool {
 
 // Query is the query language parser.
 type Query struct {
-	s    Scanner
 	Root Json
 	k, v Json
 	save Json
 	savs map[string]Json
 	args []any
-	defs map[string]Scanner
+	defs map[string]ByteCode
+	code ByteCode
 }
 
 func (q *Query) Parse(j Json) Json {
-	q.s.WS()
 	return funcGet(q, j)
 }
 
 func (q *Query) ParseFunOrKey(j Json) Json {
-	if q.s.EqualByte('(') {
+	if q.code.isFun() {
 		return q.ParseFun(j)
 	}
-	return q.ParseKey(j)
+	key := q.code.ident()
+	if len(key) > 2 && key[0] == '"' {
+		key = key[1 : len(key)-1]
+	}
+	return j.Get(key)
 }
 
 func (q *Query) ParseFunOrKeyOptional(j Json) Json {
@@ -62,282 +86,245 @@ func (q *Query) ParseFunOrKeyOptional(j Json) Json {
 }
 
 func (q *Query) ParseFunOrRaw(j Json) Json {
-	if q.s.EqualByte('(') {
+	if q.code.isFun() {
 		return q.ParseFun(j)
 	}
-	return q.ParseRaw()
+	return JSON(q.code.ident())
 }
 
 func (q *Query) ParseFun(j Json) Json {
-	if q.s.MatchByte('(') {
-		qk, qv := q.k, q.v
-		fname := q.ParseRaw().String()
-		j = q.CallFun(fname, j)
-		q.SkipArgs()
-		q.s.MatchByte(')')
-		q.s.WS()
-		q.k, q.v = qk, qv
+	qk, qv := q.k, q.v
+	op := q.code.next()
+	switch op {
+	case opGet:
+		j = funcGet(q, j)
+	case opSet:
+		j = funcSet(q, j)
+	case opUpsert:
+		j = funcUpsert(q, j)
+	case opArr:
+		j = funcArr(q, j)
+	case opCollect:
+		j = funcCollect(q, j)
+	case opFirst:
+		j = funcFirst(q, j)
+	case opLast:
+		j = funcLast(q, j)
+	case opUnique:
+		j = funcUnique(q, j)
+	case opGroup:
+		j = funcGroup(q, j)
+	case opAt:
+		j = funcAt(q, j)
+	case opExpr:
+		j = funcExpr(q, j)
+	case opObj:
+		j = funcObj(q, j)
+	case opFlatten:
+		j = funcFlatten(q, j)
+	case opReverse:
+		j = funcReverse(q, j)
+	case opSort:
+		j = funcSort(q, j)
+	case opSlice:
+		j = funcSlice(q, j)
+	case opReduce:
+		j = funcReduce(q, j)
+	case opChunk:
+		j = funcChunk(q, j)
+	case opPartition:
+		j = funcPartition(q, j)
+	case opMin:
+		j = funcMin(q, j)
+	case opMax:
+		j = funcMax(q, j)
+	case opArg:
+		j = funcArg(q, j)
+	case opPick:
+		j = funcPick(q, j)
+	case opPluck:
+		j = funcPluck(q, j)
+	case opUnwind:
+		j = funcUnwind(q, j)
+	case opTranspose:
+		j = funcTranspose(q, j)
+	case opIf:
+		j = funcIf(q, j)
+	case opEither:
+		j = funcEither(q, j)
+	case opAnd:
+		j = funcAnd(q, j)
+	case opOr:
+		j = funcOr(q, j)
+	case opNot:
+		j = funcNot(q, j)
+	case opIn:
+		j = funcIN(q, j)
+	case opEQ:
+		j = funcEQ(q, j)
+	case opNEQ:
+		j = funcNEQ(q, j)
+	case opGT:
+		j = funcGT(q, j)
+	case opGTE:
+		j = funcGTE(q, j)
+	case opLT:
+		j = funcLT(q, j)
+	case opLTE:
+		j = funcLTE(q, j)
+	case opIsNum:
+		j = funcIsNum(q, j)
+	case opIsObj:
+		j = funcIsObj(q, j)
+	case opIsArr:
+		j = funcIsArr(q, j)
+	case opIsStr:
+		j = funcIsStr(q, j)
+	case opIsBool:
+		j = funcIsBool(q, j)
+	case opIsNull:
+		j = funcIsNull(q, j)
+	case opIsNully:
+		j = funcIsNully(q, j)
+	case opIsEmpty:
+		j = funcIsEmpty(q, j)
+	case opIsEmptyObj:
+		j = funcIsEmptyObj(q, j)
+	case opIsEmptyArr:
+		j = funcIsEmptyArr(q, j)
+	case opIsEmptyStr:
+		j = funcIsEmptyStr(q, j)
+	case opIsVoid:
+		j = funcIsVoid(q, j)
+	case opIsBlank:
+		j = funcIsBlank(q, j)
+	case opIsSome:
+		j = funcIsSome(q, j)
+	case opFalsy:
+		j = funcIsFalsy(q, j)
+	case opTruthy:
+		j = funcIsTruthy(q, j)
+	case opExists:
+		j = funcExists(q, j)
+	case opBool:
+		j = funcBool(q, j)
+	case opDefault:
+		j = funcDefault(q, j)
+	case opIterate:
+		j = funcIterate(q, j)
+	case opDebug:
+		j = funcDebug(q, j)
+	case opReplace:
+		j = funcReplace(q, j)
+	case opConcat:
+		j = funcConcat(q, j)
+	case opJoin:
+		j = funcJoin(q, j)
+	case opSplit:
+		j = funcSplit(q, j)
+	case opMatch:
+		j = funcMatch(q, j)
+	case opValid:
+		j = funcValid(q, j)
+	case opSave:
+		j = funcSave(q, j)
+	case opLoad:
+		j = funcLoad(q, j)
+	case opDef:
+		j = funcDef(q, j)
+	case opRoot:
+		j = q.Root
+	case opKey:
+		j = q.k
+	case opVal:
+		j = q.v
+	case opNothing:
+		j = JSON("")
+	case opMerge:
+		j = j.Merge()
+	case opSize:
+		j = j.Size()
+	case opRaw:
+		j = q.ParseFunOrRaw(j)
+	case opStringify:
+		j = j.Stringify()
+	case opJsonify:
+		j = j.Jsonify()
+	case opUgly:
+		j = j.Uglify()
+	case opPretty:
+		j = j.Prettify()
+	case opKeys:
+		j = j.Keys()
+	case opValues:
+		j = j.Values()
+	case opEntries:
+		j = j.Entries()
+	case opObjectify:
+		j = j.Objectify()
+	case opUpper:
+		j = JSON(strings.ToUpper(j.String()))
+	case opLower:
+		j = JSON(strings.ToLower(j.String()))
+	case opUnknown:
+		j = funcUnknown(q, j)
 	}
+	if op > opThis {
+		q.SkipArgs()
+		q.code.match(opEOF)
+	}
+	q.k, q.v = qk, qv
 	return j
 }
 
-func (q *Query) ParseKey(j Json) Json {
-	key := ""
-	if m := q.s.Mark(); q.s.UtilMatchString('"') {
-		key = q.s.Token(m)
-		key = key[1 : len(key)-1]
-	} else if q.MatchAnything() {
-		key = q.s.Token(m)
-	}
-	q.s.WS()
-	return j.Get(key)
-}
-
-func (q *Query) ParseRaw() Json {
-	m := q.s.Mark()
-	_ = q.s.UtilMatchString('"') ||
-		q.s.UtilMatchOpenCloseCount('{', '}', '"') ||
-		q.s.UtilMatchOpenCloseCount('[', ']', '"') ||
-		q.MatchAnything()
-	raw := q.s.Token(m)
-	q.s.WS()
-	return JSON(raw)
-}
-
 func (q *Query) Match(flag string) bool {
-	return q.s.Match(flag) && q.s.WS()
+	return q.code.matchIdent(flag)
 }
 
 func (q *Query) SkipArgs() {
-	for q.MoreArg() {
-		q.SkipArg()
-	}
+	q.code.skipArgs()
 }
 
 func (q *Query) SkipArg() {
-	_ = q.s.UtilMatchOpenCloseCount('(', ')', '"') ||
-		q.s.UtilMatchString('"') ||
-		q.MatchAnything()
-	q.s.WS()
-}
-
-func (q *Query) IsEmpty() bool {
-	return q.s.String() == ""
+	q.code.skipArg()
 }
 
 func (q Query) MoreArg() bool {
-	return !q.s.EqualByte(')') && !q.IsEmpty()
+	return q.code.more() && !q.code.equal(opEOF)
 }
 
-func (q *Query) MatchAnything() bool {
-	return q.s.MatchUntilLTEOr2(' ', ')', 0)
-}
-
-func (q *Query) CallFun(fname string, j Json) Json {
-	switch fname {
-	case "get":
-		return funcGet(q, j)
-	case "set":
-		return funcSet(q, j)
-	case "obj":
-		return funcObj(q, j)
-	case "arr":
-		return funcArr(q, j)
-	case "raw":
-		return q.ParseRaw()
-	case "collect":
-		return funcCollect(q, j)
-	case "unique":
-		return funcUnique(q, j)
-	case "first":
-		return funcFirst(q, j)
-	case "last":
-		return funcLast(q, j)
-	case "flatten":
-		return funcFlatten(q, j)
-	case "slice":
-		return funcSlice(q, j)
-	case "reduce":
-		return funcReduce(q, j)
-	case "chunk":
-		return funcChunk(q, j)
-	case "partition":
-		return funcPartition(q, j)
-	case "min":
-		return funcMin(q, j)
-	case "max":
-		return funcMax(q, j)
-	case "at":
-		return funcAt(q, j)
-	case "group":
-		return funcGroup(q, j)
-	case "upsert":
-		return funcUpsert(q, j)
-	case "size":
-		return j.Size()
-	case "default":
-		return funcDefault(q, j)
-	case "merge":
-		return j.Merge()
-	case "iterate":
-		return funcIterate(q, j)
-	case "is-num":
-		return funcIsNum(q, j)
-	case "is-obj":
-		return funcIsObj(q, j)
-	case "is-arr":
-		return funcIsArr(q, j)
-	case "is-str":
-		return funcIsStr(q, j)
-	case "is-bool":
-		return funcIsBool(q, j)
-	case "is-null":
-		return funcIsNull(q, j)
-	case "is-empty":
-		return funcIsEmpty(q, j)
-	case "is-empty-arr":
-		return funcIsEmptyArr(q, j)
-	case "is-empty-obj":
-		return funcIsEmptyObj(q, j)
-	case "is-empty-str":
-		return funcIsEmptyStr(q, j)
-	case "is-some":
-		return funcIsSome(q, j)
-	case "is-void":
-		return funcIsVoid(q, j)
-	case "is-blank":
-		return funcIsBlank(q, j)
-	case "is-nully":
-		return funcIsNully(q, j)
-	case "truthy":
-		return funcIsTruthy(q, j)
-	case "falsy":
-		return funcIsFalsy(q, j)
-	case "exists":
-		return funcExists(q, j)
-	case "if":
-		return funcIf(q, j)
-	case "either":
-		return funcEither(q, j)
-	case "root":
-		return q.Root
-	case "this":
-		return j
-	case "in":
-		return funcIN(q, j)
-	case "==":
-		return funcEQ(q, j)
-	case "!=":
-		return funcNEQ(q, j)
-	case ">=":
-		return funcGTE(q, j)
-	case "<=":
-		return funcLTE(q, j)
-	case ">":
-		return funcGT(q, j)
-	case "<":
-		return funcLT(q, j)
-	case "or":
-		return funcOr(q, j)
-	case "and":
-		return funcAnd(q, j)
-	case "not":
-		return funcNot(q, j)
-	case "bool":
-		return funcBool(q, j)
-	case "debug":
-		return funcDebug(q, j)
-	case "keys":
-		return j.Keys()
-	case "values":
-		return j.Values()
-	case "entries":
-		return j.Entries()
-	case "objectify":
-		return j.Objectify()
-	case "ugly":
-		return j.Uglify()
-	case "pretty":
-		return j.Prettify()
-	case "jsonify":
-		return j.Jsonify()
-	case "stringify":
-		return j.Stringify()
-	case "upper":
-		return JSON(strings.ToUpper(j.String()))
-	case "lower":
-		return JSON(strings.ToLower(j.String()))
-	case "replace":
-		return funcReplace(q, j)
-	case "join":
-		return funcJoin(q, j)
-	case "split":
-		return funcSplit(q, j)
-	case "concat":
-		return funcConcat(q, j)
-	case "sort":
-		return funcSort(q, j)
-	case "reverse":
-		return funcReverse(q, j)
-	case "pick":
-		return funcPick(q, j)
-	case "pluck":
-		return funcPluck(q, j)
-	case "def":
-		return funcDef(q, j)
-	case "save":
-		return funcSave(q, j)
-	case "load":
-		return funcLoad(q, j)
-	case "key":
-		return q.k
-	case "val":
-		return q.v
-	case "arg":
-		return funcArg(q, j)
-	case "match":
-		return funcMatch(q, j)
-	case "expr":
-		return funcExpr(q, j)
-	case "unwind":
-		return funcUnwind(q, j)
-	case "transpose":
-		return funcTranspose(q, j)
-	case "valid":
-		return funcValid(q, j)
-	default:
-		if defFunMark, ok := q.defs[fname]; ok {
-			return callDefFun(q, j, defFunMark)
-		}
-	}
-	return JSON("")
-}
-
-func callDefFun(q *Query, j Json, defFunMark Scanner) Json {
-	m := q.s.Mark()
-	q.s.Back(defFunMark)
-	j = q.ParseFun(j)
-	q.s.Back(m)
+func callDefFun(q *Query, j Json, defFunMark ByteCode) Json {
+	m := q.code
+	q.code = defFunMark
+	j = q.ParseFunOrKey(j)
+	q.code = m
 	return j
 }
 
 // #region Functions
 
-func funcDef(q *Query, j Json) Json {
-	fname := q.ParseRaw().String()
-	if m := q.s.Mark(); q.s.UtilMatchOpenCloseCount('(', ')', '"') {
-		if q.defs == nil {
-			q.defs = make(map[string]Scanner)
-		}
-		q.defs[fname] = m
+func funcUnknown(q *Query, j Json) Json {
+	name := q.code.ident()
+	if defFunMark, ok := q.defs[name]; ok {
+		j = callDefFun(q, j, defFunMark)
 	}
+	return j
+}
+
+func funcDef(q *Query, j Json) Json {
+	fname := q.ParseFunOrRaw(j).String()
+	m := q.code
+	q.SkipArg()
+	if q.defs == nil {
+		q.defs = make(map[string]ByteCode)
+	}
+	q.defs[fname] = m
 	return j
 }
 
 func funcGet(q *Query, j Json) Json {
 	for q.MoreArg() {
-		if q.s.MatchByte('*') {
-			q.s.WS()
+		if q.Match("*") {
 			j = funcCollect(q, j)
 		} else {
 			j = q.ParseFunOrKey(j)
@@ -353,7 +340,7 @@ func funcSet(q *Query, j Json) Json {
 
 func funcSetInternal(q *Query, j Json, insert bool) Json {
 	if q.Match("-m") {
-		j = q.ParseFun(j)
+		j = q.ParseFunOrKey(j)
 	}
 	keyOrIndex := q.ParseFunOrRaw(j)
 	if !q.MoreArg() {
@@ -370,7 +357,7 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 			if k.TrimQuote() == keyOrIdx {
 				found = true
 				if q.Match("-r") {
-					k = q.ParseRaw()
+					k = q.ParseFunOrRaw(v)
 				}
 				if v = funcSetInternal(q, v, insert); v.Exists() {
 					if o.Len() > 1 {
@@ -426,9 +413,9 @@ func funcSetInternal(q *Query, j Json, insert bool) Json {
 					v = funcSetInternal(q, v, insert)
 				} else if keyOrIndex.s.EqualByte('*') {
 					found = true
-					m := q.s.Mark()
+					m := q.code
 					v = funcSetInternal(q, v, insert)
-					q.s.Back(m)
+					q.code = m
 				}
 			}
 			if v.Exists() {
@@ -475,9 +462,9 @@ func funcArr(q *Query, j Json) Json {
 func funcArrTest(q *Query, j Json) Json {
 	if j.IsArray() {
 		var ok bool
-		m := q.s.Mark()
+		m := q.code
 		j.ForEach(func(i, v Json) bool {
-			q.s.Back(m)
+			q.code = m
 			ok = q.ParseFunOrKey(v).Exists()
 			return !ok
 		})
@@ -506,16 +493,16 @@ func funcObj(q *Query, j Json) Json {
 		}
 	}
 	if q.Match("-i") {
-		m := q.s.Mark()
+		m := q.code
 		j.ForEach(func(i, v Json) bool {
 			q.k, q.v = i, v
-			q.s.Back(m)
+			q.code = m
 			writeKeyVals(v)
 			return false
 		})
 		j.ForEachKeyVal(func(k, v Json) bool {
 			q.k, q.v = k, v
-			q.s.Back(m)
+			q.code = m
 			writeKeyVals(v)
 			return false
 		})
@@ -530,10 +517,10 @@ func funcCollect(q *Query, j Json) Json {
 	var o strings.Builder
 	o.Grow(len(j.s))
 	o.WriteString("[")
-	ini := q.s.Mark()
+	m := q.code
 	f := func(k, item Json) bool {
 		q.k, q.v = k, item
-		q.s.Back(ini)
+		q.code = m
 		if item = funcGet(q, item); item.Exists() {
 			if o.Len() > 1 {
 				o.WriteString(",")
@@ -554,10 +541,10 @@ func funcUnique(q *Query, j Json) Json {
 	var o strings.Builder
 	o.Grow(len(j.s))
 	o.WriteString("[")
-	ini := q.s.Mark()
+	m := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.code = m
 		if item = funcGet(q, item); item.Exists() && !uniq[item] {
 			uniq[item] = true
 			if o.Len() > 1 {
@@ -573,10 +560,10 @@ func funcUnique(q *Query, j Json) Json {
 
 func funcFirst(q *Query, j Json) Json {
 	var first Json
-	ini := q.s.Mark()
+	m := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.code = m
 		first = funcGet(q, item)
 		return first.Exists()
 	})
@@ -585,10 +572,10 @@ func funcFirst(q *Query, j Json) Json {
 
 func funcLast(q *Query, j Json) Json {
 	var last Json
-	ini := q.s.Mark()
+	m := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.code = m
 		if item = funcGet(q, item); item.Exists() {
 			last = item
 		}
@@ -598,21 +585,21 @@ func funcLast(q *Query, j Json) Json {
 }
 
 func funcFlatten(q *Query, j Json) Json {
-	m := q.s.Mark()
+	m := q.code
 	if q.Match("-k") {
 		if j.IsObject() {
 			var o strings.Builder
 			o.Grow(len(j.s))
 			o.WriteString("{")
-			m := q.s.Mark()
+			m := q.code
 			j.ForEachKeyVal(func(k, v Json) bool {
 				if o.Len() > 1 {
 					o.WriteString(",")
 				}
 				found := false
-				q.s.Back(m)
+				q.code = m
 				for q.MoreArg() {
-					if q.ParseRaw().TrimQuote() == k.TrimQuote() {
+					if q.ParseFunOrRaw(v).TrimQuote() == k.TrimQuote() {
 						found = true
 						break
 					}
@@ -633,7 +620,7 @@ func funcFlatten(q *Query, j Json) Json {
 			o.Grow(len(j.s))
 			o.WriteString("[")
 			j.ForEach(func(i, v Json) bool {
-				q.s.Back(m)
+				q.code = m
 				if v = funcFlatten(q, v); v.Exists() {
 					if o.Len() > 1 {
 						o.WriteString(",")
@@ -647,7 +634,7 @@ func funcFlatten(q *Query, j Json) Json {
 		}
 	}
 	depth := -1
-	if v := q.ParseRaw(); v.Exists() {
+	if v := q.ParseFunOrRaw(j); v.Exists() {
 		depth = v.Int()
 	}
 	return j.Flatten(depth)
@@ -702,11 +689,11 @@ func funcAt(q *Query, j Json) Json {
 
 func funcReduce(q *Query, j Json) Json {
 	acc := q.ParseFunOrRaw(j)
-	m := q.s.Mark()
+	m := q.code
 	f := func(i, v Json) bool {
 		q.k, q.v = i, acc
-		q.s.Back(m)
-		acc = q.ParseFun(v)
+		q.code = m
+		acc = q.ParseFunOrKey(v)
 		return false
 	}
 	j.ForEachKeyVal(f)
@@ -751,10 +738,10 @@ func funcPartition(q *Query, j Json) Json {
 	var o strings.Builder
 	o.Grow(len(j.s) + 5)
 	o.WriteString("[[")
-	m := q.s.Mark()
+	m := q.code
 	j.ForEach(func(i, v Json) bool {
 		q.k, q.v = i, v
-		q.s.Back(m)
+		q.code = m
 		if q.ParseFunOrKey(v).Exists() {
 			if o.Len() > 2 {
 				o.WriteString(",")
@@ -778,10 +765,10 @@ func funcPartition(q *Query, j Json) Json {
 
 func funcMin(q *Query, j Json) Json {
 	var min Json
-	ini := q.s.Mark()
+	ini := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.code = ini
 		if item = funcGet(q, item); item.Exists() {
 			if i.String() == "0" || item.LT(min) {
 				min = item
@@ -794,10 +781,10 @@ func funcMin(q *Query, j Json) Json {
 
 func funcMax(q *Query, j Json) Json {
 	var max Json
-	ini := q.s.Mark()
+	ini := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.code = ini
 		if item = funcGet(q, item); item.Exists() {
 			if i.String() == "0" || item.GT(max) {
 				max = item
@@ -811,10 +798,10 @@ func funcMax(q *Query, j Json) Json {
 func funcGroup(q *Query, j Json) Json {
 	group := make(map[Json][]Json, 16)
 	groupOrder := make([]Json, 0, len(group))
-	m := q.s.Mark()
+	m := q.code
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(m)
+		q.code = m
 		if g, v := q.ParseFunOrKey(item), q.ParseFunOrKey(item); g.Exists() && v.Exists() {
 			if _, ok := group[g]; !ok {
 				groupOrder = append(groupOrder, g)
@@ -947,18 +934,18 @@ func funcIterateCollect(q *Query, j Json) Json {
 	includeRoot := q.Match("-r")
 	depth := 0
 	if q.Match("-d") {
-		depth = q.ParseRaw().Int()
+		depth = q.ParseFunOrRaw(j).Int()
 	}
 	var o strings.Builder
 	o.Grow(len(j.s))
 	o.WriteString("[")
-	m := q.s.Mark()
+	m := q.code
 	j.Iterator(depth, func(k, v Json) {
 		q.k, q.v = k, v
 		if !includeRoot && k.IsNull() {
 			return
 		}
-		q.s.Back(m)
+		q.code = m
 		if v = q.ParseFun(v); v.Exists() {
 			if o.Len() > 1 {
 				o.WriteString(",")
@@ -974,56 +961,56 @@ func funcIterateAll(q *Query, j Json) Json {
 	includeRoot := q.Match("-r")
 	depth := 0
 	if q.Match("-d") {
-		depth = q.ParseRaw().Int()
+		depth = q.ParseFunOrRaw(j).Int()
 	}
-	ini := q.s.Mark()
+	m := q.code
 	return j.Iterate(depth, func(k, v Json) (Json, Json) {
 		q.k, q.v = k, v
 		if !includeRoot && k.IsNull() {
 			return k, v
 		}
-		q.s.Back(ini)
-		k = q.ParseFun(k)
-		v = q.ParseFun(v)
+		q.code = m
+		k = q.ParseFunOrKey(k)
+		v = q.ParseFunOrKey(v)
 		return k, v
 	})
 }
 
 func funcIterateFast(q *Query, j Json) Json {
-	ini := q.s.Mark()
+	m := q.code
 	return j.IterateFast(func(k, v Json) (Json, Json) {
 		q.k, q.v = k, v
-		q.s.Back(ini)
-		k = q.ParseFun(k)
-		v = q.ParseFun(v)
+		q.code = m
+		k = q.ParseFunOrKey(k)
+		v = q.ParseFunOrKey(v)
 		return k, v
 	})
 }
 
 func funcIterateKeys(q *Query, j Json) Json {
-	ini := q.s.Mark()
+	m := q.code
 	return j.IterateKeys(func(k Json) Json {
 		q.k = k
-		q.s.Back(ini)
-		return q.ParseFun(k)
+		q.code = m
+		return q.ParseFunOrKey(k)
 	})
 }
 
 func funcIterateValues(q *Query, j Json) Json {
-	ini := q.s.Mark()
+	m := q.code
 	return j.IterateValues(func(v Json) Json {
 		q.v = v
-		q.s.Back(ini)
-		return q.ParseFun(v)
+		q.code = m
+		return q.ParseFunOrKey(v)
 	})
 }
 
 func funcIterateKeysValues(q *Query, j Json) Json {
-	ini := q.s.Mark()
+	m := q.code
 	return j.IterateKeysValues(func(kv Json) Json {
 		q.k, q.v = kv, kv
-		q.s.Back(ini)
-		return q.ParseFun(kv)
+		q.code = m
+		return q.ParseFunOrKey(kv)
 	})
 }
 
@@ -1199,9 +1186,9 @@ func funcUnwind(q *Query, j Json) Json {
 			return false
 		})
 	} else if j.IsArray() {
-		m := q.s.Mark()
+		m := q.code
 		j.ForEach(func(i, v Json) bool {
-			q.s.Back(m)
+			q.code = m
 			if unwinded := funcUnwind(q, v).Flatten(-1); unwinded.Exists() {
 				if o.Len() > 1 {
 					o.WriteString(",")
@@ -1535,15 +1522,15 @@ func funcBool(q *Query, j Json) Json {
 func funcDebug(q *Query, j Json) Json {
 	msg := "debug"
 	if q.MoreArg() {
-		msg = q.ParseRaw().String()
+		msg = q.ParseFunOrRaw(j).String()
 	}
 	fmt.Printf("[%s] %s\n", msg, j.String())
 	return j
 }
 
 func funcReplace(q *Query, j Json) Json {
-	old := q.ParseRaw()
-	new := q.ParseRaw()
+	old := q.ParseFunOrRaw(j)
+	new := q.ParseFunOrRaw(j)
 	if j.IsString() {
 		return JSON(strings.ReplaceAll(j.String(), old.TrimQuote(), new.TrimQuote()))
 	}
@@ -1551,7 +1538,7 @@ func funcReplace(q *Query, j Json) Json {
 }
 
 func funcJoin(q *Query, j Json) Json {
-	sep := q.ParseRaw().Str()
+	sep := q.ParseFunOrRaw(j).Str()
 	j = q.ParseFunOrKeyOptional(j)
 	var o strings.Builder
 	o.Grow(len(j.s))
@@ -1566,7 +1553,7 @@ func funcJoin(q *Query, j Json) Json {
 }
 
 func funcSplit(q *Query, j Json) Json {
-	sep := q.ParseRaw().Str()
+	sep := q.ParseFunOrRaw(j).Str()
 	j = q.ParseFunOrKeyOptional(j)
 	var o strings.Builder
 	o.Grow(len(j.s) + 32)
@@ -1601,9 +1588,9 @@ func funcSort(q *Query, j Json) Json {
 	key := q.MoreArg()
 	if j.IsObject() {
 		if asc {
-			return j.Query("(entries) (sort 0) (objectify)")
+			return Get(j.String(), "(entries) (sort 0) (objectify)")
 		}
-		return j.Query("(entries) (sort desc 0) (objectify)")
+		return Get(j.String(), "(entries) (sort desc 0) (objectify)")
 	}
 	if j.IsArray() {
 		var items []string
@@ -1611,13 +1598,13 @@ func funcSort(q *Query, j Json) Json {
 			items = append(items, v.String())
 			return false
 		})
-		ini := q.s.Mark()
+		m := q.code
 		sort.SliceStable(items, func(i, j int) bool {
 			var a, b string
 			if key {
-				q.s.Back(ini)
+				q.code = m
 				a = q.ParseFunOrKey(JSON(items[i])).String()
-				q.s.Back(ini)
+				q.code = m
 				b = q.ParseFunOrKey(JSON(items[j])).String()
 			} else {
 				a = items[i]
@@ -1657,10 +1644,10 @@ func funcPick(q *Query, j Json) Json {
 			key := q.ParseFunOrRaw(j).TrimQuote()
 			v := j.Get(key)
 			if q.Match("-r") {
-				key = q.ParseRaw().String()
+				key = q.ParseFunOrRaw(v).String()
 			}
 			if q.Match("-m") {
-				v = q.ParseFun(v)
+				v = q.ParseFunOrKey(v)
 			}
 			if v.Exists() {
 				if o.Len() > 1 {
@@ -1683,10 +1670,10 @@ func funcPluck(q *Query, j Json) Json {
 		var o strings.Builder
 		o.Grow(len(j.s))
 		o.WriteByte('{')
-		ini := q.s.Mark()
+		m := q.code
 		j.ForEachKeyVal(func(k, v Json) bool {
-			for q.s.Back(ini); q.MoreArg(); {
-				key := q.ParseRaw()
+			for q.code = m; q.MoreArg(); {
+				key := q.ParseFunOrRaw(v)
 				if key.TrimQuote() == k.TrimQuote() {
 					return false
 				}
@@ -1711,7 +1698,7 @@ func funcSave(q *Query, j Json) Json {
 			q.savs = make(map[string]Json, 4)
 		}
 		for q.MoreArg() {
-			k := q.ParseRaw().TrimQuote()
+			k := q.ParseFunOrRaw(j).TrimQuote()
 			var v Json
 			if q.Match("-v") {
 				v = q.ParseFunOrKey(j)
@@ -1730,7 +1717,7 @@ func funcSave(q *Query, j Json) Json {
 
 func funcLoad(q *Query, j Json) Json {
 	if q.MoreArg() {
-		id := q.ParseRaw().String()
+		id := q.ParseFunOrRaw(j).String()
 		return q.savs[id]
 	}
 	return q.save
@@ -1745,18 +1732,6 @@ func funcLoad(q *Query, j Json) Json {
 // Json represents a JSON document.
 type Json struct {
 	s Scanner
-}
-
-func (j Json) Query(qry string) Json {
-	j.s.WS()
-	q := Query{s: Scanner(qry), Root: j}
-	return q.Parse(j)
-}
-
-func (j Json) QueryWith(qry string, args []any) Json {
-	j.s.WS()
-	q := Query{s: Scanner(qry), Root: j, args: args}
-	return q.Parse(j)
 }
 
 // String returns the raw JSON data.
@@ -2741,3 +2716,412 @@ func (j *Json) valid() bool {
 }
 
 // #endregion Json
+
+// #region Compiler
+
+func (c *encoder) Encode() {
+	for c.s.More() {
+		c.encode()
+	}
+}
+
+func (c *encoder) encode() {
+	c.s.WS()
+	if c.s.MatchByte('(') {
+		name := c.Raw()
+		op := c.FunOp(name)
+		c.b = append(c.b, op)
+		if op == opUnknown {
+			c.b = append(c.b, opIdent, byte(len(name)))
+			c.b = append(c.b, name...)
+		}
+		for c.s.WS() && c.s.More() && !c.s.MatchByte(')') {
+			c.encode()
+		}
+		if op > opThis {
+			c.b = append(c.b, opEOF)
+		}
+	} else if ident := c.Raw(); ident != "" {
+		c.b = append(c.b, opIdent, byte(len(ident)))
+		c.b = append(c.b, ident...)
+	} else {
+		c.s.Next()
+	}
+}
+
+func (q *encoder) Raw() string {
+	m := q.s.Mark()
+	_ = q.s.UtilMatchString('"') ||
+		q.s.UtilMatchOpenCloseCount('{', '}', '"') ||
+		q.s.UtilMatchOpenCloseCount('[', ']', '"') ||
+		q.s.MatchUntilLTEOr2(' ', ')', 0)
+	return q.s.Token(m)
+}
+
+func (q *encoder) FunOp(name string) byte {
+	switch name {
+	case "get":
+		return opGet
+	case "set":
+		return opSet
+	case "obj":
+		return opObj
+	case "arr":
+		return opArr
+	case "raw":
+		return opRaw
+	case "collect":
+		return opCollect
+	case "unique":
+		return opUnique
+	case "first":
+		return opFirst
+	case "last":
+		return opLast
+	case "flatten":
+		return opFlatten
+	case "slice":
+		return opSlice
+	case "reduce":
+		return opReduce
+	case "chunk":
+		return opChunk
+	case "partition":
+		return opPartition
+	case "min":
+		return opMin
+	case "max":
+		return opMax
+	case "at":
+		return opAt
+	case "group":
+		return opGroup
+	case "upsert":
+		return opUpsert
+	case "size":
+		return opSize
+	case "default":
+		return opDefault
+	case "merge":
+		return opMerge
+	case "iterate":
+		return opIterate
+	case "is-num":
+		return opIsNum
+	case "is-obj":
+		return opIsObj
+	case "is-arr":
+		return opIsArr
+	case "is-str":
+		return opIsStr
+	case "is-bool":
+		return opIsBool
+	case "is-null":
+		return opIsNull
+	case "is-empty":
+		return opIsEmpty
+	case "is-empty-arr":
+		return opIsEmptyArr
+	case "is-empty-obj":
+		return opIsEmptyObj
+	case "is-empty-str":
+		return opIsEmptyStr
+	case "is-some":
+		return opIsSome
+	case "is-void":
+		return opIsVoid
+	case "is-blank":
+		return opIsBlank
+	case "is-nully":
+		return opIsNully
+	case "truthy":
+		return opTruthy
+	case "falsy":
+		return opFalsy
+	case "exists":
+		return opExists
+	case "if":
+		return opIf
+	case "either":
+		return opEither
+	case "root":
+		return opRoot
+	case "this":
+		return opThis
+	case "in":
+		return opIn
+	case "==":
+		return opEQ
+	case "!=":
+		return opNEQ
+	case ">=":
+		return opGTE
+	case "<=":
+		return opLTE
+	case ">":
+		return opGT
+	case "<":
+		return opLT
+	case "or":
+		return opOr
+	case "and":
+		return opAnd
+	case "not":
+		return opNot
+	case "bool":
+		return opBool
+	case "debug":
+		return opDebug
+	case "keys":
+		return opKeys
+	case "values":
+		return opValues
+	case "entries":
+		return opEntries
+	case "objectify":
+		return opObjectify
+	case "ugly":
+		return opUgly
+	case "pretty":
+		return opPretty
+	case "jsonify":
+		return opJsonify
+	case "stringify":
+		return opStringify
+	case "upper":
+		return opUpper
+	case "lower":
+		return opLower
+	case "replace":
+		return opReplace
+	case "join":
+		return opJoin
+	case "split":
+		return opSplit
+	case "concat":
+		return opConcat
+	case "sort":
+		return opSort
+	case "reverse":
+		return opReverse
+	case "pick":
+		return opPick
+	case "pluck":
+		return opPluck
+	case "def":
+		return opDef
+	case "save":
+		return opSave
+	case "load":
+		return opLoad
+	case "key":
+		return opKey
+	case "val":
+		return opVal
+	case "arg":
+		return opArg
+	case "match":
+		return opMatch
+	case "expr":
+		return opExpr
+	case "unwind":
+		return opUnwind
+	case "transpose":
+		return opTranspose
+	case "valid":
+		return opValid
+	case "nothing":
+		return opNothing
+	}
+	return opUnknown
+}
+
+// encoder encodes the query language into bytecode.
+type encoder struct {
+	s Scanner
+	b ByteCode
+}
+
+// ByteCode is the encoded query language.
+type ByteCode []byte
+
+func (b ByteCode) curr() byte {
+	return b[0]
+}
+
+func (b *ByteCode) next() byte {
+	c := b.curr()
+	*b = (*b)[1:]
+	return c
+}
+
+func (b ByteCode) equal(v byte) bool {
+	return b.curr() == v
+}
+
+func (b *ByteCode) match(v byte) bool {
+	if b.more() && b.equal(v) {
+		*b = (*b)[1:]
+		return true
+	}
+	return false
+}
+
+func (b *ByteCode) matchIdent(id string) bool {
+	if b.equal(opIdent) {
+		// 0 = op; 1 = size; 2 = identifier start; 2 + size = identifier end.
+		size := (*b)[1]
+		ident := (*b)[2 : 2+int(size)]
+		if string(ident) == id {
+			*b = (*b)[2+int(size):]
+			return true
+		}
+	}
+	return false
+}
+
+func (b ByteCode) more() bool {
+	return len(b) > 0
+}
+
+func (b *ByteCode) ident() string {
+	if b.match(opIdent) {
+		size := b.next()
+		ident := (*b)[:size]
+		*b = (*b)[size:]
+		return *(*string)(unsafe.Pointer(&ident))
+	}
+	return ""
+}
+
+func (b *ByteCode) skipArgs() {
+	for b.more() && !b.equal(opEOF) {
+		_ = b.skipIdent() ||
+			b.skipFun()
+	}
+}
+
+func (b *ByteCode) skipArg() {
+	if b.more() && !b.equal(opEOF) {
+		_ = b.skipIdent() ||
+			b.skipFun()
+	}
+}
+
+func (b *ByteCode) skipIdent() bool {
+	if b.match(opIdent) {
+		size := b.next()
+		*b = (*b)[size:]
+		return true
+	}
+	return false
+}
+
+func (b *ByteCode) skipFun() bool {
+	if b.next() > opThis {
+		b.skipArgs()
+		return b.match(opEOF)
+	}
+	return true
+}
+
+func (b ByteCode) isFun() bool {
+	return b.curr() > opIdent
+}
+
+const (
+	opEOF byte = iota
+	opIdent
+	// Functions.
+	opVal
+	opKey
+	opUgly
+	opPretty
+	opSize
+	opTranspose
+	opMerge
+	opNothing
+	opKeys
+	opValues
+	opEntries
+	opObjectify
+	opStringify
+	opJsonify
+	opUpper
+	opLower
+	opValid
+	opReverse
+	opJoin
+	opRoot
+	// If a function has no arguments put it above opThis, so that
+	// it will not have an extra byte. Put it below otherwise.
+	opThis
+	opGet
+	opDefault
+	opReplace
+	opSplit
+	opDef
+	opSlice
+	opSet
+	opObj
+	opArr
+	opRaw
+	opAt
+	opArg
+	opCollect
+	opReduce
+	opChunk
+	opPartition
+	opUnique
+	opFirst
+	opLast
+	opFlatten
+	opMin
+	opMax
+	opGroup
+	opUpsert
+	opIterate
+	opIsNum
+	opIsObj
+	opIsArr
+	opIsStr
+	opIsBool
+	opIsNull
+	opIsEmpty
+	opIsEmptyArr
+	opIsEmptyObj
+	opIsEmptyStr
+	opIsSome
+	opIsVoid
+	opIsBlank
+	opIsNully
+	opTruthy
+	opFalsy
+	opExists
+	opIf
+	opEither
+	opIn
+	opEQ
+	opNEQ
+	opGTE
+	opLTE
+	opGT
+	opLT
+	opOr
+	opAnd
+	opNot
+	opBool
+	opDebug
+	opConcat
+	opSort
+	opPick
+	opPluck
+	opSave
+	opLoad
+	opMatch
+	opExpr
+	opUnwind
+	opUnknown
+)
+
+// #endregion Compiler

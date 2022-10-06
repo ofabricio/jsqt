@@ -17,6 +17,15 @@ func TestGet(t *testing.T) {
 		// (iterate -c)
 		{give: `{"a":3,"b":[{"a":4,"b":[{"a":5,"b":[{"a":6}]},{"a":7,"b":[{"a":8}]}]}]}`, when: `(iterate -c (== "a" (key)))`, then: `[3,4,5,6,7,8]`},
 		{give: `{"a":3,"b":[{"a":4,"b":[{"a":5,"b":[{"a":6}]},{"a":7,"b":[{"a":8}]}]}, {"a":9}]}`, when: `(iterate -c -d 3 (== "a" (key)))`, then: `[3,4,9]`},
+		// Test the biggest key possible (255 characters).
+		{
+			give: `{"012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234":3}`,
+			when: `012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234`,
+			then: `3`,
+		},
+		// Test argument skipping.
+		{give: `"a.b"`, when: `(if (is-num) (replace (this) (this)) (is-str) (replace "." "_"))`, then: `"a_b"`},
+		{give: `"a.b"`, when: `(if (is-num) (at (raw 1)) (is-str) (replace "." "_"))`, then: `"a_b"`},
 		// (partition)
 		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(partition (> 2 a))`, then: `[[{"a":3}],[{"a":2},{"a":1}]]`},
 		{give: `[1,2,3,4]`, when: `(partition (> 4))`, then: `[[],[1,2,3,4]]`},
@@ -117,7 +126,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":3,"b":[4,5]}`, when: `(unwind b)`, then: `[{"a":3,"b":4},{"a":3,"b":5}]`},
 		// (expr)
 		{give: ``, when: `(expr 1 + 2 ? 3)`, then: `3`},
-		{give: ``, when: `(expr -4 * -5 + -(raw 1) - -2 + -3)`, then: `18`},
+		{give: ``, when: `(expr -4 * -5 + - (raw 1) - -2 + -3)`, then: `18`},
 		{give: `{"a":3}`, when: `(expr 4 * (expr 5 + (get a)))`, then: `32`},
 		{give: `{"a":3}`, when: `(expr 4 * 5 + (get a))`, then: `23`},
 		{give: ``, when: `(expr 1 + 1 / 2)`, then: `1.5`},
@@ -403,9 +412,9 @@ func TestGet(t *testing.T) {
 		// (entries)
 		{give: `{"a":3,"b":4}`, when: `(entries) (collect (flatten))`, then: `["a",3,"b",4]`},
 		{give: `{"a":3,"b":4}`, when: `(entries)`, then: `[["a",3],["b",4]]`},
-		//(values)
+		// (values)
 		{give: `{"a":3,"b":4}`, when: `(values)`, then: `[3,4]`},
-		// (key)
+		// (keys)
 		{give: `{"a":3,"b":4}`, when: `(keys)`, then: `["a","b"]`},
 		// (if)
 		{give: `[3,4,5,6]`, when: `(iterate (key) (if (== 4) 7 (== 5) 8 (raw 9)))`, then: `[9,7,8,9]`},
@@ -446,7 +455,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(is-some)`, then: `3`},
 		{give: `""`, when: `(is-some)`, then: `""`},
 		{give: `null`, when: `(is-some)`, then: ``},
-		// (nothing) - Undocumented.
+		// (nothing)
 		{give: `3`, when: `(nothing)`, then: ``},
 		// (exists)
 		{give: `{"a":3}`, when: `(exists a)`, then: `{"a":3}`},
@@ -614,7 +623,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(iterate -v (this))`, then: `3`},
 		// (iterate -k)
 		{give: "{ \"a\"\t:\t3\t}", when: `(iterate -k (this))`, then: `{"a":3}`},
-		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate -k (if (== "a") (raw "x") (this))))`, then: `{"x":3,"b":[3,{"x":3}]}`},
+		{give: `{ "a" : 3 , "b" : [ 3, { "a": 3 } ] }`, when: `(iterate -k (if (== "a") (raw "x") (this)))`, then: `{"x":3,"b":[3,{"x":3}]}`},
 		{give: `{ "a" : 3 }`, when: `(iterate -k (if (== "a") (raw "x") (this)))`, then: `{"x":3}`},
 		{give: `3`, when: `(iterate -k (stringify))`, then: `3`},
 		{give: `3`, when: `(iterate -k (this))`, then: `3`},
@@ -772,7 +781,7 @@ func Test_Invalid_Query(t *testing.T) {
 	}
 }
 
-func TestGetWith(t *testing.T) {
+func TestGetArgs(t *testing.T) {
 
 	tt := []struct {
 		give string
@@ -794,15 +803,15 @@ func TestGetWith(t *testing.T) {
 		},
 	}
 	for _, tc := range tt {
-		r := GetWith(tc.give, tc.when, tc.args)
+		r := GetArgs(tc.give, tc.when, tc.args)
 		assertEqual(t, tc.then, r.String(), tc)
 	}
 }
 
-func BenchmarkGetWith(b *testing.B) {
+func BenchmarkGetArgs(b *testing.B) {
 	a := []any{3}
 	for i := 0; i < b.N; i++ {
-		_ = GetWith("", "(arg 0)", a)
+		_ = GetArgs("", "(arg 0)", a)
 	}
 }
 
@@ -1448,8 +1457,9 @@ func BenchmarkJson_IterateFast(b *testing.B) {
 }
 
 func Benchmark_QueryFunction_Iterate(b *testing.B) {
+	c := Compile(`(iterate (this) (this))`)
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate (this) (this))`)
+		c.Get(TestData1)
 	}
 }
 
@@ -1506,8 +1516,9 @@ func BenchmarkJson_IterateKeysValues(b *testing.B) {
 }
 
 func Benchmark_QueryFunction_IterateKV(b *testing.B) {
+	c := Compile(`(iterate -kv (this) (this))`)
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate -kv (this) (this))`)
+		c.Get(TestData1)
 	}
 }
 
@@ -1551,8 +1562,9 @@ func BenchmarkJson_IterateKeys(b *testing.B) {
 }
 
 func Benchmark_QueryFunction_IterateK(b *testing.B) {
+	c := Compile(`(iterate -k (this))`)
 	for i := 0; i < b.N; i++ {
-		Get(TestData1, `(iterate -k (this))`)
+		c.Get(TestData1)
 	}
 }
 

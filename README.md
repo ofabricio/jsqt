@@ -22,8 +22,24 @@ func main() {
 }
 ```
 
-The `jsqt.Get(jsn, qry)` function applies a query to a JSON.
+Use `jsqt.Get(jsn, qry)` function to apply a query to a JSON.
 Note that it only works on a valid JSON.
+
+This function is not the most efficient one as it compiles a query each time it is called.
+
+Preferably use a precompiled query instead:
+
+**Example**
+
+```go
+j := `{ "data": { "message": "Hello" } }`
+
+q := jsqt.Compile(`(get data message)`)
+
+v := q.Get(j)
+
+fmt.Println(v) // "Hello"
+```
 
 ### Notes
 
@@ -54,6 +70,8 @@ There are three types of function arguments:
   When the parser finds a raw value it uses that value as argument.
   There is also a `(raw)` function that can be used to pass raw values as argument
   when a function accepts functions but not raw values.
+
+⚠ Note that both **Key** and **Raw** can be 255 characters long at max.
 
 ## (get)
 
@@ -1364,7 +1382,7 @@ The solution in this case is to [(save)](#save-load) the previous value and [(lo
 
 ## (arg)
 
-This function returns the value of an argument provided with `GetWith(jsn, qry, args)`.
+This function returns the value of an argument provided with `GetArgs(jsn, qry, args)`.
 
 ```clj
 (arg index)
@@ -1375,7 +1393,7 @@ This function returns the value of an argument provided with `GetWith(jsn, qry, 
 **Example**
 
 ```go
-a := jsqt.GetWith(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
+a := jsqt.GetArgs(``, `(obj msg (arg 0) val (arg 1))`, []any{"hello", 3})
 
 fmt.Println(a) // {"msg":"hello","val":3}
 ```
@@ -1394,7 +1412,7 @@ f := func(date jsqt.Json) jsqt.Json {
     return jsqt.JSON(newDate).Stringify()
 }
 
-a := jsqt.GetWith(j, `(set date (arg 0))`, []any{f})
+a := jsqt.GetArgs(j, `(set date (arg 0))`, []any{f})
 
 fmt.Println(a) // {"date":"Wed, 07 Sep 2022 12:30:00 UTC"}
 ```
