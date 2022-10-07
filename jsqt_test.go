@@ -394,7 +394,7 @@ func TestGet(t *testing.T) {
 		{give: `{"a":""}`, when: `(get a (if (is-str) {} (raw 3)))`, then: `{}`},          // Then.
 		{give: `{"a":{"b":3}}`, when: `(get a (if (is-str) {} (this)))`, then: `{"b":3}`}, // Else.
 		{give: `3`, when: `(if (is-num) (obj b (this)) (raw 3))`, then: `{"b":3}`},        // Then.
-		{give: `{"b":3}`, when: `(if (is-num) 3 (this))`, then: `{"b":3}`},                // Else.
+		{give: `3`, when: `(if (is-str) 4 (nothing))`, then: ``},                          // Else.
 		// (is-void)
 		{give: `{"a":[]}`, when: `(is-void a)`, then: `{"a":[]}`},
 		{give: `{"a":[3]}`, when: `(is-void a)`, then: ``},
