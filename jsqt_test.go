@@ -122,10 +122,11 @@ func TestGet(t *testing.T) {
 		{give: `[3,4]`, when: `(at (raw 1))`, then: `4`},
 		{give: `[3,4]`, when: `(at 0)`, then: `3`},
 		// (group)
-		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a x y) (sort)`, then: `[{"x":3,"y":[{"a":3},{"a":3}]},{"x":4,"y":[{"a":4}]}]`},
-		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a) (sort)`, then: `[{"key":3,"values":[{"a":3},{"a":3}]},{"key":4,"values":[{"a":4}]}]`},
-		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val)) (sort)`, then: `{"3":[{"a":3},{"a":3}],"4":[{"a":4}]}`},
-		{give: `[3,4,3,4,5]`, when: `(group (val) (key)) (sort)`, then: `{"3":[0,2],"4":[1,3],"5":[4]}`},
+		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a x y)`, then: `[{"x":3,"y":[{"a":3},{"a":3}]},{"x":4,"y":[{"a":4}]}]`},
+		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a)`, then: `[{"key":3,"values":[{"a":3},{"a":3}]},{"key":4,"values":[{"a":4}]}]`},
+		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a)`, then: `[{"key":3,"values":[{"a":3},{"a":3}]},{"key":4,"values":[{"a":4}]}]`},
+		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val))`, then: `{"3":[{"a":3},{"a":3}],"4":[{"a":4}]}`},
+		{give: `[3,4,3,4,5]`, when: `(group (val) (key))`, then: `{"3":[0,2],"4":[1,3],"5":[4]}`},
 		// (unique)
 		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(unique a)`, then: `[3,4]`},
 		{give: `[3,4,3,4,5]`, when: `(unique)`, then: `[3,4,5]`},
