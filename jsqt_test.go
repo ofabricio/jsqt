@@ -122,6 +122,7 @@ func TestGet(t *testing.T) {
 		{give: `[3,4]`, when: `(at (raw 1))`, then: `4`},
 		{give: `[3,4]`, when: `(at 0)`, then: `3`},
 		// (group)
+		{give: `[{"a":"3"},{"a":"3"},{"a":"4"}]`, when: `(group a (val) -a x y)`, then: `[{"x":"3","y":[{"a":"3"},{"a":"3"}]},{"x":"4","y":[{"a":"4"}]}]`},
 		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a x y)`, then: `[{"x":3,"y":[{"a":3},{"a":3}]},{"x":4,"y":[{"a":4}]}]`},
 		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a)`, then: `[{"key":3,"values":[{"a":3},{"a":3}]},{"key":4,"values":[{"a":4}]}]`},
 		{give: `[{"a":3},{"a":3},{"a":4}]`, when: `(group a (val) -a)`, then: `[{"key":3,"values":[{"a":3},{"a":3}]},{"key":4,"values":[{"a":4}]}]`},

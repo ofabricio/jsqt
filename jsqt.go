@@ -743,18 +743,17 @@ func funcMax(q *Query, j Json) Json {
 }
 
 func funcGroup(q *Query, j Json) Json {
-	group := make(map[string][]Json, 16)
-	groupOrder := make([]string, 0, len(group))
-	ini := q.s.Mark()
+	group := make(map[Json][]Json, 16)
+	groupOrder := make([]Json, 0, len(group))
+	m := q.s.Mark()
 	j.ForEach(func(i, item Json) bool {
 		q.k, q.v = i, item
-		q.s.Back(ini)
+		q.s.Back(m)
 		if g, v := q.ParseFunOrKey(item), q.ParseFunOrKey(item); g.Exists() && v.Exists() {
-			gg := g.TrimQuote()
-			if _, ok := group[gg]; !ok {
-				groupOrder = append(groupOrder, gg)
+			if _, ok := group[g]; !ok {
+				groupOrder = append(groupOrder, g)
 			}
-			group[gg] = append(group[gg], v)
+			group[g] = append(group[g], v)
 		}
 		return false
 	})
@@ -776,7 +775,7 @@ func funcGroup(q *Query, j Json) Json {
 			o.WriteString(`{"`)
 			o.WriteString(keyName)
 			o.WriteString(`":`)
-			o.WriteString(gkey)
+			o.WriteString(gkey.String())
 			o.WriteString(`,"`)
 			o.WriteString(valName)
 			o.WriteString(`":[`)
@@ -798,7 +797,7 @@ func funcGroup(q *Query, j Json) Json {
 				o.WriteString(",")
 			}
 			o.WriteString(`"`)
-			o.WriteString(gkey)
+			o.WriteString(gkey.TrimQuote())
 			o.WriteString(`":[`)
 			for i, v := range g {
 				if i > 0 {
