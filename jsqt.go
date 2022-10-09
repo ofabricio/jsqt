@@ -1836,7 +1836,7 @@ func (j Json) IN(arr Json) (yes bool) {
 }
 
 func (j Json) EQ(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na == nb
 	}
@@ -1844,7 +1844,7 @@ func (j Json) EQ(b Json) bool {
 }
 
 func (j Json) NEQ(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na != nb
 	}
@@ -1852,7 +1852,7 @@ func (j Json) NEQ(b Json) bool {
 }
 
 func (j Json) GT(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na > nb
 	}
@@ -1860,7 +1860,7 @@ func (j Json) GT(b Json) bool {
 }
 
 func (j Json) GTE(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na >= nb
 	}
@@ -1868,7 +1868,7 @@ func (j Json) GTE(b Json) bool {
 }
 
 func (j Json) LT(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na < nb
 	}
@@ -1876,7 +1876,7 @@ func (j Json) LT(b Json) bool {
 }
 
 func (j Json) LTE(b Json) bool {
-	if j.IsNumber() {
+	if j.IsNumber() && b.IsNumber() {
 		na, nb := toFloat(j, b)
 		return na <= nb
 	}

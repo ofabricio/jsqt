@@ -514,6 +514,7 @@ func TestGet(t *testing.T) {
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(pretty)`, then: "[\n    {\n        \"a\": 3,\n        \"b\": [\n            4,\n            {\n                \"c\": 5,\n                \"d\": \"e f\"\n            }\n        ],\n        \"c\": [],\n        \"d\": {}\n    }\n]"},
 		{give: `[ { "a" : 3 , "b" : [ 4 , { "c" : 5, "d": "e f" } ], "c": [ ], "d": { } } ]`, when: `(ugly)`, then: `[{"a":3,"b":[4,{"c":5,"d":"e f"}],"c":[],"d":{}}]`},
 		// (==)
+		{give: `{"a":"3"}`, when: `(== 0 a)`, then: ``},
 		{give: `{"a":3}`, when: `(== 2 a)`, then: ``},
 		{give: `{"a":3}`, when: `(== 3 a)`, then: `{"a":3}`},
 		{give: `3`, when: `(== 2 (this))`, then: ``},
@@ -521,6 +522,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(== 2)`, then: ``},
 		{give: `3`, when: `(== 3)`, then: `3`},
 		// (!=)
+		{give: `{"a":"3"}`, when: `(!= 0 a)`, then: `{"a":"3"}`},
 		{give: `{"a":3}`, when: `(!= 2 a)`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(!= 3 a)`, then: ``},
 		{give: `3`, when: `(!= 3 (this))`, then: ``},
@@ -528,6 +530,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(!= 3)`, then: ``},
 		{give: `3`, when: `(!= 2)`, then: `3`},
 		// (>=)
+		{give: `{"a":"3"}`, when: `(>= 0 a)`, then: ``},
 		{give: `"bear"`, when: `(>= "ant")`, then: `"bear"`},
 		{give: `"ant"`, when: `(>= "bear")`, then: ``},
 		{give: `{"a":3}`, when: `(>= 2 a)`, then: `{"a":3}`},
@@ -540,6 +543,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(>= 3)`, then: `3`},
 		{give: `3`, when: `(>= 4)`, then: ``},
 		// (<=)
+		{give: `{"a":"3"}`, when: `(<= 0 a)`, then: `{"a":"3"}`},
 		{give: `"bear"`, when: `(<= "ant")`, then: ``},
 		{give: `"ant"`, when: `(<= "bear")`, then: `"ant"`},
 		{give: `{"a":3}`, when: `(<= 2 a)`, then: ``},
@@ -552,6 +556,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(<= 3)`, then: `3`},
 		{give: `3`, when: `(<= 4)`, then: `3`},
 		// (>)
+		{give: `{"a":"3"}`, when: `(> 0 a)`, then: ``},
 		{give: `{"a":3}`, when: `(> 2 a)`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(> 3 a)`, then: ``},
 		{give: `3`, when: `(> 2 (this))`, then: `3`},
@@ -559,6 +564,7 @@ func TestGet(t *testing.T) {
 		{give: `3`, when: `(> 2)`, then: `3`},
 		{give: `3`, when: `(> 3)`, then: ``},
 		// (<)
+		{give: `{"a":"3"}`, when: `(< 0 a)`, then: `{"a":"3"}`},
 		{give: `{"a":3}`, when: `(< 4 a)`, then: `{"a":3}`},
 		{give: `{"a":3}`, when: `(< 3 a)`, then: ``},
 		{give: `3`, when: `(< 4 (this))`, then: `3`},
