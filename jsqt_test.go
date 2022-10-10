@@ -840,7 +840,7 @@ func TestJsonBytes(t *testing.T) {
 		{give: `[3,4]`, then: []byte{'[', '3', ',', '4', ']'}},
 	}
 	for _, tc := range tt {
-		r := Get(tc.give, `(this`).Bytes()
+		r := Get(tc.give, `(this)`).Bytes()
 		assertEqual(t, tc.then, r, tc)
 	}
 }
