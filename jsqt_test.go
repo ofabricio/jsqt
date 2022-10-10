@@ -14,6 +14,17 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (chunk)
+		{give: `[1,2,3,4]`, when: `(chunk 4)`, then: `[[1,2,3,4]]`},
+		{give: `[1,2,3,4]`, when: `(chunk 3)`, then: `[[1,2,3],[4]]`},
+		{give: `[1,2,3,4]`, when: `(chunk 2)`, then: `[[1,2],[3,4]]`},
+		{give: `[1,2,3,4]`, when: `(chunk 1)`, then: `[[1],[2],[3],[4]]`},
+		{give: `[1,2,3]`, when: `(chunk 11)`, then: `[[1,2,3]]`},
+		{give: `[1,2,3]`, when: `(chunk 4)`, then: `[[1,2,3]]`},
+		{give: `[1,2,3]`, when: `(chunk 3)`, then: `[[1,2,3]]`},
+		{give: `[1,2,3]`, when: `(chunk 2)`, then: `[[1,2],[3]]`},
+		{give: `[1,2,3]`, when: `(chunk 1)`, then: `[[1],[2],[3]]`},
+		{give: `[1,2,3]`, when: `(chunk 0)`, then: `[[1],[2],[3]]`},
 		// (min) (max)
 		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(max a)`, then: `3`},
 		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(min a)`, then: `1`},

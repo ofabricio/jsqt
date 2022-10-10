@@ -536,6 +536,26 @@ fmt.Println(a) // 14
 fmt.Println(b) // 14
 ```
 
+## (chunk)
+
+This function splits an array into groups the length of size.
+
+```clj
+(chunk size)
+```
+
+`size` can be a function or a raw value.
+
+**Example**
+
+```go
+a := jsqt.Get(`[ 3, 4, 5, 6 ]`, `(chunk 2)`)
+b := jsqt.Get(`[ 3, 4, 5, 6 ]`, `(chunk 3)`)
+
+fmt.Println(a) // [[3,4],[5,6]]
+fmt.Println(b) // [[3,4,5],[6]]
+```
+
 ## (min) (max)
 
 These functions return the min or max value.

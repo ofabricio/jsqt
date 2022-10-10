@@ -159,6 +159,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcSlice(q, j)
 	case "reduce":
 		return funcReduce(q, j)
+	case "chunk":
+		return funcChunk(q, j)
 	case "min":
 		return funcMin(q, j)
 	case "max":
@@ -708,6 +710,38 @@ func funcReduce(q *Query, j Json) Json {
 	j.ForEachKeyVal(f)
 	j.ForEach(f)
 	return acc
+}
+
+func funcChunk(q *Query, j Json) Json {
+	size := q.ParseFunOrRaw(j).Int()
+	if size == 0 {
+		size = 1
+	}
+	var o strings.Builder
+	o.Grow(len(j.s) + 32)
+	o.WriteString("[")
+	c := 0
+	j.ForEach(func(i, v Json) bool {
+		q.k, q.v = i, v
+		if o.Len() > 1 {
+			o.WriteString(",")
+		}
+		mod := c % size
+		if mod == 0 {
+			o.WriteString("[")
+		}
+		o.WriteString(v.String())
+		if mod == size-1 {
+			o.WriteString("]")
+		}
+		c++
+		return false
+	})
+	if c%size != 0 {
+		o.WriteString("]")
+	}
+	o.WriteString("]")
+	return JSON(o.String())
 }
 
 func funcMin(q *Query, j Json) Json {
