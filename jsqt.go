@@ -1705,7 +1705,7 @@ func (j Json) Jsonify() Json {
 // Example: "name" -> name.
 func (j Json) TrimQuote() string {
 	v := j.String()
-	if j.IsString() {
+	if j.IsString() && len(j.s) > 1 {
 		return v[1 : len(v)-1]
 	}
 	return v

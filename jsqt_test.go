@@ -333,6 +333,7 @@ func TestGet(t *testing.T) {
 		{give: `{ "a": "hello" }`, when: `(concat a (raw " \"world\""))`, then: `"hello \"world\""`},
 		{give: `{ "a": "hello", "b": "world" }`, when: `(concat a (raw " ") b)`, then: `"hello world"`},
 		//(replace)
+		{give: `"a b"`, when: `(replace " " ")`, then: `"a"b"`}, // Invalid second param. This tests a crash protection.
 		{give: `"a b"`, when: `(replace " " "_")`, then: `"a_b"`},
 		// (upper)
 		{give: `"a"`, when: `(upper)`, then: `"A"`},
