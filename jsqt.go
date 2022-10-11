@@ -161,6 +161,8 @@ func (q *Query) CallFun(fname string, j Json) Json {
 		return funcReduce(q, j)
 	case "chunk":
 		return funcChunk(q, j)
+	case "partition":
+		return funcPartition(q, j)
 	case "min":
 		return funcMin(q, j)
 	case "max":
@@ -741,6 +743,36 @@ func funcChunk(q *Query, j Json) Json {
 		o.WriteString("]")
 	}
 	o.WriteString("]")
+	return JSON(o.String())
+}
+
+func funcPartition(q *Query, j Json) Json {
+	falsy := make([]string, 0, 16)
+	var o strings.Builder
+	o.Grow(len(j.s) + 5)
+	o.WriteString("[[")
+	m := q.s.Mark()
+	j.ForEach(func(i, v Json) bool {
+		q.k, q.v = i, v
+		q.s.Back(m)
+		if q.ParseFunOrKey(v).Exists() {
+			if o.Len() > 2 {
+				o.WriteString(",")
+			}
+			o.WriteString(v.String())
+		} else {
+			falsy = append(falsy, v.String())
+		}
+		return false
+	})
+	o.WriteString("],[")
+	for i, v := range falsy {
+		if i > 0 {
+			o.WriteString(",")
+		}
+		o.WriteString(v)
+	}
+	o.WriteString("]]")
 	return JSON(o.String())
 }
 

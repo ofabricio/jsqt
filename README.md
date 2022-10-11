@@ -556,6 +556,24 @@ fmt.Println(a) // [[3,4],[5,6]]
 fmt.Println(b) // [[3,4,5],[6]]
 ```
 
+## (partition)
+
+This function splits an array into two groups given a condition.
+
+```clj
+(partition cond)
+```
+
+`cond` can be a function or a key.
+
+**Example**
+
+```go
+a := jsqt.Get(`[ 3, 30, 4, 40 ]`, `(partition (> 10))`)
+
+fmt.Println(a) // [[30,40],[3,4]]
+```
+
 ## (min) (max)
 
 These functions return the min or max value.
