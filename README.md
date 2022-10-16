@@ -213,7 +213,7 @@ fmt.Println(a) // [3,5,4]
 Use `-t cond` to test each array item against a condition.
 If all items succeed it returns the current context;
 if any item fails it returns an empty context.
-This can be used to validate a JSON schema. See [(and)](#or-and-not) for another example.
+This can be used to validate a JSON schema. See [(and)](#and-or-not) for another example.
 
 **Example**
 
@@ -1464,7 +1464,7 @@ This function deconstructs an array field.
 (unwind key -r newkey)
 ```
 
-`key` can be a function or a raw value. Use `-r` to rename a key.
+`key` can be a key or a function. Use `-r` to rename a key.
 
 **Example**
 
