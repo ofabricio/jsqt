@@ -1178,7 +1178,7 @@ and applies a map function to transform them.
 ```clj
 (iterate key val)
 (iterate -r key val)
-(iterate -d n key val)
+(iterate -c val)
 
 (iterate -f key val)
 (iterate -k key)
@@ -1188,42 +1188,54 @@ and applies a map function to transform them.
 
 Arguments must be functions.
 
-The `iterate` iterates over all keys and values, and values include objects and arrays.
+The `iterate` iterates over all keys and values; values include objects and arrays.
 Use `-r` flag to tell iterate to emit the root value. When the root value is emitted `(key)` is `null`.
 If either `key` or `val` functions return an empty context the field is removed from the result.
-Use `-d n` flag to set the depth level to iterate.
+Note that this version of iterate is a depth-first post-order traversal.
 
-The `iterate -f` is a fast version of iterate, but it does not emit objects and arrays.
+The `iterate -f` is just a faster version of iterate, but it does not emit objects and arrays.
 
-The `iterate -k` is a fast version that iterates over all keys. The `key` argument receives the key string.
+The `iterate -k` is just a faster version that iterates over all keys. The `key` argument receives the key string.
 
-The `iterate -v` is a fast version that iterates over values, but values do not include objects and arrays.
+The `iterate -v` is just a faster version that iterates over values, but values do not include objects and arrays.
 The `val` argument receives the value.
 
-The `iterate -kv` is a fast version that iterates over all keys and values consecutively,
+The `iterate -kv` is just a faster version that iterates over all keys and values consecutively,
 but values do not include objects and arrays.
 The `keyval` argument receives a key or a value consecutively.
+
+The `iterate -c` can be used to recursivelly collect values into an array.
+Note that this version of iterate is a depth-first pre-order traversal.
 
 **Example**
 
 ```go
-j := `{ "One": "One", "Two": { "One": "One", "Three": "" }, "Three": "" }`
+j := `{ "Month": "May", "Next": { "Month": "June", "Other": "" }, "Other": "" }`
 
-a := jsqt.Get(j, `(iterate (key) (pluck Three))`)
-b := jsqt.Get(j, `(iterate -r (key) (pluck Three))`)
-c := jsqt.Get(j, `(iterate -d 1 (upper) (val))`)
-d := jsqt.Get(j, `(iterate -f (lower) (size))`)
-e := jsqt.Get(j, `(iterate -k (upper))`)
-f := jsqt.Get(j, `(iterate -v (upper))`)
-g := jsqt.Get(j, `(iterate -kv (upper))`)
+// Preserve non-empty fields (aka: remove all empty fields).
+a := jsqt.Get(j, `(iterate (key) (not (is-empty)))`)
 
-fmt.Println(a) // {"One":"One","Two":{"One":"One"},"Three":""}
-fmt.Println(b) // {"One":"One","Two":{"One":"One"}}
-fmt.Println(c) // {"ONE":"One","TWO":{"One":"One","Three":""},"THREE":""}
-fmt.Println(d) // {"one":3,"two":{"one":3,"three":0},"three":0}
-fmt.Println(e) // {"ONE":"One","TWO":{"ONE":"One","THREE":""},"THREE":""}
-fmt.Println(f) // {"One":"ONE","Two":{"One":"ONE","Three":""},"Three":""}
-fmt.Println(g) // {"ONE":"ONE","TWO":{"ONE":"ONE","THREE":""},"THREE":""}
+// Convert all keys to lowercase and replace the values with the size of the string.
+b := jsqt.Get(j, `(iterate -f (lower) (size))`)
+
+// Convert all keys to uppercase.
+c := jsqt.Get(j, `(iterate -k (upper))`)
+
+// Convert all values to uppercase.
+d := jsqt.Get(j, `(iterate -v (upper))`)
+
+// Convert all keys and values to uppercase.
+e := jsqt.Get(j, `(iterate -kv (upper))`)
+
+// Collect all values in which the keys equal "Month".
+f := jsqt.Get(j, `(iterate -c (== "Month" (key)))`)
+
+fmt.Println(a) // {"Month":"May","Next":{"Month":"June"}}
+fmt.Println(b) // {"month":3,"next":{"month":4,"other":0},"other":0}
+fmt.Println(c) // {"MONTH":"May","NEXT":{"MONTH":"June","OTHER":""},"OTHER":""}
+fmt.Println(d) // {"Month":"MAY","Next":{"Month":"JUNE","Other":""},"Other":""}
+fmt.Println(e) // {"MONTH":"MAY","NEXT":{"MONTH":"JUNE","OTHER":""},"OTHER":""}
+fmt.Println(f) // ["May","June"]
 ```
 
 It is also possible to use [(key)](#key-val) and [(val)](#key-val) functions with iterate.

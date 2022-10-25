@@ -14,6 +14,9 @@ func TestGet(t *testing.T) {
 		when string
 		then string
 	}{
+		// (iterate -c)
+		{give: `{"a":3,"b":[{"a":4,"b":[{"a":5,"b":[{"a":6}]},{"a":7,"b":[{"a":8}]}]}]}`, when: `(iterate -c (== "a" (key)))`, then: `[3,4,5,6,7,8]`},
+		{give: `{"a":3,"b":[{"a":4,"b":[{"a":5,"b":[{"a":6}]},{"a":7,"b":[{"a":8}]}]}, {"a":9}]}`, when: `(iterate -c -d 3 (== "a" (key)))`, then: `[3,4,9]`},
 		// (partition)
 		{give: `[{"a":2},{"a":1},{"a":3}]`, when: `(partition (> 2 a))`, then: `[[{"a":3}],[{"a":2},{"a":1}]]`},
 		{give: `[1,2,3,4]`, when: `(partition (> 4))`, then: `[[],[1,2,3,4]]`},

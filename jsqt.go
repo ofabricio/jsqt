@@ -925,6 +925,9 @@ func funcDefault(q *Query, j Json) Json {
 }
 
 func funcIterate(q *Query, j Json) Json {
+	if q.Match("-c") {
+		return funcIterateCollect(q, j)
+	}
 	if q.Match("-f") {
 		return funcIterateFast(q, j)
 	}
@@ -938,6 +941,33 @@ func funcIterate(q *Query, j Json) Json {
 		return funcIterateValues(q, j)
 	}
 	return funcIterateAll(q, j)
+}
+
+func funcIterateCollect(q *Query, j Json) Json {
+	includeRoot := q.Match("-r")
+	depth := 0
+	if q.Match("-d") {
+		depth = q.ParseRaw().Int()
+	}
+	var o strings.Builder
+	o.Grow(len(j.s))
+	o.WriteString("[")
+	m := q.s.Mark()
+	j.Iterator(depth, func(k, v Json) {
+		q.k, q.v = k, v
+		if !includeRoot && k.IsNull() {
+			return
+		}
+		q.s.Back(m)
+		if v = q.ParseFun(v); v.Exists() {
+			if o.Len() > 1 {
+				o.WriteString(",")
+			}
+			o.WriteString(v.String())
+		}
+	})
+	o.WriteString("]")
+	return JSON(o.String())
 }
 
 func funcIterateAll(q *Query, j Json) Json {
@@ -1953,6 +1983,28 @@ func toFloat(a, b Json) (float64, float64) {
 	na, _ := strconv.ParseFloat(a.String(), 64)
 	nb, _ := strconv.ParseFloat(b.String(), 64)
 	return na, nb
+}
+
+func (j Json) Iterator(depth int, m func(k, v Json)) {
+	if depth == 0 {
+		depth = -2
+	}
+	j.iterator(depth, JSON("null"), m)
+}
+
+func (j Json) iterator(depth int, key Json, m func(k, v Json)) {
+	if depth == -1 {
+		return
+	}
+	m(key, j)
+	j.ForEachKeyVal(func(k, v Json) bool {
+		v.iterator(depth-1, k, m)
+		return false
+	})
+	j.ForEach(func(i, v Json) bool {
+		v.iterator(depth-1, i, m)
+		return false
+	})
 }
 
 func (j Json) Iterate(depth int, m func(k, v Json) (Json, Json)) Json {
